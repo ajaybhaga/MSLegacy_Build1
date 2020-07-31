@@ -37,7 +37,7 @@
 
 
 #include <Urho3D/DebugNew.h>
-#include <MayaSpace/ai/agent.h>
+#include <MayaScape/ai/agent.h>
 #include "GameController.h"
 
 

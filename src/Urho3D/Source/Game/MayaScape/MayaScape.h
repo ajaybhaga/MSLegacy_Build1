@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include <MayaSpace/ai/evolution_manager.h>
+#include <MayaScape/ai/evolution_manager.h>
 #include "Game.h"
 #include "Sample2D.h"
 
@@ -51,13 +51,13 @@ struct ParticlePool {
 ///    - Using Box2D Contact listeners to handle the gameplay
 ///    - Displaying debug geometry for physics and tile map
 /// Note that this sample uses some functions from Sample2D utility class.
-class MayaSpace : public Game
+class MayaScape : public Game
 {
-    URHO3D_OBJECT(MayaSpace, Game);
+    URHO3D_OBJECT(MayaScape, Game);
 
 public:
     /// Construct.
-    explicit MayaSpace(Context* context);
+    explicit MayaScape(Context* context);
 
     /// Setup after engine initialization and before running the main loop.
     void Start() override;

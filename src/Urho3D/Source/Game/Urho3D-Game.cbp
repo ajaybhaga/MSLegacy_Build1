@@ -5,21 +5,21 @@
 		<Option title="Urho3D-Game"/>
 		<Option makefile_is_custom="1"/>
 		<Option compiler="gcc"/>
-		<Option virtualFolders="CMake Files\;CMake Files\Source\;CMake Files\Source\ThirdParty\;CMake Files\Source\ThirdParty\Assimp\;CMake Files\Source\ThirdParty\Assimp\include\;CMake Files\Source\ThirdParty\Assimp\include\assimp\;CMake Files\Source\ThirdParty\Assimp\contrib\;CMake Files\Source\ThirdParty\Assimp\contrib\zlib\;CMake Files\Source\ThirdParty\Assimp\code\;CMake Files\Source\ThirdParty\Assimp\cmake-modules\;CMake Files\Source\ThirdParty\FreeType\;CMake Files\Source\ThirdParty\LZ4\;CMake Files\Source\ThirdParty\PugiXml\;CMake Files\Source\ThirdParty\rapidjson\;CMake Files\Source\ThirdParty\SDL\;CMake Files\Source\ThirdParty\SDL\cmake\;CMake Files\Source\ThirdParty\SDL\include\;CMake Files\Source\ThirdParty\StanHull\;CMake Files\Source\ThirdParty\STB\;CMake Files\Source\ThirdParty\AngelScript\;CMake Files\Source\ThirdParty\Lua\;CMake Files\Source\ThirdParty\toluapp\;CMake Files\Source\ThirdParty\toluapp\src\;CMake Files\Source\ThirdParty\toluapp\src\lib\;CMake Files\Source\ThirdParty\toluapp\src\bin\;CMake Files\Source\ThirdParty\Civetweb\;CMake Files\Source\ThirdParty\kNet\;CMake Files\Source\ThirdParty\ik\;CMake Files\Source\ThirdParty\ik\include\;CMake Files\Source\ThirdParty\ik\include\ik\;CMake Files\Source\ThirdParty\Detour\;CMake Files\Source\ThirdParty\DetourCrowd\;CMake Files\Source\ThirdParty\DetourTileCache\;CMake Files\Source\ThirdParty\Recast\;CMake Files\Source\ThirdParty\Box2D\;CMake Files\Source\ThirdParty\WebP\;CMake Files\Source\ThirdParty\Bullet\;CMake Files\Source\ThirdParty\GLEW\;CMake Files\Source\Urho3D\;CMake Files\Source\Tools\;CMake Files\Source\Tools\Urho3DPlayer\;CMake Files\Source\Tools\AssetImporter\;CMake Files\Source\Tools\OgreImporter\;CMake Files\Source\Tools\PackageTool\;CMake Files\Source\Tools\RampGenerator\;CMake Files\Source\Tools\SpritePacker\;CMake Files\Source\Tools\ScriptCompiler\;CMake Files\Source\Game\;CMake Files\Source\Game\MayaSpace\;CMake Files\CMake\;CMake Files\CMake\Modules\;CMake Files\Docs\;"/>
+		<Option virtualFolders="CMake Files\;CMake Files\Source\;CMake Files\Source\ThirdParty\;CMake Files\Source\ThirdParty\Assimp\;CMake Files\Source\ThirdParty\Assimp\include\;CMake Files\Source\ThirdParty\Assimp\include\assimp\;CMake Files\Source\ThirdParty\Assimp\contrib\;CMake Files\Source\ThirdParty\Assimp\contrib\zlib\;CMake Files\Source\ThirdParty\Assimp\code\;CMake Files\Source\ThirdParty\Assimp\cmake-modules\;CMake Files\Source\ThirdParty\FreeType\;CMake Files\Source\ThirdParty\LZ4\;CMake Files\Source\ThirdParty\PugiXml\;CMake Files\Source\ThirdParty\rapidjson\;CMake Files\Source\ThirdParty\SDL\;CMake Files\Source\ThirdParty\SDL\cmake\;CMake Files\Source\ThirdParty\SDL\include\;CMake Files\Source\ThirdParty\StanHull\;CMake Files\Source\ThirdParty\STB\;CMake Files\Source\ThirdParty\AngelScript\;CMake Files\Source\ThirdParty\Lua\;CMake Files\Source\ThirdParty\toluapp\;CMake Files\Source\ThirdParty\toluapp\src\;CMake Files\Source\ThirdParty\toluapp\src\lib\;CMake Files\Source\ThirdParty\toluapp\src\bin\;CMake Files\Source\ThirdParty\Civetweb\;CMake Files\Source\ThirdParty\kNet\;CMake Files\Source\ThirdParty\ik\;CMake Files\Source\ThirdParty\ik\include\;CMake Files\Source\ThirdParty\ik\include\ik\;CMake Files\Source\ThirdParty\Detour\;CMake Files\Source\ThirdParty\DetourCrowd\;CMake Files\Source\ThirdParty\DetourTileCache\;CMake Files\Source\ThirdParty\Recast\;CMake Files\Source\ThirdParty\Box2D\;CMake Files\Source\ThirdParty\WebP\;CMake Files\Source\ThirdParty\Bullet\;CMake Files\Source\ThirdParty\GLEW\;CMake Files\Source\Urho3D\;CMake Files\Source\Tools\;CMake Files\Source\Tools\Urho3DPlayer\;CMake Files\Source\Tools\AssetImporter\;CMake Files\Source\Tools\OgreImporter\;CMake Files\Source\Tools\PackageTool\;CMake Files\Source\Tools\RampGenerator\;CMake Files\Source\Tools\SpritePacker\;CMake Files\Source\Tools\ScriptCompiler\;CMake Files\Source\Game\;CMake Files\Source\Game\MayaScape\;CMake Files\Source\Game\MayaScape\terrain\;CMake Files\CMake\;CMake Files\CMake\Modules\;CMake Files\Docs\;"/>
 		<Build>
 			<Target title="all">
-				<Option working_dir="/code/dev/MayaSpace/src/Urho3D/Source/Game"/>
+				<Option working_dir="/code/dev/MayaScape/src/Urho3D/Source/Game"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="/bin/gmake -f &quot;/code/dev/MayaSpace/src/Urho3D/Source/Game/Makefile&quot;  VERBOSE=1 all"/>
-					<CompileFile command="/bin/gmake -f &quot;/code/dev/MayaSpace/src/Urho3D/Source/Game/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/bin/gmake -f &quot;/code/dev/MayaSpace/src/Urho3D/Source/Game/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/bin/gmake -f &quot;/code/dev/MayaSpace/src/Urho3D/Source/Game/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/bin/gmake -f &quot;/code/dev/MayaScape/src/Urho3D/Source/Game/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/bin/gmake -f &quot;/code/dev/MayaScape/src/Urho3D/Source/Game/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/bin/gmake -f &quot;/code/dev/MayaScape/src/Urho3D/Source/Game/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/bin/gmake -f &quot;/code/dev/MayaScape/src/Urho3D/Source/Game/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="MayaSpace">
-				<Option output="/code/dev/MayaSpace/src/Urho3D/bin/MayaSpace" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/code/dev/MayaSpace/src/Urho3D/bin"/>
+				<Option output="/code/dev/MayaScape/src/Urho3D/bin/MayaSpace" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/code/dev/MayaScape/src/Urho3D/bin"/>
 				<Option object_output="./"/>
 				<Option type="1"/>
 				<Option compiler="gcc"/>
@@ -37,22 +37,22 @@
 					<Add option="-DURHO3D_THREADING"/>
 					<Add option="-DURHO3D_URHO2D"/>
 					<Add option="-DURHO3D_WEBP"/>
-					<Add directory="/code/dev/MayaSpace/src/Urho3D/include"/>
-					<Add directory="/code/dev/MayaSpace/src/Urho3D/include/Urho3D/ThirdParty"/>
-					<Add directory="/code/dev/MayaSpace/src/Urho3D/include/Urho3D/ThirdParty/Bullet"/>
-					<Add directory="/code/dev/MayaSpace/src/Urho3D/include/Urho3D/ThirdParty/Lua"/>
-					<Add directory="/code/dev/MayaSpace/src/Urho3D/Source/Game"/>
+					<Add directory="/code/dev/MayaScape/src/Urho3D/include"/>
+					<Add directory="/code/dev/MayaScape/src/Urho3D/include/Urho3D/ThirdParty"/>
+					<Add directory="/code/dev/MayaScape/src/Urho3D/include/Urho3D/ThirdParty/Bullet"/>
+					<Add directory="/code/dev/MayaScape/src/Urho3D/include/Urho3D/ThirdParty/Lua"/>
+					<Add directory="/code/dev/MayaScape/src/Urho3D/Source/Game"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/bin/gmake -f &quot;/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/Makefile&quot;  VERBOSE=1 MayaSpace"/>
-					<CompileFile command="/bin/gmake -f &quot;/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/bin/gmake -f &quot;/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/bin/gmake -f &quot;/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/bin/gmake -f &quot;/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Makefile&quot;  VERBOSE=1 MayaSpace"/>
+					<CompileFile command="/bin/gmake -f &quot;/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/bin/gmake -f &quot;/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/bin/gmake -f &quot;/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="MayaSpace/fast">
-				<Option output="/code/dev/MayaSpace/src/Urho3D/bin/MayaSpace" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/code/dev/MayaSpace/src/Urho3D/bin"/>
+				<Option output="/code/dev/MayaScape/src/Urho3D/bin/MayaSpace" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/code/dev/MayaScape/src/Urho3D/bin"/>
 				<Option object_output="./"/>
 				<Option type="1"/>
 				<Option compiler="gcc"/>
@@ -70,366 +70,443 @@
 					<Add option="-DURHO3D_THREADING"/>
 					<Add option="-DURHO3D_URHO2D"/>
 					<Add option="-DURHO3D_WEBP"/>
-					<Add directory="/code/dev/MayaSpace/src/Urho3D/include"/>
-					<Add directory="/code/dev/MayaSpace/src/Urho3D/include/Urho3D/ThirdParty"/>
-					<Add directory="/code/dev/MayaSpace/src/Urho3D/include/Urho3D/ThirdParty/Bullet"/>
-					<Add directory="/code/dev/MayaSpace/src/Urho3D/include/Urho3D/ThirdParty/Lua"/>
-					<Add directory="/code/dev/MayaSpace/src/Urho3D/Source/Game"/>
+					<Add directory="/code/dev/MayaScape/src/Urho3D/include"/>
+					<Add directory="/code/dev/MayaScape/src/Urho3D/include/Urho3D/ThirdParty"/>
+					<Add directory="/code/dev/MayaScape/src/Urho3D/include/Urho3D/ThirdParty/Bullet"/>
+					<Add directory="/code/dev/MayaScape/src/Urho3D/include/Urho3D/ThirdParty/Lua"/>
+					<Add directory="/code/dev/MayaScape/src/Urho3D/Source/Game"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/bin/gmake -f &quot;/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/Makefile&quot;  VERBOSE=1 MayaSpace/fast"/>
-					<CompileFile command="/bin/gmake -f &quot;/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/bin/gmake -f &quot;/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/bin/gmake -f &quot;/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/bin/gmake -f &quot;/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Makefile&quot;  VERBOSE=1 MayaSpace/fast"/>
+					<CompileFile command="/bin/gmake -f &quot;/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/bin/gmake -f &quot;/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/bin/gmake -f &quot;/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="39_CrowdNavigation">
+				<Option output="/code/dev/MayaScape/src/Urho3D/bin/39_CrowdNavigation" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/code/dev/MayaScape/src/Urho3D/bin"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DURHO3D_STATIC_DEFINE"/>
+					<Add option="-DURHO3D_ANGELSCRIPT"/>
+					<Add option="-DURHO3D_FILEWATCHER"/>
+					<Add option="-DURHO3D_IK"/>
+					<Add option="-DURHO3D_LOGGING"/>
+					<Add option="-DURHO3D_LUA"/>
+					<Add option="-DURHO3D_NAVIGATION"/>
+					<Add option="-DURHO3D_NETWORK"/>
+					<Add option="-DURHO3D_PHYSICS"/>
+					<Add option="-DURHO3D_PROFILING"/>
+					<Add option="-DURHO3D_THREADING"/>
+					<Add option="-DURHO3D_URHO2D"/>
+					<Add option="-DURHO3D_WEBP"/>
+					<Add directory="/code/dev/MayaScape/src/Urho3D/include"/>
+					<Add directory="/code/dev/MayaScape/src/Urho3D/include/Urho3D/ThirdParty"/>
+					<Add directory="/code/dev/MayaScape/src/Urho3D/include/Urho3D/ThirdParty/Bullet"/>
+					<Add directory="/code/dev/MayaScape/src/Urho3D/include/Urho3D/ThirdParty/Lua"/>
+					<Add directory="/code/dev/MayaScape/src/Urho3D/Source/Game"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/bin/gmake -f &quot;/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/terrain/Makefile&quot;  VERBOSE=1 39_CrowdNavigation"/>
+					<CompileFile command="/bin/gmake -f &quot;/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/terrain/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/bin/gmake -f &quot;/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/terrain/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/bin/gmake -f &quot;/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/terrain/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="39_CrowdNavigation/fast">
+				<Option output="/code/dev/MayaScape/src/Urho3D/bin/39_CrowdNavigation" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/code/dev/MayaScape/src/Urho3D/bin"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DURHO3D_STATIC_DEFINE"/>
+					<Add option="-DURHO3D_ANGELSCRIPT"/>
+					<Add option="-DURHO3D_FILEWATCHER"/>
+					<Add option="-DURHO3D_IK"/>
+					<Add option="-DURHO3D_LOGGING"/>
+					<Add option="-DURHO3D_LUA"/>
+					<Add option="-DURHO3D_NAVIGATION"/>
+					<Add option="-DURHO3D_NETWORK"/>
+					<Add option="-DURHO3D_PHYSICS"/>
+					<Add option="-DURHO3D_PROFILING"/>
+					<Add option="-DURHO3D_THREADING"/>
+					<Add option="-DURHO3D_URHO2D"/>
+					<Add option="-DURHO3D_WEBP"/>
+					<Add directory="/code/dev/MayaScape/src/Urho3D/include"/>
+					<Add directory="/code/dev/MayaScape/src/Urho3D/include/Urho3D/ThirdParty"/>
+					<Add directory="/code/dev/MayaScape/src/Urho3D/include/Urho3D/ThirdParty/Bullet"/>
+					<Add directory="/code/dev/MayaScape/src/Urho3D/include/Urho3D/ThirdParty/Lua"/>
+					<Add directory="/code/dev/MayaScape/src/Urho3D/Source/Game"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/bin/gmake -f &quot;/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/terrain/Makefile&quot;  VERBOSE=1 39_CrowdNavigation/fast"/>
+					<CompileFile command="/bin/gmake -f &quot;/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/terrain/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/bin/gmake -f &quot;/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/terrain/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/bin/gmake -f &quot;/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/terrain/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 		</Build>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/Character2D.cpp">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Character2D.cpp">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/Character2D.h">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Character2D.h">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/GameController.cpp">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/GameController.cpp">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/GameController.h">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/GameController.h">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/MayaSpace.cpp">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/MayaScape.cpp">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/MayaSpace.h">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/MayaScape.h">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/Object2D.cpp">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Object2D.cpp">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/Object2D.h">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Object2D.h">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/Sample2D.cpp">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Sample2D.cpp">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/Sample2D.h">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Sample2D.h">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/ai/agent.cpp">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/agent.cpp">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/ai/agent.h">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/agent.h">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/ai/agent_controller.cpp">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/agent_controller.cpp">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/ai/agent_controller.h">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/agent_controller.h">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/ai/agent_fsm.cpp">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/agent_fsm.cpp">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/ai/agent_fsm.h">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/agent_fsm.h">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/ai/agent_movement.cpp">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/agent_movement.cpp">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/ai/agent_movement.h">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/agent_movement.h">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/ai/evolution_manager.cpp">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/evolution_manager.cpp">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/ai/evolution_manager.h">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/evolution_manager.h">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/ai/fsm.cpp">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/fsm.cpp">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/ai/fsm.h">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/fsm.h">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/ai/fsm_event_data.cpp">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/fsm_event_data.cpp">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/ai/fsm_event_data.h">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/fsm_event_data.h">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/ai/genetic_algorithm.cpp">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/genetic_algorithm.cpp">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/ai/genetic_algorithm.h">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/genetic_algorithm.h">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/ai/genotype.cpp">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/genotype.cpp">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/ai/genotype.h">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/genotype.h">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/ai/neural_layer.cpp">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/neural_layer.cpp">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/ai/neural_layer.h">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/neural_layer.h">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/ai/neural_network.cpp">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/neural_network.cpp">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/ai/neural_network.h">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/neural_network.h">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/ai/sensor.cpp">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/sensor.cpp">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/ai/sensor.h">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/sensor.h">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/app.cpp">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/app.cpp">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/app.h">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/app.h">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/block.h">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/block.h">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/shared_libs.h">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/shared_libs.h">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/util/event.cpp">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/terrain/CrowdNavigation.cpp">
+			<Option target="39_CrowdNavigation"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/terrain/CrowdNavigation.h">
+			<Option target="39_CrowdNavigation"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/util/event.cpp">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/util/event.h">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/util/event.h">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/util/math_helper.cpp">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/util/math_helper.cpp">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/util/math_helper.h">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/util/math_helper.h">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/util/random_d.h">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/util/random_d.h">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/util/semaphore.h">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/util/semaphore.h">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/Utilities2D/Mover.cpp">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/Utilities2D/Mover.cpp">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/Utilities2D/Mover.h">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/Utilities2D/Mover.h">
 			<Option target="MayaSpace"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/bin/CoreData">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/bin/CoreData">
 			<Option target="MayaSpace"/>
+			<Option target="39_CrowdNavigation"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/bin/Data">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/bin/Data">
 			<Option target="MayaSpace"/>
+			<Option target="39_CrowdNavigation"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/CMakeLists.txt">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/CMakeLists.txt">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\Source\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/ThirdParty/Assimp/CMakeLists.txt">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/ThirdParty/Assimp/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\Source\ThirdParty\Assimp\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/ThirdParty/Assimp/revision.h.in">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/ThirdParty/Assimp/revision.h.in">
 			<Option virtualFolder="CMake Files\Source\ThirdParty\Assimp\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/ThirdParty/Assimp/include/assimp/config.h.in">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/ThirdParty/Assimp/include/assimp/config.h.in">
 			<Option virtualFolder="CMake Files\Source\ThirdParty\Assimp\include\assimp\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/ThirdParty/Assimp/contrib/zlib/zconf.h.cmakein">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/ThirdParty/Assimp/contrib/zlib/zconf.h.cmakein">
 			<Option virtualFolder="CMake Files\Source\ThirdParty\Assimp\contrib\zlib\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/ThirdParty/Assimp/code/CMakeLists.txt">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/ThirdParty/Assimp/code/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\Source\ThirdParty\Assimp\code\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/ThirdParty/Assimp/cmake-modules/FindRT.cmake">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/ThirdParty/Assimp/cmake-modules/FindRT.cmake">
 			<Option virtualFolder="CMake Files\Source\ThirdParty\Assimp\cmake-modules\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/ThirdParty/FreeType/CMakeLists.txt">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/ThirdParty/FreeType/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\Source\ThirdParty\FreeType\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/ThirdParty/LZ4/CMakeLists.txt">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/ThirdParty/LZ4/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\Source\ThirdParty\LZ4\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/ThirdParty/PugiXml/CMakeLists.txt">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/ThirdParty/PugiXml/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\Source\ThirdParty\PugiXml\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/ThirdParty/rapidjson/CMakeLists.txt">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/ThirdParty/rapidjson/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\Source\ThirdParty\rapidjson\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/ThirdParty/SDL/CMakeLists.txt">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/ThirdParty/SDL/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\Source\ThirdParty\SDL\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/ThirdParty/SDL/cmake/macros.cmake">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/ThirdParty/SDL/cmake/macros.cmake">
 			<Option virtualFolder="CMake Files\Source\ThirdParty\SDL\cmake\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/ThirdParty/SDL/cmake/sdlchecks.cmake">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/ThirdParty/SDL/cmake/sdlchecks.cmake">
 			<Option virtualFolder="CMake Files\Source\ThirdParty\SDL\cmake\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/ThirdParty/SDL/include/SDL_config.h.cmake">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/ThirdParty/SDL/include/SDL_config.h.cmake">
 			<Option virtualFolder="CMake Files\Source\ThirdParty\SDL\include\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/ThirdParty/StanHull/CMakeLists.txt">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/ThirdParty/StanHull/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\Source\ThirdParty\StanHull\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/ThirdParty/STB/CMakeLists.txt">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/ThirdParty/STB/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\Source\ThirdParty\STB\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/ThirdParty/AngelScript/CMakeLists.txt">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/ThirdParty/AngelScript/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\Source\ThirdParty\AngelScript\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/ThirdParty/Lua/CMakeLists.txt">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/ThirdParty/Lua/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\Source\ThirdParty\Lua\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/ThirdParty/toluapp/src/lib/CMakeLists.txt">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/ThirdParty/toluapp/src/lib/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\Source\ThirdParty\toluapp\src\lib\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/ThirdParty/toluapp/src/bin/CMakeLists.txt">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/ThirdParty/toluapp/src/bin/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\Source\ThirdParty\toluapp\src\bin\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/ThirdParty/Civetweb/CMakeLists.txt">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/ThirdParty/Civetweb/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\Source\ThirdParty\Civetweb\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/ThirdParty/kNet/CMakeLists.txt">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/ThirdParty/kNet/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\Source\ThirdParty\kNet\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/ThirdParty/ik/CMakeLists.txt">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/ThirdParty/ik/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\Source\ThirdParty\ik\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/ThirdParty/ik/include/ik/config.h.in">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/ThirdParty/ik/include/ik/config.h.in">
 			<Option virtualFolder="CMake Files\Source\ThirdParty\ik\include\ik\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/ThirdParty/ik/include/ik/export.h.in">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/ThirdParty/ik/include/ik/export.h.in">
 			<Option virtualFolder="CMake Files\Source\ThirdParty\ik\include\ik\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/ThirdParty/Detour/CMakeLists.txt">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/ThirdParty/Detour/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\Source\ThirdParty\Detour\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/ThirdParty/DetourCrowd/CMakeLists.txt">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/ThirdParty/DetourCrowd/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\Source\ThirdParty\DetourCrowd\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/ThirdParty/DetourTileCache/CMakeLists.txt">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/ThirdParty/DetourTileCache/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\Source\ThirdParty\DetourTileCache\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/ThirdParty/Recast/CMakeLists.txt">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/ThirdParty/Recast/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\Source\ThirdParty\Recast\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/ThirdParty/Box2D/CMakeLists.txt">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/ThirdParty/Box2D/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\Source\ThirdParty\Box2D\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/ThirdParty/WebP/CMakeLists.txt">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/ThirdParty/WebP/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\Source\ThirdParty\WebP\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/ThirdParty/Bullet/CMakeLists.txt">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/ThirdParty/Bullet/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\Source\ThirdParty\Bullet\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/ThirdParty/GLEW/CMakeLists.txt">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/ThirdParty/GLEW/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\Source\ThirdParty\GLEW\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Urho3D/CMakeLists.txt">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Urho3D/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\Source\Urho3D\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Urho3D/Urho3D.pc.in">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Urho3D/Urho3D.pc.in">
 			<Option virtualFolder="CMake Files\Source\Urho3D\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Urho3D/Urho3DAll.h.in">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Urho3D/Urho3DAll.h.in">
 			<Option virtualFolder="CMake Files\Source\Urho3D\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Tools/CMakeLists.txt">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Tools/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\Source\Tools\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Tools/Urho3DPlayer/CMakeLists.txt">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Tools/Urho3DPlayer/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\Source\Tools\Urho3DPlayer\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Tools/AssetImporter/CMakeLists.txt">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Tools/AssetImporter/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\Source\Tools\AssetImporter\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Tools/OgreImporter/CMakeLists.txt">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Tools/OgreImporter/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\Source\Tools\OgreImporter\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Tools/PackageTool/CMakeLists.txt">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Tools/PackageTool/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\Source\Tools\PackageTool\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Tools/RampGenerator/CMakeLists.txt">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Tools/RampGenerator/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\Source\Tools\RampGenerator\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Tools/SpritePacker/CMakeLists.txt">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Tools/SpritePacker/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\Source\Tools\SpritePacker\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Tools/ScriptCompiler/CMakeLists.txt">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Tools/ScriptCompiler/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\Source\Tools\ScriptCompiler\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/CMakeLists.txt">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\Source\Game\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Source/Game/MayaSpace/CMakeLists.txt">
-			<Option virtualFolder="CMake Files\Source\Game\MayaSpace\"/>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\Source\Game\MayaScape\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/CMake/Modules/CheckCompilerToolchain.cmake">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/terrain/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\Source\Game\MayaScape\terrain\"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/CMake/Modules/CheckCompilerToolchain.cmake">
 			<Option virtualFolder="CMake Files\CMake\Modules\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/CMake/Modules/CheckHost.cmake">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/CMake/Modules/CheckHost.cmake">
 			<Option virtualFolder="CMake Files\CMake\Modules\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/CMake/Modules/FindDirectRenderingManager.cmake">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/CMake/Modules/FindDirectRenderingManager.cmake">
 			<Option virtualFolder="CMake Files\CMake\Modules\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/CMake/Modules/FindEsound.cmake">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/CMake/Modules/FindEsound.cmake">
 			<Option virtualFolder="CMake Files\CMake\Modules\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/CMake/Modules/FindFusionSound.cmake">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/CMake/Modules/FindFusionSound.cmake">
 			<Option virtualFolder="CMake Files\CMake\Modules\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/CMake/Modules/FindGenericBufferManagement.cmake">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/CMake/Modules/FindGenericBufferManagement.cmake">
 			<Option virtualFolder="CMake Files\CMake\Modules\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/CMake/Modules/FindJack.cmake">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/CMake/Modules/FindJack.cmake">
 			<Option virtualFolder="CMake Files\CMake\Modules\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/CMake/Modules/FindNetworkAudioSystem.cmake">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/CMake/Modules/FindNetworkAudioSystem.cmake">
 			<Option virtualFolder="CMake Files\CMake\Modules\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/CMake/Modules/FindOSS.cmake">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/CMake/Modules/FindOSS.cmake">
 			<Option virtualFolder="CMake Files\CMake\Modules\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/CMake/Modules/FindPulseAudio.cmake">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/CMake/Modules/FindPulseAudio.cmake">
 			<Option virtualFolder="CMake Files\CMake\Modules\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/CMake/Modules/FindReadline.cmake">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/CMake/Modules/FindReadline.cmake">
 			<Option virtualFolder="CMake Files\CMake\Modules\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/CMake/Modules/FindRoarAudio.cmake">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/CMake/Modules/FindRoarAudio.cmake">
 			<Option virtualFolder="CMake Files\CMake\Modules\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/CMake/Modules/FindSecretRabbitCode.cmake">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/CMake/Modules/FindSecretRabbitCode.cmake">
 			<Option virtualFolder="CMake Files\CMake\Modules\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/CMake/Modules/FindUrho3D.cmake">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/CMake/Modules/FindUrho3D.cmake">
 			<Option virtualFolder="CMake Files\CMake\Modules\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/CMake/Modules/FindaRts.cmake">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/CMake/Modules/FindaRts.cmake">
 			<Option virtualFolder="CMake Files\CMake\Modules\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/CMake/Modules/GenerateExportHeader.cmake">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/CMake/Modules/GenerateExportHeader.cmake">
 			<Option virtualFolder="CMake Files\CMake\Modules\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/CMake/Modules/UrhoCommon.cmake">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/CMake/Modules/UrhoCommon.cmake">
 			<Option virtualFolder="CMake Files\CMake\Modules\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/CMake/Modules/exportheader.cmake.in">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/CMake/Modules/exportheader.cmake.in">
 			<Option virtualFolder="CMake Files\CMake\Modules\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Docs/CMakeLists.txt">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Docs/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\Docs\"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaSpace/src/Urho3D/Docs/Doxyfile.in">
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Docs/Doxyfile.in">
 			<Option virtualFolder="CMake Files\Docs\"/>
 		</Unit>
 	</Project>

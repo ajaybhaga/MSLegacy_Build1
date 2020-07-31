@@ -21,7 +21,7 @@
 //
 /*
 
-    Written by Ajay Bhaga 2019/2020
+    Written by Ajay Bhaga 2020
 
 */
 #include <sstream>
@@ -88,16 +88,16 @@
 #include "Object2D.h"
 #include "Sample2D.h"
 #include "Utilities2D/Mover.h"
-#include "MayaSpace.h"
-#include <MayaSpace/ai/evolution_manager.h>
+#include "MayaScape.h"
+#include <MayaScape/ai/evolution_manager.h>
 
 
 // AgentSim shared libs
 #include "shared_libs.h"
 
-URHO3D_DEFINE_APPLICATION_MAIN(MayaSpace)
+URHO3D_DEFINE_APPLICATION_MAIN(MayaScape)
 
-MayaSpace::MayaSpace(Context *context) :
+MayaScape::MayaScape(Context *context) :
         Game(context) {
     // Register factory for the Character2D component so it can be created via CreateComponent
     Character2D::RegisterObject(context);
@@ -107,11 +107,11 @@ MayaSpace::MayaSpace(Context *context) :
     Mover::RegisterObject(context);
 }
 
-void MayaSpace::Setup() {
+void MayaScape::Setup() {
     Game::Setup();
 }
 
-void MayaSpace::InitEvolutionSpriteGenerator() {
+void MayaScape::InitEvolutionSpriteGenerator() {
 
     std::cout << "Evolution Manager -> starting..." << std::endl;
 
@@ -178,7 +178,7 @@ void MayaSpace::InitEvolutionSpriteGenerator() {
 }
 
 
-void MayaSpace::ShowEvolutionManagerStats() {
+void MayaScape::ShowEvolutionManagerStats() {
     std::vector<Agent *> agents = EvolutionManager::getInstance()->getAgents();
     std::vector<AgentController *> controllers = EvolutionManager::getInstance()->getAgentControllers();
 
@@ -267,7 +267,7 @@ void MayaSpace::ShowEvolutionManagerStats() {
     delete[] c;
 }
 
-void MayaSpace::Start() {
+void MayaScape::Start() {
 
     for (int i = 0; i < sizeof(particlePool_) / sizeof(*particlePool_); i++) {
         particlePool_[i].used = false;
@@ -278,7 +278,7 @@ void MayaSpace::Start() {
     Game::Start();
 
     // Initialize evolution sprite generator
-    MayaSpace::InitEvolutionSpriteGenerator();
+    MayaScape::InitEvolutionSpriteGenerator();
 
     sample2D_ = new Sample2D(context_);
 
@@ -293,17 +293,17 @@ void MayaSpace::Start() {
     UI *ui = GetSubsystem<UI>();
 
     // Create the UI content
-    sample2D_->CreateUIContent("MayaSpace Game Engine v0.1", player_->remainingLifes_, player_->remainingCoins_);
+    sample2D_->CreateUIContent("MayaScape Game Engine v0.1", player_->remainingLifes_, player_->remainingCoins_);
 //    auto* ui = GetSubsystem<UI>();
     Button *playButton = static_cast<Button *>(ui->GetRoot()->GetChild("PlayButton", true));
-    SubscribeToEvent(playButton, E_RELEASED, URHO3D_HANDLER(MayaSpace, HandlePlayButton));
+    SubscribeToEvent(playButton, E_RELEASED, URHO3D_HANDLER(MayaScape, HandlePlayButton));
 
     // Hook up to the frame update events
     SubscribeToEvents();
 
 }
 
-void MayaSpace::Stop() {
+void MayaScape::Stop() {
 
     // Free evolution manager
     EvolutionManager::clean();
@@ -313,7 +313,7 @@ void MayaSpace::Stop() {
 }
 
 
-void MayaSpace::CreateScene() {
+void MayaScape::CreateScene() {
     scene_ = new Scene(context_);
     sample2D_->scene_ = scene_;
 
@@ -457,7 +457,7 @@ void MayaSpace::CreateScene() {
     TileMap3D *tileMap = tileMapNode->CreateComponent<TileMap3D>();
     URHO3D_LOGINFOF("tileMap=%x", tileMap);
 
-    tileMap->SetTmxFile(cache->GetResource<TmxFile2D>("Urho2D/Tilesets/MayaSpace_Level0.tmx"));
+    tileMap->SetTmxFile(cache->GetResource<TmxFile2D>("Urho2D/Tilesets/MayaScape_Level0.tmx"));
     const TileMapInfo2D &info = tileMap->GetInfo();
 
 /*
@@ -679,10 +679,10 @@ void MayaSpace::CreateScene() {
 
 
     // Check when scene is rendered
-    SubscribeToEvent(E_ENDRENDERING, URHO3D_HANDLER(MayaSpace, HandleSceneRendered));
+    SubscribeToEvent(E_ENDRENDERING, URHO3D_HANDLER(MayaScape, HandleSceneRendered));
 }
 
-void MayaSpace::HandleSceneRendered(StringHash eventType, VariantMap &eventData) {
+void MayaScape::HandleSceneRendered(StringHash eventType, VariantMap &eventData) {
     UnsubscribeFromEvent(E_ENDRENDERING);
     // Save the scene so we can reload it later
     sample2D_->SaveScene(true);
@@ -690,30 +690,30 @@ void MayaSpace::HandleSceneRendered(StringHash eventType, VariantMap &eventData)
     scene_->SetUpdateEnabled(false);
 }
 
-void MayaSpace::SubscribeToEvents() {
+void MayaScape::SubscribeToEvents() {
     // Subscribe HandleUpdate() function for processing update events
-    SubscribeToEvent(E_UPDATE, URHO3D_HANDLER(MayaSpace, HandleUpdate));
+    SubscribeToEvent(E_UPDATE, URHO3D_HANDLER(MayaScape, HandleUpdate));
 
     // Subscribe HandlePostUpdate() function for processing post update events
-    SubscribeToEvent(E_POSTUPDATE, URHO3D_HANDLER(MayaSpace, HandlePostUpdate));
+    SubscribeToEvent(E_POSTUPDATE, URHO3D_HANDLER(MayaScape, HandlePostUpdate));
 
     // Subscribe to PostRenderUpdate to draw debug geometry
-    SubscribeToEvent(E_POSTRENDERUPDATE, URHO3D_HANDLER(MayaSpace, HandlePostRenderUpdate));
+    SubscribeToEvent(E_POSTRENDERUPDATE, URHO3D_HANDLER(MayaScape, HandlePostRenderUpdate));
 
     // Subscribe to Box2D contact listeners
-    SubscribeToEvent(E_PHYSICSBEGINCONTACT2D, URHO3D_HANDLER(MayaSpace, HandleCollisionBegin));
-    SubscribeToEvent(E_PHYSICSENDCONTACT2D, URHO3D_HANDLER(MayaSpace, HandleCollisionEnd));
+    SubscribeToEvent(E_PHYSICSBEGINCONTACT2D, URHO3D_HANDLER(MayaScape, HandleCollisionBegin));
+    SubscribeToEvent(E_PHYSICSENDCONTACT2D, URHO3D_HANDLER(MayaScape, HandleCollisionEnd));
 
     // If the node pointer is non-null, this component has been created into a scene node. Subscribe to physics collisions that
     // concern this scene node
-//    SubscribeToEvent(E_NODEUPDATECONTACT2D, URHO3D_HANDLER(MayaSpace, HandleNodeCollision));
+//    SubscribeToEvent(E_NODEUPDATECONTACT2D, URHO3D_HANDLER(MayaScape, HandleNodeCollision));
 
     // Unsubscribe the SceneUpdate event from base class to prevent camera pitch and yaw in 2D sample
     UnsubscribeFromEvent(E_SCENEUPDATE);
 }
 
 /*
-void MayaSpace::HandleNodeCollision(StringHash eventType, VariantMap& eventData) {
+void MayaScape::HandleNodeCollision(StringHash eventType, VariantMap& eventData) {
 
     using namespace PhysicsBeginContact2D;
 
@@ -744,7 +744,7 @@ void MayaSpace::HandleNodeCollision(StringHash eventType, VariantMap& eventData)
 
 }*/
 
-void MayaSpace::HandleCollisionBegin(StringHash eventType, VariantMap &eventData) {
+void MayaScape::HandleCollisionBegin(StringHash eventType, VariantMap &eventData) {
     // Get colliding node
     auto *hitNode = static_cast<Node *>(eventData[PhysicsBeginContact2D::P_NODEA].GetPtr());
     if (hitNode->GetName() == "Bear-P1")
@@ -972,7 +972,7 @@ void MayaSpace::HandleCollisionBegin(StringHash eventType, VariantMap &eventData
 }
 
 
-void MayaSpace::SetParticleEmitter(int hitId, float contactX, float contactY, int type, float timeStep) {
+void MayaScape::SetParticleEmitter(int hitId, float contactX, float contactY, int type, float timeStep) {
     // CREATE
     auto *cache = GetSubsystem<ResourceCache>();
     ParticleEffect2D *particleEffect;
@@ -1013,7 +1013,7 @@ void MayaSpace::SetParticleEmitter(int hitId, float contactX, float contactY, in
     URHO3D_LOGINFOF("PARTICLE EMITTER CREATED used by id=%d", hitId);
 }
 
-void MayaSpace::HandleUpdateParticlePool(float timeStep) {
+void MayaScape::HandleUpdateParticlePool(float timeStep) {
     // CREATE
     auto *cache = GetSubsystem<ResourceCache>();
 /*    auto* particleEffect = cache->GetResource<ParticleEffect2D>("Urho2D/sun.pex");
@@ -1037,7 +1037,7 @@ void MayaSpace::HandleUpdateParticlePool(float timeStep) {
 }
 
 
-void MayaSpace::HandleCollisionEnd(StringHash eventType, VariantMap &eventData) {
+void MayaScape::HandleCollisionEnd(StringHash eventType, VariantMap &eventData) {
     // Get colliding node
     auto *hitNode = static_cast<Node *>(eventData[PhysicsEndContact2D::P_NODEA].GetPtr());
     if (hitNode->GetName() == "Bear-P1")
@@ -1070,7 +1070,7 @@ void MayaSpace::HandleCollisionEnd(StringHash eventType, VariantMap &eventData) 
     }
 }
 
-void MayaSpace::HandleUpdate(StringHash eventType, VariantMap &eventData) {
+void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
     using namespace Update;
     auto *input = GetSubsystem<Input>();
 
@@ -1308,7 +1308,7 @@ void MayaSpace::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 
 }
 
-void MayaSpace::HandlePostUpdate(StringHash eventType, VariantMap &eventData) {
+void MayaScape::HandlePostUpdate(StringHash eventType, VariantMap &eventData) {
     if (!player_)
         return;
 
@@ -1317,7 +1317,7 @@ void MayaSpace::HandlePostUpdate(StringHash eventType, VariantMap &eventData) {
                                      -10.0f)); // Camera tracks character
 }
 
-void MayaSpace::HandlePostRenderUpdate(StringHash eventType, VariantMap &eventData) {
+void MayaScape::HandlePostRenderUpdate(StringHash eventType, VariantMap &eventData) {
     // Mesh and bones do not match -> bones are too big
     // Scale down bone
 //    player_->
@@ -1351,7 +1351,7 @@ void MayaSpace::HandlePostRenderUpdate(StringHash eventType, VariantMap &eventDa
     }
 }
 
-void MayaSpace::ReloadScene(bool reInit) {
+void MayaScape::ReloadScene(bool reInit) {
     String filename = sample2D_->demoFilename_;
     if (!reInit)
         filename += "InGame";
@@ -1383,7 +1383,7 @@ void MayaSpace::ReloadScene(bool reInit) {
     coinsText->SetText(String(coins));
 }
 
-void MayaSpace::HandlePlayButton(StringHash eventType, VariantMap &eventData) {
+void MayaScape::HandlePlayButton(StringHash eventType, VariantMap &eventData) {
 //    sample2D_->PlaySoundEffect("enemy01-laugh.wav");
 //    sample2D_->PlaySoundEffect("BAY-r1.wav");
 
