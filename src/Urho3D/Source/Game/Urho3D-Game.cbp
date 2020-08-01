@@ -17,8 +17,8 @@
 					<DistClean command="/bin/gmake -f &quot;/code/dev/MayaScape/src/Urho3D/Source/Game/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
-			<Target title="MayaSpace">
-				<Option output="/code/dev/MayaScape/src/Urho3D/bin/MayaSpace" prefix_auto="0" extension_auto="0"/>
+			<Target title="MayaScape">
+				<Option output="/code/dev/MayaScape/src/Urho3D/bin/MayaScape" prefix_auto="0" extension_auto="0"/>
 				<Option working_dir="/code/dev/MayaScape/src/Urho3D/bin"/>
 				<Option object_output="./"/>
 				<Option type="1"/>
@@ -44,14 +44,14 @@
 					<Add directory="/code/dev/MayaScape/src/Urho3D/Source/Game"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/bin/gmake -f &quot;/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Makefile&quot;  VERBOSE=1 MayaSpace"/>
+					<Build command="/bin/gmake -f &quot;/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Makefile&quot;  VERBOSE=1 MayaScape"/>
 					<CompileFile command="/bin/gmake -f &quot;/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
 					<Clean command="/bin/gmake -f &quot;/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Makefile&quot;  VERBOSE=1 clean"/>
 					<DistClean command="/bin/gmake -f &quot;/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
-			<Target title="MayaSpace/fast">
-				<Option output="/code/dev/MayaScape/src/Urho3D/bin/MayaSpace" prefix_auto="0" extension_auto="0"/>
+			<Target title="MayaScape/fast">
+				<Option output="/code/dev/MayaScape/src/Urho3D/bin/MayaScape" prefix_auto="0" extension_auto="0"/>
 				<Option working_dir="/code/dev/MayaScape/src/Urho3D/bin"/>
 				<Option object_output="./"/>
 				<Option type="1"/>
@@ -77,7 +77,7 @@
 					<Add directory="/code/dev/MayaScape/src/Urho3D/Source/Game"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/bin/gmake -f &quot;/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Makefile&quot;  VERBOSE=1 MayaSpace/fast"/>
+					<Build command="/bin/gmake -f &quot;/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Makefile&quot;  VERBOSE=1 MayaScape/fast"/>
 					<CompileFile command="/bin/gmake -f &quot;/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
 					<Clean command="/bin/gmake -f &quot;/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Makefile&quot;  VERBOSE=1 clean"/>
 					<DistClean command="/bin/gmake -f &quot;/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Makefile&quot;  VERBOSE=1 clean"/>
@@ -151,118 +151,118 @@
 			</Target>
 		</Build>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Character2D.cpp">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Character2D.h">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/GameController.cpp">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/GameController.h">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/MayaScape.cpp">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/MayaScape.h">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Object2D.cpp">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Object2D.h">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Sample2D.cpp">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Sample2D.h">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/agent.cpp">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/agent.h">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/agent_controller.cpp">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/agent_controller.h">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/agent_fsm.cpp">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/agent_fsm.h">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/agent_movement.cpp">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/agent_movement.h">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/evolution_manager.cpp">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/evolution_manager.h">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/fsm.cpp">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/fsm.h">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/fsm_event_data.cpp">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/fsm_event_data.h">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/genetic_algorithm.cpp">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/genetic_algorithm.h">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/genotype.cpp">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/genotype.h">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/neural_layer.cpp">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/neural_layer.h">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/neural_network.cpp">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/neural_network.h">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/sensor.cpp">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/ai/sensor.h">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/app.cpp">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/app.h">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/block.h">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/shared_libs.h">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/terrain/CrowdNavigation.cpp">
 			<Option target="39_CrowdNavigation"/>
@@ -271,35 +271,35 @@
 			<Option target="39_CrowdNavigation"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/util/event.cpp">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/util/event.h">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/util/math_helper.cpp">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/util/math_helper.h">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/util/random_d.h">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/util/semaphore.h">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/Utilities2D/Mover.cpp">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/Utilities2D/Mover.h">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/bin/CoreData">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 			<Option target="39_CrowdNavigation"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/bin/Data">
-			<Option target="MayaSpace"/>
+			<Option target="MayaScape"/>
 			<Option target="39_CrowdNavigation"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/CMakeLists.txt">

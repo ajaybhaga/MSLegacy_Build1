@@ -764,8 +764,8 @@ void Sample2D::CreateUIContent(const String& demoTitle, int remainingLifes, int 
 
     // Create the image
     auto* spriteUI = fullUI->CreateChild<BorderImage>("Sprite");
-    spriteUI->SetTexture(cache->GetResource<Texture2D>("Textures/BZLogo-lg.png"));
-    spriteUI->SetSize(700, 328);
+    spriteUI->SetTexture(cache->GetResource<Texture2D>("Textures/logo.png"));
+    spriteUI->SetSize(512, 256);
     spriteUI->SetAlignment(HA_CENTER, VA_CENTER);
     spriteUI->SetPosition(0, - ui->GetRoot()->GetHeight() / 4);
 

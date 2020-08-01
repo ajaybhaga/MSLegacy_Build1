@@ -457,7 +457,7 @@ void MayaScape::CreateScene() {
     TileMap3D *tileMap = tileMapNode->CreateComponent<TileMap3D>();
     URHO3D_LOGINFOF("tileMap=%x", tileMap);
 
-    tileMap->SetTmxFile(cache->GetResource<TmxFile2D>("Urho2D/Tilesets/MayaScape_Level0.tmx"));
+    tileMap->SetTmxFile(cache->GetResource<TmxFile2D>("Urho2D/Tilesets/MayaSpace_Level0.tmx"));
     const TileMapInfo2D &info = tileMap->GetInfo();
 
 /*
@@ -646,7 +646,8 @@ void MayaScape::CreateScene() {
 
 // Generate physics collision shapes from the tmx file's objects located in "Physics" (top) layer
     TileMapLayer3D *tileMapLayer = tileMap->GetLayer(tileMap->GetNumLayers() - 1);
-    sample2D_->CreateCollisionShapesFromTMXObjects(tileMapNode, tileMapLayer, info);
+    if (tileMapLayer)
+        sample2D_->CreateCollisionShapesFromTMXObjects(tileMapNode, tileMapLayer, info);
 
     // Create a directional light to the world so that we can see something. The light scene node's orientation controls the
     // light direction; we will use the SetDirection() function which calculates the orientation from a forward direction vector.

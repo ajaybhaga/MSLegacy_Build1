@@ -167,7 +167,7 @@ void Game::CreateLogo()
 {
     // Get logo texture
     ResourceCache* cache = GetSubsystem<ResourceCache>();
-    Texture2D* logoTexture = cache->GetResource<Texture2D>("Textures/BZLogo.png");
+    Texture2D* logoTexture = cache->GetResource<Texture2D>("Textures/logo.png");
     if (!logoTexture)
         return;
 
@@ -227,7 +227,7 @@ void Game::SetWindowTitleAndIcon()
     graphics->SetWindowIcon(icon);
 
     std::string s;
-    s = s.append("MayaSpace Engine Build ").append(datetime()).append(" by Ajay Bhaga");
+    s = s.append("MayaScape Engine Build ").append(datetime()).append(" by Ajay Bhaga");
 
     graphics->SetWindowTitle(s.c_str());
     //sprintf("MayaSpace Engine Build " " by Ajay Bhaga", __DATE__));
