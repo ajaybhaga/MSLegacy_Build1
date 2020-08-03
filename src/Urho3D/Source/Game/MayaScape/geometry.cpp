@@ -24,6 +24,7 @@
 #include "objectdef.h"
 #include "map.h"
 #include "display.h"
+#include "mathdef.h"
 
 uint16_t calcDirection(int32_t x0, int32_t y0, int32_t x1, int32_t y1)
 {

@@ -23,6 +23,7 @@
 
 #pragma once
 
+#include "basedef.h"
 //#include "droiddef.h"
 
 #include <memory>
@@ -49,7 +50,7 @@ struct PATHJOB
 	//DROID_TYPE	droidType;
 	int		destX, destY;
 	int		origX, origY;
-	//StructureBounds dstStructure;
+	StructureBounds dstStructure;
 	UDWORD		droidID;
 	FPATH_MOVETYPE	moveType;
 	int		owner;		///< Player owner

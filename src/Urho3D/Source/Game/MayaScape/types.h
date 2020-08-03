@@ -1,5 +1,13 @@
 #pragma once
 
+#include <future>
+#include <unordered_map>
+
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+#include <iostream>
+
 #include <limits.h>
 #include <ctype.h>
 #include <stdint.h>
@@ -154,3 +162,8 @@ union PIELIGHT
     UBYTE vector[4];
 };
 
+#define CLIP(val, min, max) do                                                \
+	{                                                                             \
+		if ((val) < (min)) (val) = (min);                                         \
+		else if ((val) > (max)) (val) = (max);                                    \
+	} while(0)

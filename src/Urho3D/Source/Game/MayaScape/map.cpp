@@ -25,12 +25,13 @@
 //#include "astar.h"
 //#include "fpath.h"
 //#include "levels.h"
+#include "stringdef.h"
 
 #define GAME_TICKS_FOR_DANGER (GAME_TICKS_PER_SEC * 2)
 
-static WZ_THREAD *dangerThread = nullptr;
-static WZ_SEMAPHORE *dangerSemaphore = nullptr;
-static WZ_SEMAPHORE *dangerDoneSemaphore = nullptr;
+static std::thread *dangerThread = nullptr;
+static Semaphore dangerSemaphore = Semaphore(0);
+static Semaphore dangerDoneSemaphore = Semaphore(0);
 struct floodtile
 {
 	uint8_t x;
@@ -116,8 +117,9 @@ static void init_tileNames(int type)
 	int		numlines = 0, i = 0, cnt = 0;
 	uint32_t	fileSize = 0;
 
-	pFileData = fileLoadBuffer;
+	//pFileData = fileLoadBuffer;
 
+	/*
 	switch (type)
 	{
 	case ARIZONA:
@@ -199,7 +201,7 @@ static void init_tileNames(int type)
 		pFileData += cnt;
 		//increment the pointer to the start of the next record
 		pFileData = strchr(pFileData, '\n') + 1;
-	}
+	}*/
 }
 
 // This is the main loading routine to get all the map's parameters set.
@@ -1003,7 +1005,8 @@ bool mapShutdown()
 
 	if (dangerThread)
 	{
-		wzSemaphoreWait(dangerDoneSemaphore);
+		//wzSemaphoreWait(dangerDoneSemaphore);
+        dangerDoneSemaphore->wait();
 		lastDangerPlayer = -1;
 		wzSemaphorePost(dangerSemaphore);
 		wzThreadJoin(dangerThread);
@@ -1952,8 +1955,8 @@ void mapInit()
 			auxMapRestore(player, AUX_DANGERMAP, AUXBITS_DANGER | AUXBITS_THREAT | AUXBITS_AATHREAT);
 		}
 		lastDangerPlayer = 0;
-		dangerSemaphore = wzSemaphoreCreate(0);
-		dangerDoneSemaphore = wzSemaphoreCreate(0);
+	//	dangerSemaphore = Semaphore(0);
+//		dangerDoneSemaphore = Semaphore(0);
 		dangerThread = wzThreadCreate(dangerThreadFunc, nullptr);
 		wzThreadStart(dangerThread);
 	}

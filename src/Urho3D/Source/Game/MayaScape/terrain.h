@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "types.h"
 #include <glm/fwd.hpp>
 
 bool initTerrain();

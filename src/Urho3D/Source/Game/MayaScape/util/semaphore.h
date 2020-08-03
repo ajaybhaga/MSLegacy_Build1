@@ -1,5 +1,4 @@
-#ifndef EANN_SIMPLE_SEMAPHORE_H
-#define EANN_SIMPLE_SEMAPHORE_H
+#pragma once
 
 #include <mutex>
 #include <condition_variable>
@@ -28,5 +27,3 @@ private:
     std::condition_variable cv;
     int count;
 };
-
-#endif //EANN_SIMPLE_SEMAPHORE_H

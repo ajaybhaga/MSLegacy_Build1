@@ -22,7 +22,7 @@ static PointTree::Filter *gridFiltersDroidsByPlayer;
 // initialise the grid system
 bool gridInitialise()
 {
-	ASSERT(gridPointTree == nullptr, "gridInitialise already called, without calling gridShutDown.");
+	//ASSERT(gridPointTree == nullptr, "gridInitialise already called, without calling gridShutDown.");
 	gridPointTree = new PointTree;
 	gridFiltersUnseen = new PointTree::Filter[MAX_PLAYERS];
 	gridFiltersDroidsByPlayer = new PointTree::Filter[MAX_PLAYERS];
@@ -38,6 +38,7 @@ void gridReset()
 	// Put all existing objects into the point tree.
 	for (unsigned player = 0; player < MAX_PLAYERS; player++)
 	{
+	    /*
 		BASE_OBJECT *start[3] = {(BASE_OBJECT *)apsDroidLists[player], (BASE_OBJECT *)apsStructLists[player], (BASE_OBJECT *)apsFeatureLists[player]};
 		for (unsigned type = 0; type != sizeof(start) / sizeof(*start); ++type)
 		{
@@ -52,7 +53,7 @@ void gridReset()
 					}
 				}
 			}
-		}
+		}*/
 	}
 
 	gridPointTree->sort();
@@ -102,7 +103,7 @@ static GridList const &gridStartIterateFiltered(int32_t x, int32_t y, uint32_t r
 		{
 			filter->erase(gridPointTree->lastFilteredQueryIndices[i - gridPointTree->lastQueryResults.begin()]);  // Stop the object from appearing in future searches.
 		}
-		else if (isInRadius(obj->pos.x - x, obj->pos.y - y, radius))  // Check that search result is less than radius (since they can be up to a factor of sqrt(2) more).
+		else if (isInRadius(obj->pos.x_ - x, obj->pos.y_ - y, radius))  // Check that search result is less than radius (since they can be up to a factor of sqrt(2) more).
 		{
 			*w = *i;
 			++w;

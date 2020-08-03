@@ -6,7 +6,6 @@
 #include "display.h"
 #include "display3ddef.h"	// This should be the only place including this file
 #include "objectdef.h"
-#include "MayaScape/not-used/message.h"
 
 #define HEIGHT_TRACK_INCREMENTS (50)
 
@@ -31,8 +30,8 @@ enum ENERGY_BAR
 
 struct iView
 {
-	Vector3i p = Vector3i(0, 0, 0);
-	Vector3i r = Vector3i(0, 0, 0);
+	IntVector3 p = IntVector3(0, 0, 0);
+	IntVector3 r = IntVector3(0, 0, 0);
 };
 
 extern bool showFPS;
@@ -48,7 +47,7 @@ bool radarVisible();
 
 extern bool rangeOnScreen; // Added to get sensor/gun range on screen.  -Q 5-10-05
 void setViewPos(UDWORD x, UDWORD y, bool Pan);
-Vector2i    getPlayerPos();
+IntVector2    getPlayerPos();
 void setPlayerPos(SDWORD x, SDWORD y);
 void disp3d_setView(iView *newView);
 void disp3d_oldView(); // for save games <= 10
@@ -62,7 +61,7 @@ void draw3DScene();
 //void renderDeliveryPoint(FLAG_POSITION *psPosition, bool blueprint, const glm::mat4 &viewMatrix);
 void debugToggleSensorDisplay();
 
-void calcScreenCoords(DROID *psDroid, const glm::mat4 &viewMatrix);
+//void calcScreenCoords(DROID *psDroid, const glm::mat4 &viewMatrix);
 ENERGY_BAR toggleEnergyBars();
 
 bool doWeDrawProximitys();
@@ -70,8 +69,8 @@ void setProximityDraw(bool val);
 
 bool	clipXY(SDWORD x, SDWORD y);
 inline bool clipShapeOnScreen(const iIMDShape *pIMD, const glm::mat4& viewModelMatrix, int overdrawScreenPoints = 10);
-bool clipDroidOnScreen(DROID *psDroid, const glm::mat4& viewModelMatrix, int overdrawScreenPoints = 25);
-bool clipStructureOnScreen(STRUCTURE *psStructure, const glm::mat4 &viewModelMatrix, int overdrawScreenPoints = 0);
+//bool clipDroidOnScreen(DROID *psDroid, const glm::mat4& viewModelMatrix, int overdrawScreenPoints = 25);
+//bool clipStructureOnScreen(STRUCTURE *psStructure, const glm::mat4 &viewModelMatrix, int overdrawScreenPoints = 0);
 
 bool init3DView();
 extern iView player;
@@ -85,23 +84,23 @@ void setUnderwaterTile(UDWORD num);
 UDWORD getRubbleTileNum();
 void setRubbleTile(UDWORD num);
 
-STRUCTURE *getTileBlueprintStructure(int mapX, int mapY);  ///< Gets the blueprint at those coordinates, if any. Previous return value becomes invalid.
-STRUCTURE_STATS const *getTileBlueprintStats(int mapX, int mapY);  ///< Gets the structure stats of the blueprint at those coordinates, if any.
-bool anyBlueprintTooClose(STRUCTURE_STATS const *stats, Vector2i pos, uint16_t dir);  ///< Checks if any blueprint is too close to the given structure.
-void clearBlueprints();
+//STRUCTURE *getTileBlueprintStructure(int mapX, int mapY);  ///< Gets the blueprint at those coordinates, if any. Previous return value becomes invalid.
+//STRUCTURE_STATS const *getTileBlueprintStats(int mapX, int mapY);  ///< Gets the structure stats of the blueprint at those coordinates, if any.
+//bool anyBlueprintTooClose(STRUCTURE_STATS const *stats, IntVector2 pos, uint16_t dir);  ///< Checks if any blueprint is too close to the given structure.
+//void clearBlueprints();
 
 void display3dScreenSizeDidChange(unsigned int oldWidth, unsigned int oldHeight, unsigned int newWidth, unsigned int newHeight);
 
 extern SDWORD mouseTileX, mouseTileY;
-extern Vector2i mousePos;
+extern IntVector2 mousePos;
 
 extern bool bRender3DOnly;
 extern bool showGateways;
 extern bool showPath;
-extern const Vector2i visibleTiles;
+extern const IntVector2 visibleTiles;
 
 /*returns the graphic ID for a droid rank*/
-UDWORD  getDroidRankGraphic(DROID *psDroid);
+//UDWORD  getDroidRankGraphic(DROID *psDroid);
 
 /* Visualize radius at position */
 void showRangeAtPos(SDWORD centerX, SDWORD centerY, SDWORD radius);

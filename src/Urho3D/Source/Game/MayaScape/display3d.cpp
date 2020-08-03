@@ -29,10 +29,10 @@
 //#include "radar.h"
 #include "display3d.h"
 //#include "lighting.h"
-#include "MayaScape/not-used/console.h"
+//#include "MayaScape/not-used/console.h"
 //#include "projectile.h"
 #include "bucket3d.h"
-#include "MayaScape/not-used/message.h"
+//#include "MayaScape/not-used/message.h"
 //#include "component.h"
 //#include "warcam.h"
 //#include "keymap.h"
@@ -53,11 +53,11 @@ static void displayDynamicObjects(const glm::mat4 &viewMatrix);
 static void displayStaticObjects(const glm::mat4 &viewMatrix);
 //static void displayFeatures(const glm::mat4 &viewMatrix);
 static UDWORD	getTargettingGfx();
-static void	drawDroidGroupNumber(DROID *psDroid);
+//static void	drawDroidGroupNumber(DROID *psDroid);
 static void	trackHeight(int desiredHeight);
 static void	renderSurroundings(const glm::mat4 &viewMatrix);
 static void	locateMouse();
-static bool	renderWallSection(STRUCTURE *psStructure, const glm::mat4 &viewMatrix);
+//static bool	renderWallSection(STRUCTURE *psStructure, const glm::mat4 &viewMatrix);
 static void	drawDragBox();
 static void	calcFlagPosScreenCoords(SDWORD *pX, SDWORD *pY, SDWORD *pR, const glm::mat4 &modelViewMatrix);
 static void	drawTiles(iView *player);
@@ -67,22 +67,22 @@ static void	drawStructureSelections();
 static void displayBlueprints(const glm::mat4 &viewMatrix);
 static void	processSensorTarget();
 static void	processDestinationTarget();
-static bool	eitherSelected(DROID *psDroid);
+//static bool	eitherSelected(DROID *psDroid);
 static void	structureEffects();
 static void	showDroidSensorRanges();
 static void	showSensorRange2(BASE_OBJECT *psObj);
 static void	drawRangeAtPos(SDWORD centerX, SDWORD centerY, SDWORD radius);
 //static void	addConstructionLine(DROID *psDroid, STRUCTURE *psStructure, const glm::mat4 &viewMatrix);
 static void	doConstructionLines(const glm::mat4 &viewMatrix);
-static void	drawDroidCmndNo(DROID *psDroid);
-static void	drawDroidOrder(const DROID *psDroid);
-static void	drawDroidRank(DROID *psDroid);
-static void	drawDroidSensorLock(DROID *psDroid);
+//static void	drawDroidCmndNo(DROID *psDroid);
+//static void	drawDroidOrder(const DROID *psDroid);
+//static void	drawDroidRank(DROID *psDroid);
+//static void	drawDroidSensorLock(DROID *psDroid);
 static void	calcAverageTerrainHeight(iView *player);
 bool	doWeDrawProximitys();
-static PIELIGHT getBlueprintColour(STRUCT_STATES state);
+//static PIELIGHT getBlueprintColour(STRUCT_STATES state);
 
-static void NetworkDisplayImage(WIDGET *psWidget, UDWORD xOffset, UDWORD yOffset);
+//static void NetworkDisplayImage(WIDGET *psWidget, UDWORD xOffset, UDWORD yOffset);
 extern bool writeGameInfo(const char *pFileName); // Used to help debug issues when we have fatal errors & crash handler testing.
 
 static std::string txtLevelName;
@@ -3769,10 +3769,10 @@ void showRangeAtPos(SDWORD centerX, SDWORD centerY, SDWORD radius)
 }
 
 /// Get the graphic ID for a droid rank
-UDWORD  getDroidRankGraphic(DROID *psDroid)
+/*UDWORD  getDroidRankGraphic(DROID *psDroid)
 {
 	UDWORD gfxId = UDWORD_MAX;
-
+*/
 	/* Establish the numerical value of the droid's rank */
 /*
 	switch (getDroidLevel(psDroid))
@@ -3807,32 +3807,33 @@ UDWORD  getDroidRankGraphic(DROID *psDroid)
 		ASSERT(!"out of range droid rank", "Weird droid level in drawDroidRank");
 		break;
 	}*/
-
+/*
 	return gfxId;
-}
+}*/
 
 /**	Will render a graphic depiction of the droid's present rank.
  * \note Assumes matrix context set and that z-buffer write is force enabled (Always).
  */
+ /*
 static void	drawDroidRank(DROID *psDroid)
 {
 	UDWORD	gfxId = getDroidRankGraphic(psDroid);
 
 	/* Did we get one? - We should have... */
-	if (gfxId != UDWORD_MAX)
+/*	if (gfxId != UDWORD_MAX)
 	{
 		/* Render the rank graphic at the correct location */ // remove hardcoded numbers?!
 /*		iV_DrawImage(IntImages, (UWORD)gfxId,
 		             psDroid->sDisplay.screenX + psDroid->sDisplay.screenR + 8,
 		             psDroid->sDisplay.screenY + psDroid->sDisplay.screenR);*/
-	}
-}
+/*	}
+}*/
 
 
 /**	Will render a sensor graphic for a droid locked to a sensor droid/structure
  * \note Assumes matrix context set and that z-buffer write is force enabled (Always).
  */
-
+/*
 static void	drawDroidSensorLock(DROID *psDroid)
 {
     /*
@@ -3842,7 +3843,7 @@ static void	drawDroidSensorLock(DROID *psDroid)
 		/* Render the sensor graphic at the correct location - which is what?!*/
 	//	iV_DrawImage(IntImages, IMAGE_GN_STAR, psDroid->sDisplay.screenX, psDroid->sDisplay.screenY);
 	//}
-}
+//}
 
 /// Draw the construction lines for all construction droids
 static void doConstructionLines(const glm::mat4 &viewMatrix)

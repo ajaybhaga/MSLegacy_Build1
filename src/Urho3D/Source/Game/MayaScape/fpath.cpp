@@ -49,38 +49,10 @@ struct PATHRESULT
 	UDWORD		droidID;	///< Unique droid ID.
 	MOVE_CONTROL	sMove;		///< New movement values for the droid.
 	FPATH_RETVAL	retval;		///< Result value from path-finding.
-	Vector2i        originalDest;   ///< Used to check if the pathfinding job is to the right destination.
+	IntVector2        originalDest;   ///< Used to check if the pathfinding job is to the right destination.
 };
 
-class Semaphore {
-public:
-    Semaphore (int count_ = 0)
-            : count(count_)
-    {
-    }
 
-    inline void notify( int tid ) {
-        std::unique_lock<std::mutex> lock(mtx);
-        count++;
-        cout << "thread " << tid <<  " notify" << endl;
-        //notify the waiting thread
-        cv.notify_one();
-    }
-    inline void wait( int tid ) {
-        std::unique_lock<std::mutex> lock(mtx);
-        while(count == 0) {
-            cout << "thread " << tid << " wait" << endl;
-            //wait on the mutex until notify is called
-            cv.wait(lock);
-            cout << "thread " << tid << " run" << endl;
-        }
-        count--;
-    }
-private:
-    std::mutex mtx;
-    std::condition_variable cv;
-    int count;
-};
 
 
 // threading stuff
@@ -88,7 +60,7 @@ private:
 //static WZ_MUTEX         *fpathMutex = nullptr;
 //static int fpathThreadFunc(void *);
 
-static std::thread fpathThread = nullptr;
+static std::thread fpathThread;
 static std::mutex fpathMutex;           // mutex for critical section
 //static WZ_SEMAPHORE     *fpathSemaphore = nullptr;
 static Semaphore fpathSemaphore(0);
@@ -311,19 +283,19 @@ bool fpathBlockingTile(SDWORD x, SDWORD y, PROPULSION_TYPE propulsion)
 // Returns the closest non-blocking tile to pos, or returns pos if no non-blocking tiles are present within a 2 tile distance.
 static Position findNonblockingPosition(Position pos, PROPULSION_TYPE propulsion, int player = 0, FPATH_MOVETYPE moveType = FMT_BLOCK)
 {
-	Vector2i centreTile = map_coord(pos.xy());
+	IntVector2 centreTile = map_coord(pos.xy());
 	if (!fpathBaseBlockingTile(centreTile.x, centreTile.y, propulsion, player, moveType))
 	{
 		return pos;  // Fast case, pos is not on a blocking tile.
 	}
 
-	Vector2i bestTile = centreTile;
+	IntVector2 bestTile = centreTile;
 	int bestDistSq = INT32_MAX;
 	for (int y = -2; y <= 2; ++y)
 		for (int x = -2; x <= 2; ++x)
 		{
-			Vector2i tile = centreTile + Vector2i(x, y);
-			Vector2i diff = world_coord(tile) + Vector2i(TILE_UNITS / 2, TILE_UNITS / 2) - pos.xy();
+			IntVector2 tile = centreTile + IntVector2(x, y);
+			IntVector2 diff = world_coord(tile) + IntVector2(TILE_UNITS / 2, TILE_UNITS / 2) - pos.xy();
 			int distSq = dot(diff, diff);
 			if (distSq < bestDistSq && !fpathBaseBlockingTile(tile.x, tile.y, propulsion, player, moveType))
 			{
@@ -333,8 +305,8 @@ static Position findNonblockingPosition(Position pos, PROPULSION_TYPE propulsion
 		}
 
 	// Return point on tile closest to the original pos.
-	Vector2i minCoord = world_coord(bestTile);
-	Vector2i maxCoord = minCoord + Vector2i(TILE_UNITS - 1, TILE_UNITS - 1);
+	IntVector2 minCoord = world_coord(bestTile);
+	IntVector2 maxCoord = minCoord + IntVector2(TILE_UNITS - 1, TILE_UNITS - 1);
 
 	return Position(std::min(std::max(pos.x, minCoord.x), maxCoord.x), std::min(std::max(pos.y, minCoord.y), maxCoord.y), pos.z);
 }*/
@@ -343,8 +315,8 @@ static Position findNonblockingPosition(Position pos, PROPULSION_TYPE propulsion
 static void fpathSetMove(MOVE_CONTROL *psMoveCntl, SDWORD targetX, SDWORD targetY)
 {
 	psMoveCntl->asPath.resize(1);
-	psMoveCntl->destination = Vector2i(targetX, targetY);
-	psMoveCntl->asPath[0] = Vector2i(targetX, targetY);
+	psMoveCntl->destination = IntVector2(targetX, targetY);
+	psMoveCntl->asPath[0] = IntVector2(targetX, targetY);
 }
 
 /*
@@ -405,7 +377,7 @@ static FPATH_RETVAL fpathRoute(MOVE_CONTROL *psMove, unsigned id, int startX, in
 		pathResults.erase(id);
 
 		objTrace(id, "Got a path to (%d, %d)! Length=%d Retval=%d", psMove->destination.x, psMove->destination.y, (int)psMove->asPath.size(), (int)retval);
-		syncDebug("fpathRoute(..., %d, %d, %d, %d, %d, %d, %d, %d, %d) = %d, path[%d] = %08X->(%d, %d)", id, startX, startY, tX, tY, propulsionType, droidType, moveType, owner, retval, (int)psMove->asPath.size(), ~crcSumVector2i(0, psMove->asPath.data(), psMove->asPath.size()), psMove->destination.x, psMove->destination.y);
+		syncDebug("fpathRoute(..., %d, %d, %d, %d, %d, %d, %d, %d, %d) = %d, path[%d] = %08X->(%d, %d)", id, startX, startY, tX, tY, propulsionType, droidType, moveType, owner, retval, (int)psMove->asPath.size(), ~crcSumIntVector2(0, psMove->asPath.data(), psMove->asPath.size()), psMove->destination.x, psMove->destination.y);
 
 		if (!correctDestination)
 		{
@@ -509,7 +481,7 @@ PATHRESULT fpathExecute(PATHJOB job)
 	PATHRESULT result;
 	result.droidID = job.droidID;
 	result.retval = FPR_FAILED;
-	result.originalDest = Vector2i(job.destX, job.destY);
+	result.originalDest = IntVector2(job.destX, job.destY);
 
 	ASR_RETVAL retval = fpathAStarRoute(&result.sMove, &job);
 

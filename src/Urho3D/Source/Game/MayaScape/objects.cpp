@@ -60,6 +60,7 @@ const char *objInfo(const BASE_OBJECT *psObj)
 
 	switch (psObj->type)
 	{
+/*
 	case OBJ_DROID:
 		{
 			const DROID *psDroid = (const DROID *)psObj;
@@ -79,12 +80,12 @@ const char *objInfo(const BASE_OBJECT *psObj)
 		}
 	case OBJ_PROJECTILE:
 		sstrcpy(info, "Projectile");	// TODO
-		break;
+		break;*/
 	case OBJ_TARGET:
-		sstrcpy(info, "Target");	// TODO
+	//	sstrcpy(info, "Target");	// TODO
 		break;
 	default:
-		sstrcpy(info, "Unknown object type");
+	//	sstrcpy(info, "Unknown object type");
 		break;
 	}
 	return info;

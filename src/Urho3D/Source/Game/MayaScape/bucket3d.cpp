@@ -57,27 +57,28 @@ static std::vector<BUCKET_TAG> bucketArray;
 static SDWORD bucketCalculateZ(RENDER_TYPE objectType, void *pObject, const glm::mat4 &viewMatrix)
 {
 	SDWORD				z = 0, radius;
-	Vector2i				pixel(0, 0);
-	Vector3i				position(0, 0, 0);
+	IntVector2				pixel(0, 0);
+	IntVector3				position(0, 0, 0);
 	UDWORD				droidSize;
-	DROID				*psDroid;
-	BODY_STATS			*psBStats;
+	//DROID				*psDroid;
+//	BODY_STATS			*psBStats;
 	SIMPLE_OBJECT		*psSimpObj;
 	const iIMDShape		*pImd;
 	Spacetime               spacetime;
 
 	switch (objectType)
 	{
+	    /*
 	case RENDER_PARTICLE:
-		position.x = ((ATPART *)pObject)->position.x;
-		position.y = ((ATPART *)pObject)->position.y;
-		position.z = ((ATPART *)pObject)->position.z;
+		position.x_ = ((ATPART *)pObject)->position.x;
+		position.y_ = ((ATPART *)pObject)->position.y;
+		position.z_ = ((ATPART *)pObject)->position.z;
 
 		position.x = position.x - player.p.x;
 		position.z = -(position.z - player.p.z);
 
 		/* 16 below is HACK!!! */
-		z = pie_RotateProject(&position, viewMatrix, &pixel) - 16;
+/*		z = pie_RotateProject(&position, viewMatrix, &pixel) - 16;
 		if (z > 0)
 		{
 			//particle use the image radius
@@ -97,7 +98,7 @@ static SDWORD bucketCalculateZ(RENDER_TYPE objectType, void *pObject, const glm:
 		    ((PROJECTILE *)pObject)->psWStats->weaponSubClass == WSC_EMP)
 		{
 			/* We don't do projectiles from these guys, cos there's an effect instead */
-			z = -1;
+	/*		z = -1;
 		}
 		else
 		{
@@ -251,7 +252,7 @@ static SDWORD bucketCalculateZ(RENDER_TYPE objectType, void *pObject, const glm:
 		position.y = ((EFFECT *)pObject)->position.y;
 
 		/* 16 below is HACK!!! */
-		z = pie_RotateProject(&position, viewMatrix, &pixel) - 16;
+/*		z = pie_RotateProject(&position, viewMatrix, &pixel) - 16;
 
 		if (z > 0)
 		{
@@ -294,7 +295,7 @@ static SDWORD bucketCalculateZ(RENDER_TYPE objectType, void *pObject, const glm:
 		}
 
 		break;
-
+*/
 	default:
 		break;
 	}
@@ -323,6 +324,7 @@ void bucketAddTypeToList(RENDER_TYPE objectType, void *pObject, const glm::mat4 
 
 	switch (objectType)
 	{
+	    /*
 	case RENDER_EFFECT:
 		switch (((EFFECT *)pObject)->group)
 		{
@@ -362,7 +364,7 @@ void bucketAddTypeToList(RENDER_TYPE objectType, void *pObject, const glm::mat4 
 		break;
 	case RENDER_PARTICLE:
 		z = 0;
-		break;
+		break;*/
 	default:
 		// Use calculated Z
 		break;
@@ -384,8 +386,7 @@ void bucketRenderCurrentList(const glm::mat4 &viewMatrix)
 
 	for (std::vector<BUCKET_TAG>::const_iterator thisTag = bucketArray.begin(); thisTag != bucketArray.end(); ++thisTag)
 	{
-		switch (thisTag->objectType)
-		{
+		switch (thisTag->objectType) {/*
 		case RENDER_PARTICLE:
 			renderParticle((ATPART *)thisTag->pObject, viewMatrix);
 			break;
@@ -410,8 +411,12 @@ void bucketRenderCurrentList(const glm::mat4 &viewMatrix)
 		case RENDER_DELIVPOINT:
 			renderDeliveryPoint((FLAG_POSITION *)thisTag->pObject, false, viewMatrix);
 			break;
-		}
+		}*/
+            case 0:
+                break;
+        }
 	}
+
 
 	//reset the bucket array as we go
 	bucketArray.resize(0);

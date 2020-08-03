@@ -149,18 +149,20 @@ void _syncDebugObject(const char *function, SIMPLE_OBJECT const *psObject, char 
 {
 	switch (psObject->type)
 	{
-	case OBJ_DROID:      _syncDebugDroid(function, (const DROID *)     psObject, ch); break;
-	case OBJ_STRUCTURE:  _syncDebugStructure(function, (const STRUCTURE *) psObject, ch); break;
-	case OBJ_FEATURE:    _syncDebugFeature(function, (const FEATURE *)   psObject, ch); break;
-	case OBJ_PROJECTILE: _syncDebugProjectile(function, (const PROJECTILE *)psObject, ch); break;
-	default:             _syncDebug(function, "%c unidentified_object%d = p%d;objectType%d", ch, psObject->id, psObject->player, psObject->type);
-		ASSERT_HELPER(!"invalid object type", "_syncDebugObject", function, "syncDebug: Invalid object type (type num %u)", (unsigned int)psObject->type);
+	    case 0: break;
+//	case OBJ_DROID:      _syncDebugDroid(function, (const DROID *)     psObject, ch); break;
+//	case OBJ_STRUCTURE:  _syncDebugStructure(function, (const STRUCTURE *) psObject, ch); break;
+//	case OBJ_FEATURE:    _syncDebugFeature(function, (const FEATURE *)   psObject, ch); break;
+//	case OBJ_PROJECTILE: _syncDebugProjectile(function, (const PROJECTILE *)psObject, ch); break;
+	default:             //_syncDebug(function, "%c unidentified_object%d = p%d;objectType%d", ch, psObject->id, psObject->player, psObject->type);
+//		ASSERT_HELPER(!"invalid object type", "_syncDebugObject", function, "syncDebug: Invalid object type (type num %u)", (unsigned int)psObject->type);
 		break;
 	}
 }
 
 IntVector2 getStatsSize(BASE_STATS const *pType, uint16_t direction)
 {
+    /*
 	if (StatIsStructure(pType))
 	{
 		return static_cast<STRUCTURE_STATS const *>(pType)->size(direction);
@@ -168,12 +170,13 @@ IntVector2 getStatsSize(BASE_STATS const *pType, uint16_t direction)
 	else if (StatIsFeature(pType))
 	{
 		return static_cast<FEATURE_STATS const *>(pType)->size();
-	}
+	}*/
 	return IntVector2(1, 1);
 }
 
 StructureBounds getStructureBounds(BASE_OBJECT const *object)
 {
+    /*
 	STRUCTURE const *psStructure = castStructure(object);
 	FEATURE const *psFeature = castFeature(object);
 
@@ -185,7 +188,7 @@ StructureBounds getStructureBounds(BASE_OBJECT const *object)
 	{
 		return getStructureBounds(psFeature);
 	}
-
+*/
 	return StructureBounds(IntVector2(32767, 32767), IntVector2(-65535, -65535));  // Default to an invalid area.
 }
 

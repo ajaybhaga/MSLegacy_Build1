@@ -63,36 +63,36 @@ struct Sector
 	bool dirty;              ///< Do we need to update the geometry for this sector?
 };
 
-using RenderVertex = Vector3f;
+using RenderVertex = Vector3;
 
 /// A vertex with a position and texture coordinates
 struct DecalVertex
 {
-	Vector3f pos = Vector3f(0.f, 0.f, 0.f);
-	Vector2f uv = Vector2f(0.f, 0.f);
+	Vector3 pos = Vector3(0.f, 0.f, 0.f);
+	Vector2 uv = Vector2(0.f, 0.f);
 };
 
 /// The lightmap texture
-static gfx_api::texture* lightmap_tex_num = nullptr;
+//static gfx_api::texture* lightmap_tex_num = nullptr;
 /// When are we going to update the lightmap next?
-static unsigned int lightmapLastUpdate;
+//static unsigned int lightmapLastUpdate;
 /// How big is the lightmap?
-static int lightmapWidth;
-static int lightmapHeight;
+//static int lightmapWidth;
+//static int lightmapHeight;
 /// Lightmap image
-static GLubyte *lightmapPixmap;
+//static GLubyte *lightmapPixmap;
 /// Ticks per lightmap refresh
 static const unsigned int LIGHTMAP_REFRESH = 80;
 
 /// VBOs
-static gfx_api::buffer *geometryVBO = nullptr, *geometryIndexVBO = nullptr, *textureVBO = nullptr, *textureIndexVBO = nullptr, *decalVBO = nullptr;
+//static gfx_api::buffer *geometryVBO = nullptr, *geometryIndexVBO = nullptr, *textureVBO = nullptr, *textureIndexVBO = nullptr, *decalVBO = nullptr;
 /// VBOs
-static gfx_api::buffer *waterVBO = nullptr, *waterIndexVBO = nullptr;
+//static gfx_api::buffer *waterVBO = nullptr, *waterIndexVBO = nullptr;
 /// The amount we shift the water textures so the waves appear to be moving
 static float waterOffset;
 
 /// These are properties of your videocard and hardware
-static GLint GLmaxElementsVertices, GLmaxElementsIndices;
+//static GLint GLmaxElementsVertices, GLmaxElementsIndices;
 
 /// The sectors are stored here
 static Sector *sectors;
@@ -110,11 +110,12 @@ static bool terrainInitialised = false;
 #define BUFFER_OFFSET(i) (reinterpret_cast<char *>(i))
 
 /// Helper variables for the DrawRangeElements functions
-GLuint dreStart, dreEnd, dreOffset;
-GLsizei dreCount;
+//GLuint dreStart, dreEnd, dreOffset;
+//GLsizei dreCount;
 /// Are we actually drawing something using the DrawRangeElements functions?
 bool drawRangeElementsStarted = false;
 
+/*
 /// Pass all remaining triangles to OpenGL
 static void finishDrawRangeElements()
 {
@@ -135,7 +136,7 @@ static void finishDrawRangeElements()
 /**
  * Either draw the elements or batch them to be sent to OpenGL later
  * This improves performance by reducing the amount of OpenGL calls.
- */
+ *//*
 static void addDrawRangeElements(GLenum mode,
                                  GLuint start,
                                  GLuint end,
@@ -184,7 +185,7 @@ static void addDrawRangeElements(GLenum mode,
 	// make sure we did everything right
 	ASSERT(dreEnd - dreStart + 1 <= GLmaxElementsVertices, "too many vertices (%i)", (int)(dreEnd - dreStart + 1));
 	ASSERT(dreCount <= GLmaxElementsIndices, "too many indices (%i)", (int)(dreCount));
-}
+}*/
 
 /// Get the colour of the terrain tile at the specified position
 PIELIGHT getTileColour(int x, int y)
@@ -204,7 +205,7 @@ void setTileColour(int x, int y, PIELIGHT colour)
 // of 2048.  This will cause ugly seams for the decals, if user picks a texture size bigger than the tile!
 #define MAX_TILE_TEXTURE_SIZE 128.0f
 /// Set up the texture coordinates for a tile
-static Vector2f getTileTexCoords(Vector2f *uv, unsigned int tileNumber)
+static Vector2 getTileTexCoords(Vector2 *uv, unsigned int tileNumber)
 {
 	/* unmask proper values from compressed data */
 	const unsigned short texture = TileNumber_texture(tileNumber);
@@ -229,10 +230,10 @@ static Vector2f getTileTexCoords(Vector2f *uv, unsigned int tileNumber)
 	 * Points for flipping the texture around if the tile is flipped or rotated
 	 * Store the source rect as four points
 	 */
-	Vector2f sP1 { one, one };
-	Vector2f sP2 { xMult - one, one };
-	Vector2f sP3 { xMult - one, yMult - one };
-	Vector2f sP4 { one, yMult - one };
+	Vector2 sP1 { one, one };
+	Vector2 sP2 { xMult - one, one };
+	Vector2 sP3 { xMult - one, yMult - one };
+	Vector2 sP4 { one, yMult - one };
 
 	if (texture & TILE_XFLIP)
 	{
@@ -245,7 +246,7 @@ static Vector2f getTileTexCoords(Vector2f *uv, unsigned int tileNumber)
 		std::swap(sP2, sP3);
 	}
 
-	Vector2f sPTemp;
+	Vector2 sPTemp;
 	switch ((texture & TILE_ROTMASK) >> TILE_ROTSHIFT)
 	{
 	case 1:
@@ -271,7 +272,7 @@ static Vector2f getTileTexCoords(Vector2f *uv, unsigned int tileNumber)
 		sP4 = sPTemp;
 		break;
 	}
-	const Vector2f offset { tileTexInfo[tile].uOffset, tileTexInfo[tile].vOffset };
+	const Vector2 offset { tileTexInfo[tile].uOffset, tileTexInfo[tile].vOffset };
 
 	uv[0 + 0] = offset + sP1;
 	uv[0 + 2] = offset + sP2;
@@ -279,11 +280,11 @@ static Vector2f getTileTexCoords(Vector2f *uv, unsigned int tileNumber)
 	uv[1 + 0] = offset + sP4;
 
 	/// Calculate the average texture coordinates of 4 points
-	return Vector2f { (uv[0].x + uv[1].x + uv[2].x + uv[3].x) / 4, (uv[0].y + uv[1].y + uv[2].y + uv[3].y) / 4 };
+	return Vector2 { (uv[0].x + uv[1].x + uv[2].x + uv[3].x) / 4, (uv[0].y + uv[1].y + uv[2].y + uv[3].y) / 4 };
 }
 
 /// Average the four positions to get the center
-static void averagePos(Vector3i *center, Vector3i *a, Vector3i *b, Vector3i *c, Vector3i *d)
+static void averagePos(IntVector3 *center, IntVector3 *a, IntVector3 *b, IntVector3 *c, IntVector3 *d)
 {
 	center->x = (a->x + b->x + c->x + d->x) / 4;
 	center->y = (a->y + b->y + c->y + d->y) / 4;
@@ -302,11 +303,11 @@ static bool isWater(int x, int y)
 }
 
 /// Get the position of a grid point
-static void getGridPos(Vector3i *result, int x, int y, bool center, bool water)
+static void getGridPos(IntVector3 *result, int x, int y, bool center, bool water)
 {
 	if (center)
 	{
-		Vector3i a, b, c, d;
+		IntVector3 a, b, c, d;
 		getGridPos(&a, x  , y  , false, water);
 		getGridPos(&b, x + 1, y  , false, water);
 		getGridPos(&c, x  , y + 1, false, water);
@@ -348,7 +349,7 @@ static void setSectorGeometry(int x, int y,
                               RenderVertex *geometry, RenderVertex *water,
                               int *geometrySize, int *waterSize)
 {
-	Vector3i pos;
+	IntVector3 pos;
 	int i, j;
 	for (i = 0; i < sectorSize + 1; i++)
 	{
@@ -387,8 +388,8 @@ static void setSectorGeometry(int x, int y,
  */
 static void setSectorDecals(int x, int y, DecalVertex *decaldata, int *decalSize)
 {
-	Vector3i pos;
-	Vector2f uv[2][2], center;
+	IntVector3 pos;
+	Vector2 uv[2][2], center;
 	int a, b;
 	int i, j;
 

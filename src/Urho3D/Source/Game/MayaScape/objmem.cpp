@@ -8,22 +8,22 @@
  */
 #include <string.h>
 
-#include "lib/framework/frame.h"
+//#include "lib/framework/frame.h"
 #include "objects.h"
-#include "lib/gamelib/gtime.h"
-#include "lib/netplay/netplay.h"
-#include "hci.h"
+//#include "lib/gamelib/gtime.h"
+//#include "lib/netplay/netplay.h"
+//#include "hci.h"
 #include "map.h"
-#include "power.h"
+//#include "power.h"
 #include "objects.h"
-#include "mission.h"
-#include "MayaScape/not-used/structuredef.h"
-#include "MayaScape/not-used/structure.h"
-#include "MayaScape/not-used/droid.h"
+//#include "mission.h"
+//#include "MayaScape/not-used/structuredef.h"
+//#include "MayaScape/not-used/structure.h"
+//#include "MayaScape/not-used/droid.h"
 #include "mapgrid.h"
-#include "combat.h"
-#include "MayaScape/not-used/visibility.h"
-#include "qtscript.h"
+//#include "combat.h"
+//#include "MayaScape/not-used/visibility.h"
+//#include "qtscript.h"
 
 // the initial value for the object ID
 #define OBJ_ID_INIT 20000
@@ -35,15 +35,15 @@ uint32_t                unsynchObjID;
 uint32_t                synchObjID;
 
 /* The lists of objects allocated */
-DROID			*apsDroidLists[MAX_PLAYERS];
-STRUCTURE		*apsStructLists[MAX_PLAYERS];
-FEATURE			*apsFeatureLists[MAX_PLAYERS];		///< Only player zero is valid for features. TODO: Reduce to single list.
-STRUCTURE		*apsExtractorLists[MAX_PLAYERS];
-FEATURE			*apsOilList[1];
+//DROID			*apsDroidLists[MAX_PLAYERS];
+//STRUCTURE		*apsStructLists[MAX_PLAYERS];
+//FEATURE			*apsFeatureLists[MAX_PLAYERS];		///< Only player zero is valid for features. TODO: Reduce to single list.
+//STRUCTURE		*apsExtractorLists[MAX_PLAYERS];
+//FEATURE			*apsOilList[1];
 BASE_OBJECT		*apsSensorList[1];			///< List of sensors in the game.
 
 /*The list of Flag Positions allocated */
-FLAG_POSITION	*apsFlagPosLists[MAX_PLAYERS];
+//FLAG_POSITION	*apsFlagPosLists[MAX_PLAYERS];
 
 /* The list of destroyed objects */
 BASE_OBJECT		*psDestroyedObj = nullptr;
@@ -79,6 +79,7 @@ static bool checkReferences(BASE_OBJECT *psVictim)
 {
 	for (int plr = 0; plr < MAX_PLAYERS; ++plr)
 	{
+	    /*
 		for (STRUCTURE *psStruct = apsStructLists[plr]; psStruct != nullptr; psStruct = psStruct->psNext)
 		{
 			if (psStruct == psVictim)
@@ -90,7 +91,9 @@ static bool checkReferences(BASE_OBJECT *psVictim)
 			{
 				ASSERT_OR_RETURN(false, psStruct->psTarget[i] != psVictim, BADREF(psStruct->targetFunc[i], psStruct->targetLine[i]));
 			}
-		}
+		}*/
+
+	    /*
 		for (DROID *psDroid = apsDroidLists[plr]; psDroid != nullptr; psDroid = psDroid->psNext)
 		{
 			if (psDroid == psVictim)
@@ -109,7 +112,7 @@ static bool checkReferences(BASE_OBJECT *psVictim)
 					ASSERT_OR_RETURN(false, psDroid->psActionTarget[i] != psVictim, BADREF(psDroid->actionTargetFunc[i], psDroid->actionTargetLine[i]));
 				}
 			}
-		}
+		}*/
 	}
 	return true;
 }
@@ -121,25 +124,26 @@ static bool objmemDestroy(BASE_OBJECT *psObj)
 	switch (psObj->type)
 	{
 	case OBJ_DROID:
-		debug(LOG_MEMORY, "freeing droid at %p", static_cast<void *>(psObj));
+//		debug(LOG_MEMORY, "freeing droid at %p", static_cast<void *>(psObj));
 		break;
 
 	case OBJ_STRUCTURE:
-		debug(LOG_MEMORY, "freeing structure at %p", static_cast<void *>(psObj));
+//		debug(LOG_MEMORY, "freeing structure at %p", static_cast<void *>(psObj));
 		break;
 
 	case OBJ_FEATURE:
-		debug(LOG_MEMORY, "freeing feature at %p", static_cast<void *>(psObj));
+//		debug(LOG_MEMORY, "freeing feature at %p", static_cast<void *>(psObj));
 		break;
 
 	default:
-		ASSERT(!"unknown object type", "unknown object type in destroyed list at 0x%p", static_cast<void *>(psObj));
+//		ASSERT(!"unknown object type", "unknown object type in destroyed list at 0x%p", static_cast<void *>(psObj));
+        break;
 	}
 	if (!checkReferences(psObj))
 	{
 		return false;
 	}
-	debug(LOG_MEMORY, "BASE_OBJECT* 0x%p is freed.", static_cast<void *>(psObj));
+//	debug(LOG_MEMORY, "BASE_OBJECT* 0x%p is freed.", static_cast<void *>(psObj));
 	delete psObj;
 	return true;
 }

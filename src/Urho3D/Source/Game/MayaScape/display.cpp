@@ -44,7 +44,7 @@
 //#include "radar.h"
 //#include "miscimd.h"
 //#include "lib/framework/math_ext.h"
-#include "MayaScape/not-used/console.h"
+//#include "MayaScape/not-used/console.h"
 //#include "order.h"
 //#include "wrappers.h"
 //#include "power.h"
@@ -59,7 +59,7 @@
 //#include "keybind.h"
 //#include "keymap.h"
 //#include "projectile.h"
-#include "MayaScape/not-used/message.h"
+//#include "MayaScape/not-used/message.h"
 //#include "effects.h"
 //#include "cmddroid.h"
 //#include "selection.h"
@@ -87,7 +87,7 @@ static const CURSOR arnMPointers[POSSIBLE_TARGETS][POSSIBLE_SELECTIONS] =
 int scrollDirLeftRight = 0;
 int scrollDirUpDown = 0;
 
-static bool	buildingDamaged(STRUCTURE *psStructure);
+//static bool	buildingDamaged(STRUCTURE *psStructure);
 static bool	repairDroidSelected(UDWORD player);
 static bool vtolDroidSelected(UDWORD player);
 static bool	anyDroidSelected(UDWORD player);
@@ -101,7 +101,7 @@ static void	dealWithLMB();
 static void	dealWithLMBDClick();
 static void	dealWithRMB();
 static bool	mouseInBox(SDWORD x0, SDWORD y0, SDWORD x1, SDWORD y1);
-static OBJECT_POSITION *checkMouseLoc();
+//static OBJECT_POSITION *checkMouseLoc();
 
 void finishDeliveryPosition();
 
@@ -124,8 +124,8 @@ static bool	mouseOverRadar = false;
 static bool	mouseOverConsole = false;
 static bool	ignoreOrder = false;
 static bool	ignoreRMBC	= true;
-static DROID	*psSelectedVtol;
-static DROID	*psDominantSelected;
+//static DROID	*psSelectedVtol;
+//static DROID	*psDominantSelected;
 static bool bRadarDragging = false;
 static bool cameraAccel;
 static bool mouseScroll = true;
@@ -164,7 +164,7 @@ void setZoom(float speed, float target)
 		zoom_target = 0;
 		zoom_time = 0;
 		setViewDistance(target);
-		UpdateFogDistance(target);
+	//	UpdateFogDistance(target);
 		return;
 	}
 
@@ -173,7 +173,7 @@ void setZoom(float speed, float target)
 		zoom_reference = getViewDistance();
 		zoom_current = getViewDistance();
 		zoom_target = getViewDistance();
-		zoom_time = realTime;
+	//	zoom_time = realTime;
 		is_zooming = true;
 	}
 	else if((target < zoom_current && zoom_target > zoom_current) || (target > zoom_current && zoom_target < zoom_current)) // switched directions "mid-air"
@@ -195,6 +195,7 @@ void zoom()
 	float delta = zoom_target - zoom_reference;
 	float current = zoom_current - zoom_reference;
 
+	float realTime = 0.0f;
 	float acceleration = std::fmin((realTime - zoom_time) / zoom_full_acceleration_time_millis, 1);
 	acceleration = acceleration * acceleration; // quadratic ease in
 
@@ -205,12 +206,12 @@ void zoom()
 
 	float speed = std::fmin(acceleration, deceleration);
 
-	zoom_current += speed * realTimeAdjustedIncrement(zoom_velocity_units_per_sec) * direction;
+//	zoom_current += speed * realTimeAdjustedIncrement(zoom_velocity_units_per_sec) * direction;
 
 	if((direction == 1 && zoom_current > zoom_target - 1) || (direction == -1 && zoom_current < zoom_target + 1))
 	{
 		setViewDistance(zoom_target);
-		UpdateFogDistance(zoom_target);
+	//	UpdateFogDistance(zoom_target);
 
 		zoom_reference = 0;
 		zoom_current = 0;
@@ -222,7 +223,7 @@ void zoom()
 	}
 
 	setViewDistance(zoom_current);
-	UpdateFogDistance(zoom_current);
+	//UpdateFogDistance(zoom_current);
 }
 
 bool isMouseOverRadar()
@@ -288,18 +289,19 @@ bool	getDrawShadows()
 void	setDrawShadows(bool val)
 {
 	bDrawShadows = val;
-	pie_setShadows(val);
+	//pie_setShadows(val);
 }
 
 void ProcessRadarInput()
 {
+    /*
 	int PosX, PosY;
 	int x = mouseX();
 	int y = mouseY();
 	UDWORD	temp1, temp2;
 
 	/* Only allow jump-to-area-of-map if radar is on-screen */
-	mouseOverRadar = false;
+	/*mouseOverRadar = false;
 	if (radarVisible())
 	{
 		if (CoordInRadar(x, y))
@@ -312,7 +314,7 @@ void ProcessRadarInput()
 				y = mousePressPos_DEPRECATED(MOUSE_ORDER).y;
 
 				/* If we're tracking a droid, then cancel that */
-				CalcRadarPosition(x, y, &PosX, &PosY);
+		/*		CalcRadarPosition(x, y, &PosX, &PosY);
 				if (mouseOverRadar)
 				{
 					// MARKER
@@ -346,12 +348,12 @@ void ProcessRadarInput()
 				if (war_GetRadarJump())
 				{
 					/* Go instantly */
-					setViewPos(PosX, PosY, true);
+	/*				setViewPos(PosX, PosY, true);
 				}
 				else
 				{
 					/* Pan to it */
-					requestRadarTrack(PosX * TILE_UNITS, PosY * TILE_UNITS);
+	/*				requestRadarTrack(PosX * TILE_UNITS, PosY * TILE_UNITS);
 				}
 			}
 			else if (mousePressed(MOUSE_WUP))
@@ -373,7 +375,7 @@ void ProcessRadarInput()
 				}
 			}
 		}
-	}
+	}*/
 }
 
 // reset the input state
@@ -388,7 +390,7 @@ void resetInput()
 void processInput()
 {
 	bool mOverConstruction = false;
-
+/*
 	if (InGameOpUp || isInGamePopupUp)
 	{
 		dragBox3D.status = DRAG_RELEASED;	// disengage the dragging since it stops menu input
@@ -405,7 +407,7 @@ void processInput()
 	ignoreRMBC = false;
 
 	/* Process all of our key mappings */
-	mouseOverConsole = mouseOverHistoryConsoleBox();
+/*	mouseOverConsole = mouseOverHistoryConsoleBox();
 	if (mousePressed(MOUSE_WUP) && !isMouseOverRadar())
 	{
 		if (mOverConstruction)
@@ -443,18 +445,18 @@ void processInput()
 	if (intMode == INT_DESIGN)
 	{
 		/* Only process the function keys */
-		keyProcessMappings(true);
+/*		keyProcessMappings(true);
 	}
 	else if (bAllowOtherKeyPresses)
 	{
 		/* Run all standard mappings */
-		keyProcessMappings(false);
+/*		keyProcessMappings(false);
 	}
 	/* Allow the user to clear the (Active) console if need be */
-	if (mouseOverConsoleBox() && mousePressed(MOUSE_LMB))
+/*	if (mouseOverConsoleBox() && mousePressed(MOUSE_LMB))
 	{
 		clearActiveConsole();
-	}
+	}*/
 }
 
 static bool OverRadarAndNotDragging()
@@ -464,6 +466,7 @@ static bool OverRadarAndNotDragging()
 
 static void CheckFinishedDrag()
 {
+    /*
 	if (mouseReleased(MOUSE_LMB) || mouseDown(MOUSE_RMB))
 	{
 		selectAttempt = false;
@@ -490,7 +493,7 @@ static void CheckFinishedDrag()
 			}
 
 			/* Only clear if shift isn't down - this is for the drag selection box for units*/
-			if (!ctrlShiftDown() && wallDrag.status == DRAG_INACTIVE)
+	/*		if (!ctrlShiftDown() && wallDrag.status == DRAG_INACTIVE)
 			{
 				clearSelection();
 			}
@@ -503,17 +506,18 @@ static void CheckFinishedDrag()
 			dragBox3D.status = DRAG_INACTIVE;
 			wallDrag.status = DRAG_INACTIVE;
 		}
-	}
+	}*/
 }
 
 static void CheckStartWallDrag()
 {
+    /*
 	if (mousePressed(MOUSE_LMB))
 	{
 		/* Store away the details if we're building */
 		// You can start dragging walls from invalid locations so check for
 		// BUILD3D_POS or BUILD3D_VALID, used tojust check for BUILD3D_VALID.
-		if ((buildState == BUILD3D_POS || buildState == BUILD3D_VALID)
+/*		if ((buildState == BUILD3D_POS || buildState == BUILD3D_VALID)
 		    && sBuildDetails.psStats->ref >= REF_STRUCTURE_START
 		    && sBuildDetails.psStats->ref < (REF_STRUCTURE_START + REF_RANGE))
 		{
@@ -534,7 +538,7 @@ static void CheckStartWallDrag()
 			//uhoh no place to build here
 			audio_PlayTrack(ID_SOUND_BUILD_FAIL);
 		}
-	}
+	}*/
 }
 
 //this function is called when a location has been chosen to place a structure or a DP
@@ -543,7 +547,7 @@ static bool CheckFinishedFindPosition()
 	bool OverRadar = OverRadarAndNotDragging();
 
 	/* Do not let the player position buildings 'under' the radar */
-	if (mouseReleased(MOUSE_LMB) && !OverRadar)
+/*	if (mouseReleased(MOUSE_LMB) && !OverRadar)
 	{
 
 		if (deliveryReposValid())
@@ -586,13 +590,13 @@ static bool CheckFinishedFindPosition()
 		}
 	}
 
-	return false;
+	return false;*/
 }
 
 static void HandleDrag()
 {
 	UDWORD dragX = 0, dragY = 0;
-
+/*
 	if (mouseDrag(MOUSE_LMB, &dragX, &dragY) && !mouseOverRadar && !mouseDown(MOUSE_RMB))
 	{
 		dragBox3D.x1 = dragX;
@@ -629,7 +633,7 @@ static void HandleDrag()
 				wallDrag.status = DRAG_DRAGGING;
 			}
 		}
-	}
+	}*/
 }
 
 UDWORD getTargetType()
@@ -652,7 +656,7 @@ void processMouseClickInput()
 	HandleDrag();
 
 	CheckFinishedDrag();
-
+/*
 	if (isMouseOverScreenOverlayChild(mouseX(), mouseY()))
 	{
 		// ignore clicks
@@ -709,13 +713,13 @@ void processMouseClickInput()
 	{
 		bRadarDragging = false;
 	}
-
+*/
 	/* Right mouse click kills a building placement */
-	if (mouseReleased(MOUSE_RMB) &&
+/*	if (mouseReleased(MOUSE_RMB) &&
 	    (buildState == BUILD3D_POS || buildState == BUILD3D_VALID))
 	{
 		/* Stop the placement */
-		kill3DBuilding();
+/*		kill3DBuilding();
 		bRadarDragging = false;
 	}
 	if (mouseReleased(MOUSE_RMB))
@@ -972,7 +976,7 @@ void processMouseClickInput()
 			wzSetCursor(CURSOR_SELECT); // Special casing for LasSat or own unit
 		}
 	}
-
+*/
 	CurrentItemUnderMouse = item;
 }
 
@@ -2277,9 +2281,9 @@ static MOUSE_TARGET	itemUnderMouse(BASE_OBJECT **ppObjectUnderMouse)
 	UDWORD		i;
 	MOUSE_TARGET retVal;
 	BASE_OBJECT	 *psNotDroid;
-	DROID		*psDroid;
+//	DROID		*psDroid;
 	UDWORD		dispX, dispY, dispR;
-	STRUCTURE	*psStructure;
+//	STRUCTURE	*psStructure;
 
 	*ppObjectUnderMouse = nullptr;
 
@@ -2296,19 +2300,19 @@ static MOUSE_TARGET	itemUnderMouse(BASE_OBJECT **ppObjectUnderMouse)
 	for (i = 0; i < MAX_PLAYERS; i++)
 	{
 		/* Note the !psObject check isn't really necessary as the goto will jump out */
-		for (psDroid = apsDroidLists[i]; psDroid && retVal == MT_NOTARGET;
+/*		for (psDroid = apsDroidLists[i]; psDroid && retVal == MT_NOTARGET;
 		     psDroid = psDroid->psNext)
 		{
 			dispX = psDroid->sDisplay.screenX;
 			dispY = psDroid->sDisplay.screenY;
 			dispR = psDroid->sDisplay.screenR;
 			/* Only check droids that're on screen */
-			if (psDroid->sDisplay.frameNumber + 1 == currentFrame && psDroid->visible[selectedPlayer])
+/*			if (psDroid->sDisplay.frameNumber + 1 == currentFrame && psDroid->visible[selectedPlayer])
 			{
 				if (mouseInBox(dispX - dispR, dispY - dispR, dispX + dispR, dispY + dispR))
 				{
 					/* We HAVE clicked on droid! */
-					if (aiCheckAlliances(psDroid->player, selectedPlayer))
+/*					if (aiCheckAlliances(psDroid->player, selectedPlayer))
 					{
 						*ppObjectUnderMouse = (BASE_OBJECT *)psDroid;
 						// need to check for command droids here as well
@@ -2370,15 +2374,17 @@ static MOUSE_TARGET	itemUnderMouse(BASE_OBJECT **ppObjectUnderMouse)
 						retVal = MT_ENEMYDROID;
 					}
 					/* There's no point in checking other object types */
-					return (retVal);
-				}
-			}
-		}
+					//return (retVal);
+				//}
+			//}
+		//}
 	} // end of checking for droids
 
 	/*	Not a droid, so maybe a structure or feature?
 		If still NULL after this then nothing */
-	psNotDroid = getTileOccupier(mouseTileX, mouseTileY);
+	//psNotDroid = getTileOccupier(mouseTileX, mouseTileY);
+
+	/*
 	if (psNotDroid == nullptr)
 	{
 		psNotDroid = getTileBlueprintStructure(mouseTileX, mouseTileY);
@@ -2458,7 +2464,7 @@ static MOUSE_TARGET	itemUnderMouse(BASE_OBJECT **ppObjectUnderMouse)
 				else
 				{
 					/* All the different stages of construction */
-					retVal = MT_OWNSTROK;
+		/*			retVal = MT_OWNSTROK;
 				}
 			}
 			else
@@ -2466,7 +2472,7 @@ static MOUSE_TARGET	itemUnderMouse(BASE_OBJECT **ppObjectUnderMouse)
 				retVal = MT_ENEMYSTR;	// enemy structure
 			}
 		}
-	}
+	}*/
 
 	/* Send the result back - if it's null then we clicked on an area of terrain */
 	/* make unseen objects just look like terrain. */

@@ -283,7 +283,7 @@ static inline void fpathNewNode(PathfindContext &context, PathCoord dest, PathCo
 	node.est = node.dist + fpathGoodEstimate(pos, dest);
 
 	IntVector2 delta = IntVector2(pos.x - prevPos.x, pos.y - prevPos.y) * 64;
-	bool isDiagonal = delta.x && delta.y;
+	bool isDiagonal = delta.x_ && delta.y_;
 
 	PathExploredTile &expl = context.map[pos.x + pos.y * mapWidth];
 	if (expl.iteration == context.iteration)
@@ -295,7 +295,7 @@ static inline void fpathNewNode(PathfindContext &context, PathCoord dest, PathCo
 		IntVector2 deltaA = delta;
 		IntVector2 deltaB = IntVector2(expl.dx, expl.dy);
 		IntVector2 deltaDelta = deltaA - deltaB;  // Vector pointing from current considered source tile leading to pos, to the previously considered source tile leading to pos.
-		if (abs(deltaDelta.x) + abs(deltaDelta.y) == 64)
+		if (abs(deltaDelta.x_) + abs(deltaDelta.y_) == 64)
 		{
 			// prevPos is tile A or B, and pos is tile P. We were previously called with prevPos being tile B or A, and pos tile P.
 			// We want to find the distance to tile P, taking into account that the actual shortest path involves coming from somewhere between tile A and tile B.
@@ -331,8 +331,8 @@ static inline void fpathNewNode(PathfindContext &context, PathCoord dest, PathCo
 
 	// Remember where we have been, and remember the way back.
 	expl.iteration = context.iteration;
-	expl.dx = delta.x;
-	expl.dy = delta.y;
+	expl.dx = delta.x_;
+	expl.dy = delta.y_;
 	expl.dist = node.dist;
 	expl.visited = false;
 
@@ -385,11 +385,11 @@ static PathCoord fpathAStarExplore(PathfindContext &context, PathCoord tileF)
 		}
 
 		// loop through possible moves in 8 directions to find a valid move
-		for (unsigned dir = 0; dir < ARRAY_SIZE(aDirOffset); ++dir)
+		for (unsigned dir = 0; dir < aDirOffset->Length(); ++dir)
 		{
 			// Try a new location
-			int x = node.p.x + aDirOffset[dir].x;
-			int y = node.p.y + aDirOffset[dir].y;
+			int x = node.p.x + aDirOffset[dir].x_;
+			int y = node.p.y + aDirOffset[dir].y_;
 
 			/*
 			   5  6  7
@@ -404,14 +404,14 @@ static PathCoord fpathAStarExplore(PathfindContext &context, PathCoord tileF)
 				int x, y;
 
 				// We cannot cut corners
-				x = node.p.x + aDirOffset[(dir + 1) % 8].x;
-				y = node.p.y + aDirOffset[(dir + 1) % 8].y;
+				x = node.p.x + aDirOffset[(dir + 1) % 8].x_;
+				y = node.p.y + aDirOffset[(dir + 1) % 8].y_;
 				if (context.isBlocked(x, y))
 				{
 					continue;
 				}
-				x = node.p.x + aDirOffset[(dir + 7) % 8].x;
-				y = node.p.y + aDirOffset[(dir + 7) % 8].y;
+				x = node.p.x + aDirOffset[(dir + 7) % 8].x_;
+				y = node.p.y + aDirOffset[(dir + 7) % 8].y_;
 				if (context.isBlocked(x, y))
 				{
 					continue;
@@ -439,7 +439,7 @@ static void fpathInitContext(PathfindContext &context, std::shared_ptr<PathBlock
 
 	// Add the start point to the open list
 	fpathNewNode(context, tileF, tileRealS, 0, tileRealS);
-	ASSERT(!context.nodes.empty(), "fpathNewNode failed to add node.");
+	//ASSERT(!context.nodes.empty(), "fpathNewNode failed to add node.");
 }
 
 ASR_RETVAL fpathAStarRoute(MOVE_CONTROL *psMove, PATHJOB *psJob)
@@ -520,23 +520,23 @@ ASR_RETVAL fpathAStarRoute(MOVE_CONTROL *psMove, PATHJOB *psJob)
 	IntVector2 newP(0, 0);
 	for (IntVector2 p(world_coord(endCoord.x) + TILE_UNITS / 2, world_coord(endCoord.y) + TILE_UNITS / 2); true; p = newP)
 	{
-		ASSERT_OR_RETURN(ASR_FAILED, worldOnMap(p.x, p.y), "Assigned XY coordinates (%d, %d) not on map!", (int)p.x, (int)p.y);
-		ASSERT_OR_RETURN(ASR_FAILED, path.size() < (static_cast<size_t>(mapWidth) * static_cast<size_t>(mapHeight)), "Pathfinding got in a loop.");
+		//ASSERT_OR_RETURN(ASR_FAILED, worldOnMap(p.x_, p.y_), "Assigned XY coordinates (%d, %d) not on map!", (int)p.x_, (int)p.y_);
+		//ASSERT_OR_RETURN(ASR_FAILED, path.size() < (static_cast<size_t>(mapWidth) * static_cast<size_t>(mapHeight)), "Pathfinding got in a loop.");
 
 		path.push_back(p);
 
-		PathExploredTile &tile = context.map[map_coord(p.x) + map_coord(p.y) * mapWidth];
+		PathExploredTile &tile = context.map[map_coord(p.x_) + map_coord(p.y_) * mapWidth];
 		newP = p - IntVector2(tile.dx, tile.dy) * (TILE_UNITS / 64);
 		IntVector2 mapP = map_coord(newP);
-		int xSide = newP.x - world_coord(mapP.x) > TILE_UNITS / 2 ? 1 : -1; // 1 if newP is on right-hand side of the tile, or -1 if newP is on the left-hand side of the tile.
-		int ySide = newP.y - world_coord(mapP.y) > TILE_UNITS / 2 ? 1 : -1; // 1 if newP is on bottom side of the tile, or -1 if newP is on the top side of the tile.
-		if (context.isBlocked(mapP.x + xSide, mapP.y))
+		int xSide = newP.x_ - world_coord(mapP.x_) > TILE_UNITS / 2 ? 1 : -1; // 1 if newP is on right-hand side of the tile, or -1 if newP is on the left-hand side of the tile.
+		int ySide = newP.y_ - world_coord(mapP.y_) > TILE_UNITS / 2 ? 1 : -1; // 1 if newP is on bottom side of the tile, or -1 if newP is on the top side of the tile.
+		if (context.isBlocked(mapP.x_ + xSide, mapP.y_))
 		{
-			newP.x = world_coord(mapP.x) + TILE_UNITS / 2; // Point too close to a blocking tile on left or right side, so move the point to the middle.
+			newP.x_ = world_coord(mapP.x_) + TILE_UNITS / 2; // Point too close to a blocking tile on left or right side, so move the point to the middle.
 		}
-		if (context.isBlocked(mapP.x, mapP.y + ySide))
+		if (context.isBlocked(mapP.x_, mapP.y_ + ySide))
 		{
-			newP.y = world_coord(mapP.y) + TILE_UNITS / 2; // Point too close to a blocking tile on rop or bottom side, so move the point to the middle.
+			newP.y_ = world_coord(mapP.y_) + TILE_UNITS / 2; // Point too close to a blocking tile on rop or bottom side, so move the point to the middle.
 		}
 		if (map_coord(p) == IntVector2(context.tileS.x, context.tileS.y) || p == newP)
 		{
@@ -599,7 +599,7 @@ ASR_RETVAL fpathAStarRoute(MOVE_CONTROL *psMove, PATHJOB *psJob)
 	return retval;
 }
 
-void fpathSetBlockingMap(PATHJOB *psJob)
+void fpathSetBlockingMap(PATHJOB *psJob, float gameTime)
 {
 	if (fpathCurrentGameTime != gameTime)
 	{
@@ -611,7 +611,7 @@ void fpathSetBlockingMap(PATHJOB *psJob)
 	// Figure out which map we are looking for.
 	PathBlockingType type;
 	type.gameTime = gameTime;
-	type.propulsion = psJob->propulsion;
+	//type.propulsion = psJob->propulsion;
 	type.owner = psJob->owner;
 	type.moveType = psJob->moveType;
 
@@ -633,9 +633,11 @@ void fpathSetBlockingMap(PATHJOB *psJob)
 		for (int y = 0; y < mapHeight; ++y)
 			for (int x = 0; x < mapWidth; ++x)
 			{
-				map[x + y * mapWidth] = fpathBaseBlockingTile(x, y, type.propulsion, type.owner, type.moveType);
+	//			map[x + y * mapWidth] = fpathBaseBlockingTile(x, y, type.propulsion, type.owner, type.moveType);
 				checksumMap ^= map[x + y * mapWidth] * (factor = 3 * factor + 1);
 			}
+
+		/*
 		if (!isHumanPlayer(type.owner) && type.moveType == FMT_MOVE)
 		{
 			std::vector<bool> &dangerMap = blockMap->dangerMap;
@@ -648,12 +650,12 @@ void fpathSetBlockingMap(PATHJOB *psJob)
 				}
 		}
 		syncDebug("blockingMap(%d,%d,%d,%d) = %08X %08X", gameTime, psJob->propulsion, psJob->owner, psJob->moveType, checksumMap, checksumDangerMap);
-
+*/
 		psJob->blockingMap = fpathBlockingMaps.back();
 	}
 	else
 	{
-		syncDebug("blockingMap(%d,%d,%d,%d) = cached", gameTime, psJob->propulsion, psJob->owner, psJob->moveType);
+	//	syncDebug("blockingMap(%d,%d,%d,%d) = cached", gameTime, psJob->propulsion, psJob->owner, psJob->moveType);
 
 		psJob->blockingMap = *i;
 	}
