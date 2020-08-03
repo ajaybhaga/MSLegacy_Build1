@@ -7,7 +7,7 @@
 #pragma once
 
 #include "objectdef.h"
-#include "droid.h"
+//#include "droid.h"
 //#include "structure.h"
 //#include "feature.h"
 #include "objmem.h"

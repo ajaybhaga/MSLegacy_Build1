@@ -7,7 +7,7 @@
 
 #include <utility>
 
-#include "objectdef.h"
+#include "MayaScape/objectdef.h"
 
 /**************************************************************************************
  *

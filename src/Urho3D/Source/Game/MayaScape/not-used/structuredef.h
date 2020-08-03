@@ -7,8 +7,8 @@
 #pragma once
 
 
-#include "positiondef.h"
-#include "basedef.h"
+#include "MayaScape/positiondef.h"
+#include "MayaScape/basedef.h"
 #include "statsdef.h"
 #include "weapondef.h"
 

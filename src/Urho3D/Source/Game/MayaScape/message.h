@@ -21,10 +21,9 @@
  *  Functions for the messages shown in the Intelligence Map View
  */
 
-#ifndef __INCLUDED_SRC_MESSAGE_H__
-#define __INCLUDED_SRC_MESSAGE_H__
+#pragma once
 
-#include "structure.h"
+//#include "structure.h"
 #include "messagedef.h"
 
 #define NO_AUDIO_MSG		-1
@@ -84,5 +83,3 @@ MESSAGE *findMessage(const BASE_OBJECT *psObj, MESSAGE_TYPE type, UDWORD player)
 void displayProximityMessage(PROXIMITY_DISPLAY *psProxDisp);
 
 bool messageInitVars();
-
-#endif // __INCLUDED_SRC_MESSAGE_H__

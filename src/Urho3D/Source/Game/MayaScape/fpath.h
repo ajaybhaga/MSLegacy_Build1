@@ -23,7 +23,7 @@
 
 #pragma once
 
-#include "droiddef.h"
+//#include "droiddef.h"
 
 #include <memory>
 

@@ -14,7 +14,7 @@
 
 #include <string.h>
 
-#include "lib/framework/frame.h"
+/*#include "lib/framework/frame.h"
 #include "lib/framework/opengl.h"
 #include "lib/ivis_opengl/ivisdef.h"
 #include "lib/ivis_opengl/imd.h"
@@ -24,7 +24,7 @@
 #include "lib/ivis_opengl/pieclip.h"
 #include "lib/ivis_opengl/piestate.h"
 #include "lib/ivis_opengl/screen.h"
-#include "lib/ivis_opengl/piematrix.h"
+#include "lib/ivis_opengl/piematrix.h"*/
 #include <glm/mat4x4.hpp>
 #ifndef GLM_ENABLE_EXPERIMENTAL
 	#define GLM_ENABLE_EXPERIMENTAL
@@ -33,10 +33,10 @@
 
 #include "terrain.h"
 #include "map.h"
-#include "texture.h"
+//#include "texture.h"
 #include "display3d.h"
-#include "hci.h"
-#include "loop.h"
+//#include "hci.h"
+//#include "loop.h"
 
 /**
  * A sector contains all information to draw a square piece of the map.

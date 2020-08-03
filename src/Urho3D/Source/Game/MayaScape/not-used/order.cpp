@@ -26,10 +26,10 @@
 
 #include <string.h>
 
-#include "objects.h"
+#include "MayaScape/objects.h"
 #include "order.h"
-#include "action.h"
-#include "map.h"
+#include "MayaScape/action.h"
+#include "MayaScape/map.h"
 #include "projectile.h"
 //#include "effects.h"	// for waypoint display
 //#include "intorder.h"
@@ -38,18 +38,18 @@
 //#include "qtscript.h"
 //#include "group.h"
 //#include "cmddroid.h"
-#include "move.h"
+#include "MayaScape/move.h"
 
 //#include "mission.h"
 //#include "hci.h"
 #include "visibility.h"
-#include "display.h"
+#include "MayaScape/display.h"
 //#include "ai.h"
 //#include "warcam.h"
 //#include "fpath.h"
-#include "display3d.h"
-#include "console.h"
-#include "mapgrid.h"
+#include "MayaScape/display3d.h"
+#include "MayaScape/console.h"
+#include "MayaScape/mapgrid.h"
 
 #include "random.h"
 

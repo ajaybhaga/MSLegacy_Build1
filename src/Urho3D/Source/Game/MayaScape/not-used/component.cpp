@@ -5,13 +5,13 @@
  * Draws component objects.
 */
 
-#include "action.h"
+#include "MayaScape/action.h"
 #include "component.h"
-#include "display3d.h"
+#include "MayaScape/display3d.h"
 //#include "effects.h"
 //#include "intdisplay.h"
 //#include "loop.h"
-#include "map.h"
+#include "MayaScape/map.h"
 //#include "miscimd.h"
 #include "projectile.h"
 //#include "transporter.h"

@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "objectdef.h"
+#include "MayaScape/objectdef.h"
 
 struct VIEWDATA;
 

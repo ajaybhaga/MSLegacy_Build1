@@ -6,10 +6,10 @@
 
 #pragma once
 
-#include "objectdef.h"
+#include "MayaScape/objectdef.h"
 #include "structuredef.h"
 #include "visibility.h"
-#include "baseobject.h"
+#include "MayaScape/baseobject.h"
 
 // how long to wait between CALL_STRUCT_ATTACKED's - plus how long to flash on radar for
 #define ATTACK_CB_PAUSE		5000

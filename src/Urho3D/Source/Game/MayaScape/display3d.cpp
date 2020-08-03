@@ -3,10 +3,7 @@
 /**
  * @file display3d.c
  * Draws the 3D view.
- * Originally by Alex McLean & Jeremy Sallis, Pumpkin Studios, EIDOS INTERACTIVE
  */
-
-
 
 #ifndef GLM_ENABLE_EXPERIMENTAL
 	#define GLM_ENABLE_EXPERIMENTAL
@@ -17,7 +14,7 @@
 //#include "loop.h"
 //#include "atmos.h"
 #include "map.h"
-#include "droid.h"
+//#include "droid.h"
 //#include "group.h"
 //#include "visibility.h"
 #include "geometry.h"
@@ -241,6 +238,7 @@ static BASE_OBJECT *psSensorObj = nullptr;
 static UDWORD	destTargetX, destTargetY;
 static UDWORD	destTileX = 0, destTileY = 0;
 
+/*
 struct Blueprint
 {
 	Blueprint(STRUCTURE_STATS const *stats, Vector2 pos, uint16_t dir, uint32_t index, STRUCT_STATES state)
@@ -395,7 +393,7 @@ void setSkyBox(const char *page, float mywind, float myscale)
 	windSpeed = mywind;
 	wind = 0.0f;
 	skybox_scale = myscale;
-	pie_Skybox_Texture(page);
+	//pie_Skybox_Texture(page);
 }
 
 static inline void rotateSomething(int &x, int &y, uint16_t angle)
@@ -407,6 +405,7 @@ static inline void rotateSomething(int &x, int &y, uint16_t angle)
 	y = newY;
 }
 
+/*
 static Blueprint getTileBlueprint(int mapX, int mapY)
 {
 	Vector2 mouse(world_coord(mapX) + TILE_UNITS / 2, world_coord(mapY) + TILE_UNITS / 2);
@@ -460,7 +459,8 @@ void clearBlueprints()
 {
 	blueprints.clear();
 }
-
+*/
+/*
 static PIELIGHT structureBrightness(STRUCTURE *psStructure)
 {
 	PIELIGHT buildingBrightness;
@@ -474,7 +474,7 @@ static PIELIGHT structureBrightness(STRUCTURE *psStructure)
 		buildingBrightness = pal_SetBrightness(200 - 100 / 65536.f * getStructureDamage(psStructure));
 
 		/* If it's selected, then it's brighter */
-		if (psStructure->selected)
+/*		if (psStructure->selected)
 		{
 			SDWORD brightVar;
 
@@ -505,7 +505,7 @@ static PIELIGHT structureBrightness(STRUCTURE *psStructure)
 	}
 	return buildingBrightness;
 }
-
+*/
 
 /// Show all droid movement parts by displaying an explosion at every step
 static void showDroidPaths()
@@ -529,13 +529,14 @@ static void showDroidPaths()
 				pos.z = psDroid->sMove.asPath[i].y;
 				pos.y = map_Height(pos.x, pos.z) + 16;
 
-				effectGiveAuxVar(80);
-				addEffect(&pos, EFFECT_EXPLOSION, EXPLOSION_TYPE_LASER, false, nullptr, 0);
+				//effectGiveAuxVar(80);
+				//addEffect(&pos, EFFECT_EXPLOSION, EXPLOSION_TYPE_LASER, false, nullptr, 0);
 			}
 		}
 	}
 }
 
+/*
 /// Displays an image for the Network Issue button
 static void NetworkDisplayImage(WIDGET *psWidget, UDWORD xOffset, UDWORD yOffset)
 {
@@ -584,8 +585,9 @@ static void NetworkDisplayImage(WIDGET *psWidget, UDWORD xOffset, UDWORD yOffset
 	}
 
 	iV_DrawImage(IntImages, ImageID, x, y);
-}
+}*/
 
+/*
 static void setupConnectionStatusForm()
 {
 	static unsigned          prevStatusMask = 0;
@@ -637,7 +639,7 @@ static void setupConnectionStatusForm()
 		}
 
 		/* Now add the buttons */
-		for (unsigned i = 0; i < CONNECTIONSTATUS_NORMAL; ++i)
+	/*	for (unsigned i = 0; i < CONNECTIONSTATUS_NORMAL; ++i)
 		{
 			if ((statusMask & 1 << i) == 0)
 			{
@@ -693,18 +695,18 @@ static void setupConnectionStatusForm()
 
 		prevStatusMask = statusMask;
 	}
-}
+}*/
 
 /// Render the 3D world
 void draw3DScene()
 {
-	wzPerfBegin(PERF_START_FRAME, "Start 3D scene");
+	//wzPerfBegin(PERF_START_FRAME, "Start 3D scene");
 
 	/* What frame number are we on? */
 	currentGameFrame = frameGetFrameNumber();
 
 	// Tell shader system what the time is
-	pie_SetShaderTime(graphicsTime);
+	//pie_SetShaderTime(graphicsTime);
 
 	/* Build the drag quad */
 	if (dragBox3D.status == DRAG_RELEASED)
@@ -729,7 +731,7 @@ void draw3DScene()
 	/* Now, draw the terrain */
 	drawTiles(&player);
 
-	wzPerfBegin(PERF_MISC, "3D scene - misc and text");
+	//wzPerfBegin(PERF_MISC, "3D scene - misc and text");
 
 	/* Show the drag Box if necessary */
 	drawDragBox();
@@ -740,32 +742,32 @@ void draw3DScene()
 		dragBox3D.status = DRAG_INACTIVE;
 	}
 
-	pie_BeginInterface();
+	//pie_BeginInterface();
 	drawDroidSelections();
 
-	drawStructureSelections();
+	//drawStructureSelections();
 
 	if (!bRender3DOnly)
 	{
 		if (radarVisible())
 		{
-			pie_SetDepthBufferStatus(DEPTH_CMP_ALWAYS_WRT_ON);
-			pie_SetFogStatus(false);
+			//pie_SetDepthBufferStatus(DEPTH_CMP_ALWAYS_WRT_ON);
+			//pie_SetFogStatus(false);
 			GL_DEBUG("Draw 3D scene - radar");
 			drawRadar();
-			pie_SetDepthBufferStatus(DEPTH_CMP_LEQ_WRT_ON);
-			pie_SetFogStatus(true);
+			//pie_SetDepthBufferStatus(DEPTH_CMP_LEQ_WRT_ON);
+			//pie_SetFogStatus(true);
 		}
 
 		/* Ensure that any text messages are displayed at bottom of screen */
-		pie_SetFogStatus(false);
+		//pie_SetFogStatus(false);
 		displayConsoleMessages();
 		bRender3DOnly = true;
 	}
 
-	pie_SetDepthBufferStatus(DEPTH_CMP_ALWAYS_WRT_OFF);
-	pie_SetFogStatus(false);
-	iV_SetTextColour(WZCOL_TEXT_BRIGHT);
+	//pie_SetDepthBufferStatus(DEPTH_CMP_ALWAYS_WRT_OFF);
+	//pie_SetFogStatus(false);
+	//iV_SetTextColour(WZCOL_TEXT_BRIGHT);
 
 	/* Dont remove this folks!!!! */
 	if (errorWaiting)
@@ -774,7 +776,7 @@ void draw3DScene()
 		if (lastErrorTime == 0 || lastErrorTime + (60 * GAME_TICKS_PER_SEC) < realTime)
 		{
 			char trimMsg[255];
-			audio_PlayTrack(ID_SOUND_BUILD_FAIL);
+			//audio_PlayTrack(ID_SOUND_BUILD_FAIL);
 			ssprintf(trimMsg, "Error! (Check your logs!): %.78s", errorWaiting);
 			addConsoleMessage(trimMsg, DEFAULT_JUSTIFY, NOTIFY_MESSAGE);
 			errorWaiting = nullptr;
@@ -866,22 +868,23 @@ void draw3DScene()
 		player.r.y -= DEG(360);
 	}
 
+
 	/* If we don't have an active camera track, then track terrain height! */
-	if (!getWarCamStatus())
+	/*if (!getWarCamStatus())
 	{
 		/* Move the autonomous camera if necessary */
-		calcAverageTerrainHeight(&player);
+	/*	calcAverageTerrainHeight(&player);
 		trackHeight(averageCentreTerrainHeight + CAMERA_PIVOT_HEIGHT);
 	}
 	else
 	{
 		processWarCam();
-	}
+	}*/
 
-	processSensorTarget();
+//	processSensorTarget();
 	processDestinationTarget();
 
-	structureEffects(); // add fancy effects to structures
+//	structureEffects(); // add fancy effects to structures
 
 	showDroidSensorRanges(); //shows sensor data for units/droids/whatever...-Q 5-10-05
 	if (CauseCrash)
@@ -915,7 +918,7 @@ void draw3DScene()
 		showDroidPaths();
 	}
 
-	wzPerfEnd(PERF_MISC);
+//	wzPerfEnd(PERF_MISC);
 }
 
 
@@ -1091,67 +1094,68 @@ static void drawTiles(iView *player)
 		}
 	}
 
-	wzPerfEnd(PERF_START_FRAME);
+	//wzPerfEnd(PERF_START_FRAME);
 
 	/* This is done here as effects can light the terrain - pause mode problems though */
-	wzPerfBegin(PERF_EFFECTS, "3D scene - effects");
-	processEffects(viewMatrix);
-	atmosUpdateSystem();
+	//wzPerfBegin(PERF_EFFECTS, "3D scene - effects");
+	//processEffects(viewMatrix);
+	//atmosUpdateSystem();
 	avUpdateTiles();
-	wzPerfEnd(PERF_EFFECTS);
+	//wzPerfEnd(PERF_EFFECTS);
 
 	// now we are about to draw the terrain
-	wzPerfBegin(PERF_TERRAIN, "3D scene - terrain");
-	pie_SetFogStatus(true);
+	//wzPerfBegin(PERF_TERRAIN, "3D scene - terrain");
+	//pie_SetFogStatus(true);
 
 	// draw it
 	// and draw it
 	drawTerrain(pie_PerspectiveGet() * viewMatrix * glm::translate(glm::vec3(-player->p.x, 0, player->p.z)));
 
-	wzPerfEnd(PERF_TERRAIN);
+	//wzPerfEnd(PERF_TERRAIN);
 
 	// draw skybox
-	wzPerfBegin(PERF_SKYBOX, "3D scene - skybox");
+	//wzPerfBegin(PERF_SKYBOX, "3D scene - skybox");
 	renderSurroundings(viewMatrix);
-	wzPerfEnd(PERF_SKYBOX);
+	//wzPerfEnd(PERF_SKYBOX);
 
 	// and prepare for rendering the models
-	wzPerfBegin(PERF_MODEL_INIT, "Draw 3D scene - model init");
-	pie_SetRendMode(REND_OPAQUE);
+	//wzPerfBegin(PERF_MODEL_INIT, "Draw 3D scene - model init");
+	//pie_SetRendMode(REND_OPAQUE);
 
 	/* ---------------------------------------------------------------- */
 	/* Now display all the static objects                               */
 	/* ---------------------------------------------------------------- */
 	displayStaticObjects(viewMatrix); // may be bucket render implemented
-	displayFeatures(viewMatrix);
+	//displayFeatures(viewMatrix);
 	displayDynamicObjects(viewMatrix); // may be bucket render implemented
+	/*
 	if (doWeDrawProximitys())
 	{
 		displayProximityMsgs(viewMatrix);
-	}
-	displayDelivPoints(viewMatrix);
-	display3DProjectiles(viewMatrix); // may be bucket render implemented
-	wzPerfEnd(PERF_MODEL_INIT);
+	}*/
+	//displayDelivPoints(viewMatrix);
+	//display3DProjectiles(viewMatrix); // may be bucket render implemented
+	//wzPerfEnd(PERF_MODEL_INIT);
 
-	wzPerfBegin(PERF_PARTICLES, "3D scene - particles");
-	atmosDrawParticles(viewMatrix);
-	wzPerfEnd(PERF_PARTICLES);
+	//wzPerfBegin(PERF_PARTICLES, "3D scene - particles");
+	//atmosDrawParticles(viewMatrix);
+	//wzPerfEnd(PERF_PARTICLES);
 
-	wzPerfBegin(PERF_WATER, "3D scene - water");
+	//wzPerfBegin(PERF_WATER, "3D scene - water");
 	// prepare for the water and the lightmap
-	pie_SetFogStatus(true);
+	//pie_SetFogStatus(true);
 
 	// also, make sure we can use world coordinates directly
 	drawWater(pie_PerspectiveGet() * viewMatrix * glm::translate(glm::vec3(-player->p.x, 0, player->p.z)));
-	wzPerfEnd(PERF_WATER);
+	//wzPerfEnd(PERF_WATER);
 
-	wzPerfBegin(PERF_MODELS, "3D scene - models");
+	//wzPerfBegin(PERF_MODELS, "3D scene - models");
 	bucketRenderCurrentList(viewMatrix);
 
 	GL_DEBUG("Draw 3D scene - blueprints");
-	displayBlueprints(viewMatrix);
+	//displayBlueprints(viewMatrix);
 
-	pie_RemainingPasses(currentGameFrame); // draws shadows and transparent shapes
+	//pie_RemainingPasses(currentGameFrame); // draws shadows and transparent shapes
 
 	if (!gamePaused())
 	{
@@ -1159,7 +1163,7 @@ static void drawTiles(iView *player)
 	}
 	locateMouse();
 
-	wzPerfEnd(PERF_MODELS);
+//	wzPerfEnd(PERF_MODELS);
 }
 
 /// Initialise the fog, skybox and some other stuff
@@ -1244,95 +1248,7 @@ bool quickClipXYToMaximumTilesFromCurrentPosition(SDWORD x, SDWORD y)
 /// Are the current tile coordinates visible on screen?
 bool clipXY(SDWORD x, SDWORD y)
 {
-	// +2 for edge of visibility fading (see terrain.cpp)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       ```````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	.
+	// +2 for edge of visibility fading (see terrain.cpp)
 	if (std::abs(x - player.p.x) < world_coord(visibleTiles.x / 2 + 2) &&
 	    std::abs(y - player.p.z) < world_coord(visibleTiles.y / 2 + 2))
 	{
@@ -1453,7 +1369,7 @@ static void	calcFlagPosScreenCoords(SDWORD *pX, SDWORD *pY, SDWORD *pR, const gl
 	UDWORD	radius = 22;
 
 	/* Pop matrices and get the screen coordinates for last point*/
-	pie_RotateProject(&center3d, modelViewMatrix, &center2d);
+//	pie_RotateProject(&center3d, modelViewMatrix, &center2d);
 
 	/*store the coords*/
 	*pX = center2d.x;
@@ -1464,6 +1380,7 @@ static void	calcFlagPosScreenCoords(SDWORD *pX, SDWORD *pY, SDWORD *pR, const gl
 /// Decide whether to render a projectile, and make sure it will be drawn
 static void display3DProjectiles(const glm::mat4 &viewMatrix)
 {
+    /*
 	PROJECTILE *psObj = proj_GetFirst();
 	while (psObj != nullptr)
 	{
@@ -1475,7 +1392,7 @@ static void display3DProjectiles(const glm::mat4 &viewMatrix)
 			   whatever for Y (height) coord - arcing ?
 			*/
 			/* these guys get drawn last */
-			if (psObj->psWStats->weaponSubClass == WSC_ROCKET ||
+	/*		if (psObj->psWStats->weaponSubClass == WSC_ROCKET ||
 			    psObj->psWStats->weaponSubClass == WSC_MISSILE ||
 			    psObj->psWStats->weaponSubClass == WSC_COMMAND ||
 			    psObj->psWStats->weaponSubClass == WSC_SLOWMISSILE ||
@@ -1492,12 +1409,13 @@ static void display3DProjectiles(const glm::mat4 &viewMatrix)
 		}
 
 		psObj = proj_GetNext();
-	}
+	}*/
 }	/* end of function display3DProjectiles */
 
 /// Draw a projectile to the screen
-void	renderProjectile(PROJECTILE *psCurr, const glm::mat4 &viewMatrix)
+/*void	renderProjectile(PROJECTILE *psCurr, const glm::mat4 &viewMatrix)
 {
+
 	WEAPON_STATS	*psStats;
 	Vector3			dv;
 	iIMDShape		*pIMD;
@@ -1505,14 +1423,14 @@ void	renderProjectile(PROJECTILE *psCurr, const glm::mat4 &viewMatrix)
 
 	psStats = psCurr->psWStats;
 	/* Reject flame or command since they have interim drawn fx */
-	if (psStats->weaponSubClass == WSC_FLAME ||
+/*	if (psStats->weaponSubClass == WSC_FLAME ||
 	    psStats->weaponSubClass == WSC_COMMAND || // || psStats->weaponSubClass == WSC_ENERGY)
 	    psStats->weaponSubClass == WSC_ELECTRONIC ||
 	    psStats->weaponSubClass == WSC_EMP ||
 	    (bMultiPlayer && psStats->weaponSubClass == WSC_LAS_SAT))
 	{
 		/* We don't do projectiles from these guys, cos there's an effect instead */
-		return;
+/*		return;
 	}
 
 	st = interpolateObjectSpacetime(psCurr, graphicsTime);
@@ -1520,7 +1438,7 @@ void	renderProjectile(PROJECTILE *psCurr, const glm::mat4 &viewMatrix)
 	//the weapon stats holds the reference to which graphic to use
 	/*Need to draw the graphic depending on what the projectile is doing - hitting target,
 	missing target, in flight etc - JUST DO IN FLIGHT FOR NOW! */
-	pIMD = psStats->pInFlightGraphic;
+/*	pIMD = psStats->pInFlightGraphic;
 
 	if (!clipXYZ(st.pos.x, st.pos.y, st.pos.z, viewMatrix))
 	{
@@ -1557,24 +1475,24 @@ void	renderProjectile(PROJECTILE *psCurr, const glm::mat4 &viewMatrix)
 		}
 
 		/* Get bullet's x coord */
-		dv.x = st.pos.x - player.p.x;
+	/*	dv.x = st.pos.x - player.p.x;
 
 		/* Get it's y coord (z coord in the 3d world */
-		dv.z = -(st.pos.y - player.p.z);
+/*		dv.z = -(st.pos.y - player.p.z);
 
 		/* What's the present height of the bullet? */
-		dv.y = st.pos.z;
+/*		dv.y = st.pos.z;
 		/* Set up the matrix */
-		Vector3 camera = actualCameraPosition;
+/*		Vector3 camera = actualCameraPosition;
 
 		/* Translate to the correct position */
-		camera -= dv;
+/*		camera -= dv;
 
 		/* Rotate it to the direction it's facing */
-		rotateSomething(camera.z, camera.x, -(-st.rot.direction));
+/*		rotateSomething(camera.z, camera.x, -(-st.rot.direction));
 
 		/* pitch it */
-		rotateSomething(camera.y, camera.z, -st.rot.pitch);
+/*		rotateSomething(camera.y, camera.z, -st.rot.pitch);
 
 		glm::mat4 modelMatrix =
 			glm::translate(glm::vec3(dv)) *
@@ -1622,7 +1540,7 @@ void	renderProjectile(PROJECTILE *psCurr, const glm::mat4 &viewMatrix)
 			pie_Draw3DShape(pIMD, 0, 0, WZCOL_WHITE, 0, 0, viewMatrix * modelMatrix);
 		}
 	}
-}
+}*/
 
 /// Draw the buildings
 static void displayStaticObjects(const glm::mat4 &viewMatrix)
@@ -2849,16 +2767,18 @@ static void	drawStructureSelections()
 			bMouseOverOwnStructure = true;
 		}
 	}
+
+/*
 	pie_SetDepthBufferStatus(DEPTH_CMP_ALWAYS_WRT_ON);
 	pie_SetFogStatus(false);
 
 	/* Go thru' all the buildings */
-	for (psStruct = apsStructLists[selectedPlayer]; psStruct; psStruct = psStruct->psNext)
+/*	for (psStruct = apsStructLists[selectedPlayer]; psStruct; psStruct = psStruct->psNext)
 	{
 		if (psStruct->sDisplay.frameNumber == currentGameFrame)
 		{
 			/* If it's selected */
-			if (psStruct->selected ||
+		/*	if (psStruct->selected ||
 			    (barMode == BAR_DROIDS_AND_STRUCTURES && psStruct->pStructureType->type != REF_WALL && psStruct->pStructureType->type != REF_WALLCORNER) ||
 			    (bMouseOverOwnStructure && psStruct == (STRUCTURE *)psClickedOn)
 			   )
@@ -2884,7 +2804,7 @@ static void	drawStructureSelections()
 		for (psStruct = apsStructLists[i]; psStruct; psStruct = psStruct->psNext)
 		{
 			/* If it's targetted and on-screen */
-			if (psStruct->flags.test(OBJECT_FLAG_TARGETED)
+/*			if (psStruct->flags.test(OBJECT_FLAG_TARGETED)
 			    && psStruct->sDisplay.frameNumber == currentGameFrame)
 			{
 				scrX = psStruct->sDisplay.screenX;
@@ -2907,7 +2827,7 @@ static void	drawStructureSelections()
 		}
 	}
 
-	pie_SetDepthBufferStatus(DEPTH_CMP_LEQ_WRT_ON);
+	pie_SetDepthBufferStatus(DEPTH_CMP_LEQ_WRT_ON);*/
 }
 
 static UDWORD	getTargettingGfx()
@@ -3002,6 +2922,10 @@ static void	drawDroidSelections()
 		    barMode == BAR_DROIDS || barMode == BAR_DROIDS_AND_STRUCTURES
 		   )
 		{
+
+
+		    /*
+
 			rectsToDraw.clear();
 			damage = PERCENT(psDroid->body, psDroid->originalBody);
 
@@ -3043,7 +2967,7 @@ static void	drawDroidSelections()
 			}
 
 			/* Power bars */
-			rectsToDraw.push_back(PIERECT_DrawRequest(scrX - scrR - 1, scrY + scrR + 2, scrX + scrR + 1, scrY + scrR + 6, WZCOL_RELOAD_BACKGROUND));
+			/*rectsToDraw.push_back(PIERECT_DrawRequest(scrX - scrR - 1, scrY + scrR + 2, scrX + scrR + 1, scrY + scrR + 6, WZCOL_RELOAD_BACKGROUND));
 			rectsToDraw.push_back(PIERECT_DrawRequest(scrX - scrR, scrY + scrR + 3, scrX - scrR + damage, scrY + scrR + 4, powerCol));
 			rectsToDraw.push_back(PIERECT_DrawRequest(scrX - scrR, scrY + scrR + 4, scrX - scrR + damage, scrY + scrR + 5, powerColShadow));
 
@@ -3051,7 +2975,7 @@ static void	drawDroidSelections()
 
 
 			/* Write the droid rank out */
-			if ((scrX + scrR) > 0
+			/*if ((scrX + scrR) > 0
 			    &&	(scrX - scrR) < pie_GetVideoBufferWidth()
 			    &&	(scrY + scrR) > 0
 			    &&	(scrY - scrR) < pie_GetVideoBufferHeight())
@@ -3066,6 +2990,7 @@ static void	drawDroidSelections()
 			{
 				drawWeaponReloadBar((BASE_OBJECT *)psDroid, &psDroid->asWeaps[i], i);
 			}
+			*/
 		}
 	}
 
@@ -3198,6 +3123,7 @@ static void	drawDroidSelections()
 /// Draw the number of the group the droid is in next to the droid
 static void	drawDroidGroupNumber(DROID *psDroid)
 {
+    /*
 	UWORD id = UWORD_MAX;
 
 	switch (psDroid->group)
@@ -3241,7 +3167,7 @@ static void	drawDroidGroupNumber(DROID *psDroid)
 		int xShift = psDroid->sDisplay.screenR + GN_X_OFFSET;
 		int yShift = psDroid->sDisplay.screenR;
 		iV_DrawImage(IntImages, id, psDroid->sDisplay.screenX - xShift, psDroid->sDisplay.screenY + yShift);
-	}
+	}*/
 }
 
 /// X offset to display the group number at
@@ -3250,11 +3176,13 @@ static void	drawDroidGroupNumber(DROID *psDroid)
 
 static void drawDroidOrder(const DROID *psDroid)
 {
+    /*
 	const int xShift = psDroid->sDisplay.screenR + GN_X_OFFSET;
 	const int yShift = psDroid->sDisplay.screenR - CMND_GN_Y_OFFSET;
 	const char *letter = getDroidOrderKey(psDroid->order.type);
 	iV_SetTextColour(WZCOL_TEXT_BRIGHT);
 	iV_DrawText(letter, psDroid->sDisplay.screenX - xShift - CMND_STAR_X_OFFSET,  psDroid->sDisplay.screenY + yShift, font_regular);
+     */
 }
 
 /// Draw the number of the commander the droid is assigned to
@@ -3269,6 +3197,8 @@ static void	drawDroidCmndNo(DROID *psDroid)
 
 	id2 = IMAGE_GN_STAR;
 	index = SDWORD_MAX;
+
+	/*
 	if (psDroid->droidType == DROID_COMMAND)
 	{
 		index = cmdDroidGetIndex(psDroid);
@@ -3317,7 +3247,7 @@ static void	drawDroidCmndNo(DROID *psDroid)
 		yShift = psDroid->sDisplay.screenR - CMND_GN_Y_OFFSET;
 		iV_DrawImage(IntImages, id2, psDroid->sDisplay.screenX - xShift - CMND_STAR_X_OFFSET, psDroid->sDisplay.screenY + yShift);
 		iV_DrawImage(IntImages, id, psDroid->sDisplay.screenX - xShift, psDroid->sDisplay.screenY + yShift);
-	}
+	}*/
 }
 /* ---------------------------------------------------------------------------- */
 
@@ -3521,6 +3451,7 @@ void	assignDestTarget()
 /// Draw a graphical effect after selecting a sensor target
 static void processSensorTarget()
 {
+
 	if (bSensorTargetting)
 	{
 		if ((realTime - lastTargetAssignation) < TARGET_TO_SENSOR_TIME)
@@ -3530,6 +3461,7 @@ static void processSensorTarget()
 				const int x = /*mouseX();*/(SWORD)psSensorObj->sDisplay.screenX;
 				const int y = (SWORD)psSensorObj->sDisplay.screenY;
 				int index = IMAGE_BLUE1;
+/*
 				if (!gamePaused())
 				{
 					index = IMAGE_BLUE1 + getModularScaledGraphicsTime(1020, 5);
@@ -3551,6 +3483,7 @@ static void processSensorTarget()
 			{
 				bSensorTargetting = false;
 			}
+			*/
 		}
 		else
 		{
@@ -3806,16 +3739,16 @@ static void showWeaponRange(BASE_OBJECT *psObj)
 }
 
 static void showSensorRange2(BASE_OBJECT *psObj)
-{/*
+{/*d
 	showEffectCircle(psObj->pos, objSensorRange(psObj), 80, EFFECT_EXPLOSION, EXPLOSION_TYPE_LASER);
 	showWeaponRange(psObj);*/
 }
 
 /// Draw a circle on the map (to show the range of something)
 static void drawRangeAtPos(SDWORD centerX, SDWORD centerY, SDWORD radius)
-{/*
+{
 	Position pos(centerX, centerY, 0);  // .z ignored.
-	showEffectCircle(pos, radius, 80, EFFECT_EXPLOSION, EXPLOSION_TYPE_SMALL);*/
+/*	showEffectCircle(pos, radius, 80, EFFECT_EXPLOSION, EXPLOSION_TYPE_SMALL);*/
 }
 
 /** Turn on drawing some effects at certain position to visualize the radius.

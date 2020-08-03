@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "basedef.h"
+#include "MayaScape/basedef.h"
 
 #include <vector>
 

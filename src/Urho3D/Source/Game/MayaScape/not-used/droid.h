@@ -6,7 +6,7 @@
 
 #pragma onceonce
 
-#include "objectdef.h"
+#include "MayaScape/objectdef.h"
 //#include "stats.h"
 //#include "visibility.h"
 

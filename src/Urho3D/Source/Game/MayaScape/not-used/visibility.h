@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "objectdef.h"
+#include "MayaScape/objectdef.h"
 #include "raycast.h"
 //#include "stats.h"
 

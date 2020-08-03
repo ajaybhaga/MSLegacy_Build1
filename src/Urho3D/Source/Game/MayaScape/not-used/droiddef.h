@@ -8,10 +8,10 @@
 
 #include <vector>
 
-#include "stringdef.h"
-#include "actiondef.h"
-#include "basedef.h"
-#include "movedef.h"
+#include "MayaScape/stringdef.h"
+#include "MayaScape/actiondef.h"
+#include "MayaScape/basedef.h"
+#include "MayaScape/movedef.h"
 //#include "statsdef.h"
 //#include "weapondef.h"
 //#include "orderdef.h"

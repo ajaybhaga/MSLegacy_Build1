@@ -7,11 +7,11 @@
  */
 
 #include "feature.h"
-#include "map.h"
+#include "MayaScape/map.h"
 //#include "hci.h"
 //#include "power.h"
-#include "objects.h"
-#include "display.h"
+#include "MayaScape/objects.h"
+#include "MayaScape/display.h"
 #include "order.h"
 #include "structure.h"
 //#include "miscimd.h"
@@ -21,8 +21,8 @@
 //#include "combat.h"
 //#include "multiplay.h"
 
-#include "mapgrid.h"
-#include "display3d.h"
+#include "MayaScape/mapgrid.h"
+#include "MayaScape/display3d.h"
 //#include "random.h"
 
 /* The statistics for the features */

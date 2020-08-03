@@ -38,34 +38,34 @@ uint16_t calcDirection(int32_t x0, int32_t y0, int32_t x1, int32_t y1)
 
   NB*****THIS WON'T PICK A VTOL DROID*****
 */
-
+/*
 DROID	*getNearestDroid(UDWORD x, UDWORD y, bool bSelected)
 {
 	DROID *psBestUnit = nullptr;
 	unsigned bestSoFar = UDWORD_MAX;
 
 	/* Go thru' all the droids  - how often have we seen this - a MACRO maybe? */
-	for (DROID *psDroid = apsDroidLists[selectedPlayer]; psDroid; psDroid = psDroid->psNext)
+/*	for (DROID *psDroid = apsDroidLists[selectedPlayer]; psDroid; psDroid = psDroid->psNext)
 	{
 		if (!isVtolDroid(psDroid))
 		{
 			/* Clever (?) bit that reads whether we're interested in droids being selected or not */
-			if (!bSelected || psDroid->selected)
+/*			if (!bSelected || psDroid->selected)
 			{
 				uint32_t dist = iHypot(psDroid->pos.x - x, psDroid->pos.y - y);
 				/* Is this the nearest one we got so far? */
-				if (dist < bestSoFar)
+/*				if (dist < bestSoFar)
 				{
 					/* Yes, then keep a record of the distance for comparison... */
-					bestSoFar = dist;
+/*					bestSoFar = dist;
 					/* ..and store away the droid responsible */
-					psBestUnit = psDroid;
+/*					psBestUnit = psDroid;
 				}
 			}
 		}
 	}
 	return psBestUnit;
-}
+}*/
 // -------------------------------------------------------------------------------------------
 
 /* Returns non-zero if a point is in a 4 sided polygon */

@@ -11,13 +11,13 @@
 #include "move.h"
 
 #include "objects.h"
-#include "visibility.h"
+#include "MayaScape/not-used/visibility.h"
 #include "map.h"
 #include "fpath.h"
 #include "loop.h"
 #include "geometry.h"
 #include "action.h"
-#include "order.h"
+#include "MayaScape/not-used/order.h"
 #include "astar.h"
 #include "mapgrid.h"
 #include "display.h"	// needed for widgetsOn flag.

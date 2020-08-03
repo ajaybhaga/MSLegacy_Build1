@@ -35,16 +35,16 @@ uint32_t generateNewObjectId();
 uint32_t generateSynchronisedObjectId();
 
 /* add the droid to the Droid Lists */
-void addDroid(DROID *psDroidToAdd, DROID *pList[MAX_PLAYERS]);
+//void addDroid(DROID *psDroidToAdd, DROID *pList[MAX_PLAYERS]);
 
 /*destroy a droid */
-void killDroid(DROID *psDel);
+//void killDroid(DROID *psDel);
 
 /* Remove all droids */
 void freeAllDroids();
 
 /*Remove a single Droid from its list*/
-void removeDroid(DROID *psDroidToRemove, DROID *pList[MAX_PLAYERS]);
+//void removeDroid(DROID *psDroidToRemove, DROID *pList[MAX_PLAYERS]);
 
 /*Removes all droids that may be stored in the mission lists*/
 void freeAllMissionDroids();

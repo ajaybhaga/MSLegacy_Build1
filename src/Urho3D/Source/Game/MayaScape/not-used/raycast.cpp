@@ -10,8 +10,8 @@
 #include "lib/framework/frame.h"
 
 #include "raycast.h"
-#include "map.h" // TILE_UNITS
-#include "display3d.h" // clipXY()
+#include "MayaScape/map.h" // TILE_UNITS
+#include "MayaScape/display3d.h" // clipXY()
 
 struct HeightCallbackHelp_t
 {

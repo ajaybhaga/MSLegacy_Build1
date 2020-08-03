@@ -2,10 +2,10 @@
 */
 
 #include "baseobject.h"
-#include "droid.h"
-#include "projectile.h"
-#include "structure.h"
-#include "feature.h"
+//#include "droid.h"
+//#include "projectile.h"
+//#include "structure.h"
+//#include "feature.h"
 //#include "intdisplay.h"
 #include "map.h"
 

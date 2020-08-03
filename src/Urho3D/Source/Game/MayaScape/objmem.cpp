@@ -17,12 +17,12 @@
 #include "power.h"
 #include "objects.h"
 #include "mission.h"
-#include "structuredef.h"
-#include "structure.h"
-#include "droid.h"
+#include "MayaScape/not-used/structuredef.h"
+#include "MayaScape/not-used/structure.h"
+#include "MayaScape/not-used/droid.h"
 #include "mapgrid.h"
 #include "combat.h"
-#include "visibility.h"
+#include "MayaScape/not-used/visibility.h"
 #include "qtscript.h"
 
 // the initial value for the object ID

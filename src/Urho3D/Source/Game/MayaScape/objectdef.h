@@ -12,7 +12,7 @@
 //#include "weapondef.h"
 
 #include "basedef.h"
-#include "droiddef.h"
+//#include "droiddef.h"
 //#include "structuredef.h"
 //#include "projectiledef.h"
 //#include "featuredef.h"

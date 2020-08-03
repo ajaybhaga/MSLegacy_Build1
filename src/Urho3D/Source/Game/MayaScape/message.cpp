@@ -25,18 +25,20 @@
  */
 
 #include <map>
-#include "lib/framework/frame.h"
+
+/*#include "lib/framework/frame.h"
 #include "lib/framework/wzconfig.h"
 #include "lib/framework/frameresource.h"
 #include "lib/framework/strres.h"
 #include "lib/sound/audio.h"
 #include "lib/sound/audio_id.h"
 #include "lib/ivis_opengl/imd.h"
+*/
 
 #include "console.h"
-#include "hci.h"
-#include "stats.h"
-#include "text.h"
+//#include "hci.h"
+//#include "stats.h"
+//#include "text.h"
 
 static std::map<WzString, VIEWDATA *> apsViewData;
 

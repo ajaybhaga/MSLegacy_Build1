@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "basedef.h"
+#include "MayaScape/basedef.h"
 
 class DROID_GROUP;
 struct BASE_OBJECT;
