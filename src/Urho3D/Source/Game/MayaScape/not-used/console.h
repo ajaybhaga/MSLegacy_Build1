@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "types.h"
+#include "MayaScape/types.h"
 #include <utility>
 
 #define MAX_CONSOLE_MESSAGES			(64)

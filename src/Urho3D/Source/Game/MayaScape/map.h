@@ -128,13 +128,13 @@ extern uint8_t *psBlockMap[AUX_MAX];
 extern uint8_t *psAuxMap[MAX_PLAYERS + AUX_MAX];	// yes, we waste one element... eyes wide open... makes API nicer
 
 /// Find aux bitfield for a given tile
-WZ_DECL_ALWAYS_INLINE static inline uint8_t auxTile(int x, int y, int player)
+static inline uint8_t auxTile(int x, int y, int player)
 {
 	return psAuxMap[player][x + y * mapWidth];
 }
 
 /// Find blocking bitfield for a given tile
-WZ_DECL_ALWAYS_INLINE static inline uint8_t blockTile(int x, int y, int slot)
+static inline uint8_t blockTile(int x, int y, int slot)
 {
 	return psBlockMap[slot][x + y * mapWidth];
 }
@@ -161,13 +161,13 @@ static inline void auxMapRestore(int player, int slot, int mask)
 }
 
 /// Set aux bits. Always set identically for all players. States not set are retained.
-WZ_DECL_ALWAYS_INLINE static inline void auxSet(int x, int y, int player, int state)
+static inline void auxSet(int x, int y, int player, int state)
 {
 	psAuxMap[player][x + y * mapWidth] |= state;
 }
 
 /// Set aux bits. Always set identically for all players. States not set are retained.
-WZ_DECL_ALWAYS_INLINE static inline void auxSetAll(int x, int y, int state)
+static inline void auxSetAll(int x, int y, int state)
 {
 	int i;
 
@@ -178,41 +178,42 @@ WZ_DECL_ALWAYS_INLINE static inline void auxSetAll(int x, int y, int state)
 }
 
 /// Set aux bits. Always set identically for all players. States not set are retained.
-WZ_DECL_ALWAYS_INLINE static inline void auxSetAllied(int x, int y, int player, int state)
+static inline void auxSetAllied(int x, int y, int player, int state)
 {
 	int i;
 
+	/*
 	for (i = 0; i < MAX_PLAYERS; i++)
 	{
 		if (alliancebits[player] & (1 << i))
 		{
 			psAuxMap[i][x + y * mapWidth] |= state;
 		}
-	}
+	}*/
 }
 
 /// Set aux bits. Always set identically for all players. States not set are retained.
-WZ_DECL_ALWAYS_INLINE static inline void auxSetEnemy(int x, int y, int player, int state)
+static inline void auxSetEnemy(int x, int y, int player, int state)
 {
 	int i;
-
+/*
 	for (i = 0; i < MAX_PLAYERS; i++)
 	{
 		if (!(alliancebits[player] & (1 << i)))
 		{
 			psAuxMap[i][x + y * mapWidth] |= state;
 		}
-	}
+	}*/
 }
 
 /// Clear aux bits. Always set identically for all players. States not cleared are retained.
-WZ_DECL_ALWAYS_INLINE static inline void auxClear(int x, int y, int player, int state)
+static inline void auxClear(int x, int y, int player, int state)
 {
 	psAuxMap[player][x + y * mapWidth] &= ~state;
 }
 
 /// Clear all aux bits. Always set identically for all players. States not cleared are retained.
-WZ_DECL_ALWAYS_INLINE static inline void auxClearAll(int x, int y, int state)
+static inline void auxClearAll(int x, int y, int state)
 {
 	int i;
 
@@ -223,13 +224,13 @@ WZ_DECL_ALWAYS_INLINE static inline void auxClearAll(int x, int y, int state)
 }
 
 /// Set blocking bits. Always set identically for all players. States not set are retained.
-WZ_DECL_ALWAYS_INLINE static inline void auxSetBlocking(int x, int y, int state)
+static inline void auxSetBlocking(int x, int y, int state)
 {
 	psBlockMap[0][x + y * mapWidth] |= state;
 }
 
 /// Clear blocking bits. Always set identically for all players. States not cleared are retained.
-WZ_DECL_ALWAYS_INLINE static inline void auxClearBlocking(int x, int y, int state)
+static inline void auxClearBlocking(int x, int y, int state)
 {
 	psBlockMap[0][x + y * mapWidth] &= ~state;
 }
@@ -245,8 +246,10 @@ static inline bool TileIsOccupied(const MAPTILE *tile)
 
 static inline bool TileIsKnownOccupied(MAPTILE const *tile, unsigned player)
 {
+/*
 	return TileIsOccupied(tile) &&
-	       (tile->psObject->type != OBJ_STRUCTURE || ((STRUCTURE *)tile->psObject)->visible[player] || aiCheckAlliances(player, ((STRUCTURE *)tile->psObject)->player));
+	       (tile->psObject->type != OBJ_STRUCTURE || ((STRUCTURE *)tile->psObject)->visible[player] || aiCheckAlliances(player, ((STRUCTURE *)tile->psObject)->player));*/
+    return false;
 }
 
 /** Check if tile contains a structure. Function is NOT thread-safe. */
@@ -266,9 +269,12 @@ static inline bool TileHasFeature(const MAPTILE *tile)
 /** Check if tile contains a wall structure. Function is NOT thread-safe. */
 static inline bool TileHasWall(const MAPTILE *tile)
 {
+    /*
 	return TileHasStructure(tile)
 	       && (((STRUCTURE *)tile->psObject)->pStructureType->type == REF_WALL
-	           || ((STRUCTURE *)tile->psObject)->pStructureType->type == REF_WALLCORNER);
+	           || ((STRUCTURE *)tile->psObject)->pStructureType->type == REF_WALLCORNER);*/
+
+    return false;
 }
 
 /** Check if tile is burning. */
@@ -286,8 +292,11 @@ static inline bool tileIsExplored(const MAPTILE *psTile)
 /** Check if tile contains a small structure. Function is NOT thread-safe. */
 static inline bool TileHasSmallStructure(const MAPTILE *tile)
 {
+    /*
 	return TileHasStructure(tile)
-	       && ((STRUCTURE *)tile->psObject)->pStructureType->height == 1;
+	       && ((STRUCTURE *)tile->psObject)->pStructureType->height == 1;*/
+
+    return false;
 }
 
 #define SET_TILE_DECAL(x)	((x)->tileInfoBits |= BITS_DECAL)
@@ -366,14 +375,14 @@ static inline float map_coordf(int32_t worldCoord)
 	return (float)worldCoord / TILE_UNITS;
 }
 
-static inline Vector2i world_coord(Vector2i const &mapCoord)
+static inline IntVector2 world_coord(IntVector2 const &mapCoord)
 {
-	return Vector2i(world_coord(mapCoord.x), world_coord(mapCoord.y));
+	return IntVector2(world_coord(mapCoord.x_), world_coord(mapCoord.y_));
 }
 
-static inline Vector2i map_coord(Vector2i const &worldCoord)
+static inline IntVector2 map_coord(IntVector2 const &worldCoord)
 {
-	return Vector2i(map_coord(worldCoord.x), map_coord(worldCoord.y));
+	return IntVector2(map_coord(worldCoord.x_), map_coord(worldCoord.y_));
 }
 
 /* Make sure world coordinates are inside the map */
@@ -386,10 +395,10 @@ static inline Vector2i map_coord(Vector2i const &worldCoord)
 static inline void clip_world_offmap(int *worldX, int *worldY)
 {
 	// x,y must be > 0
-	*worldX = MAX(1, *worldX);
-	*worldY = MAX(1, *worldY);
-	*worldX = MIN(world_coord(mapWidth) - 1, *worldX);
-	*worldY = MIN(world_coord(mapHeight) - 1, *worldY);
+	*worldX = std::max(1, *worldX);
+	*worldY = std::max(1, *worldY);
+	*worldX = std::min(world_coord(mapWidth) - 1, *worldX);
+	*worldY = std::min(world_coord(mapHeight) - 1, *worldY);
 }
 
 /* maps a position down to the corner of a tile */
@@ -405,39 +414,39 @@ bool mapLoad(char *filename, bool preview);
 bool mapSave(char **ppFileData, UDWORD *pFileSize);
 
 /** Return a pointer to the tile structure at x,y in map coordinates */
-static inline WZ_DECL_PURE MAPTILE *mapTile(int32_t x, int32_t y)
+static inline MAPTILE *mapTile(int32_t x, int32_t y)
 {
 	// Clamp x and y values to actual ones
 	// Give one tile worth of leeway before asserting, for units/transporters coming in from off-map.
-	ASSERT(x >= -1, "mapTile: x value is too small (%d,%d) in %dx%d", x, y, mapWidth, mapHeight);
-	ASSERT(y >= -1, "mapTile: y value is too small (%d,%d) in %dx%d", x, y, mapWidth, mapHeight);
-	x = MAX(x, 0);
-	y = MAX(y, 0);
-	ASSERT(x < mapWidth + 1, "mapTile: x value is too big (%d,%d) in %dx%d", x, y, mapWidth, mapHeight);
-	ASSERT(y < mapHeight + 1, "mapTile: y value is too big (%d,%d) in %dx%d", x, y, mapWidth, mapHeight);
-	x = MIN(x, mapWidth - 1);
-	y = MIN(y, mapHeight - 1);
+//	assert(x >= -1, "mapTile: x value is too small (%d,%d) in %dx%d", x, y, mapWidth, mapHeight);
+//	assert(y >= -1, "mapTile: y value is too small (%d,%d) in %dx%d", x, y, mapWidth, mapHeight);
+	x = std::max(x, 0);
+	y = std::max(y, 0);
+//	assert(x < mapWidth + 1, "mapTile: x value is too big (%d,%d) in %dx%d", x, y, mapWidth, mapHeight);
+//	assert(y < mapHeight + 1, "mapTile: y value is too big (%d,%d) in %dx%d", x, y, mapWidth, mapHeight);
+	x = std::min(x, mapWidth - 1);
+	y = std::min(y, mapHeight - 1);
 
 	return &psMapTiles[x + (y * mapWidth)];
 }
 
-static inline WZ_DECL_PURE MAPTILE *mapTile(Vector2i const &v)
+static inline MAPTILE *mapTile(IntVector2 const &v)
 {
-	return mapTile(v.x, v.y);
+	return mapTile(v.x_, v.y_);
 }
 
 /** Return a pointer to the tile structure at x,y in world coordinates */
-static inline WZ_DECL_PURE MAPTILE *worldTile(int32_t x, int32_t y)
+static inline MAPTILE *worldTile(int32_t x, int32_t y)
 {
 	return mapTile(map_coord(x), map_coord(y));
 }
-static inline WZ_DECL_PURE MAPTILE *worldTile(Vector2i const &v)
+static inline MAPTILE *worldTile(IntVector2 const &v)
 {
 	return mapTile(map_coord(v));
 }
 
 /// Return ground height of top-left corner of tile at x,y
-static inline WZ_DECL_PURE int32_t map_TileHeight(int32_t x, int32_t y)
+static inline int32_t map_TileHeight(int32_t x, int32_t y)
 {
 	if (x >= mapWidth || y >= mapHeight || x < 0 || y < 0)
 	{
@@ -447,7 +456,7 @@ static inline WZ_DECL_PURE int32_t map_TileHeight(int32_t x, int32_t y)
 }
 
 /// Return water height of top-left corner of tile at x,y
-static inline WZ_DECL_PURE int32_t map_WaterHeight(int32_t x, int32_t y)
+static inline int32_t map_WaterHeight(int32_t x, int32_t y)
 {
 	if (x >= mapWidth || y >= mapHeight || x < 0 || y < 0)
 	{
@@ -457,39 +466,39 @@ static inline WZ_DECL_PURE int32_t map_WaterHeight(int32_t x, int32_t y)
 }
 
 /// Return max(ground, water) height of top-left corner of tile at x,y
-static inline WZ_DECL_PURE int32_t map_TileHeightSurface(int32_t x, int32_t y)
+static inline int32_t map_TileHeightSurface(int32_t x, int32_t y)
 {
 	if (x >= mapWidth || y >= mapHeight || x < 0 || y < 0)
 	{
 		return 0;
 	}
-	return MAX(psMapTiles[x + (y * mapWidth)].height, psMapTiles[x + (y * mapWidth)].waterLevel);
+	return std::max(psMapTiles[x + (y * mapWidth)].height, psMapTiles[x + (y * mapWidth)].waterLevel);
 }
 
 
 /*sets the tile height */
 static inline void setTileHeight(int32_t x, int32_t y, int32_t height)
 {
-	ASSERT_OR_RETURN(, x < mapWidth && x >= 0, "x coordinate %d bigger than map width %u", x, mapWidth);
-	ASSERT_OR_RETURN(, y < mapHeight && x >= 0, "y coordinate %d bigger than map height %u", y, mapHeight);
+//	assert_OR_RETURN(, x < mapWidth && x >= 0, "x coordinate %d bigger than map width %u", x, mapWidth);
+//	assert_OR_RETURN(, y < mapHeight && x >= 0, "y coordinate %d bigger than map height %u", y, mapHeight);
 
 	psMapTiles[x + (y * mapWidth)].height = height;
 	markTileDirty(x, y);
 }
 
 /* Return whether a tile coordinate is on the map */
-WZ_DECL_ALWAYS_INLINE static inline bool tileOnMap(SDWORD x, SDWORD y)
+static inline bool tileOnMap(SDWORD x, SDWORD y)
 {
 	return (x >= 0) && (x < (SDWORD)mapWidth) && (y >= 0) && (y < (SDWORD)mapHeight);
 }
 
-WZ_DECL_ALWAYS_INLINE static inline bool tileOnMap(Vector2i pos)
+static inline bool tileOnMap(IntVector2 pos)
 {
-	return tileOnMap(pos.x, pos.y);
+	return tileOnMap(pos.x_, pos.y_);
 }
 
 /* Return whether a world coordinate is on the map */
-WZ_DECL_ALWAYS_INLINE static inline bool worldOnMap(int x, int y)
+static inline bool worldOnMap(int x, int y)
 {
 	return (x >= 0) && (x < ((SDWORD)mapWidth << TILE_SHIFT)) &&
 	       (y >= 0) && (y < ((SDWORD)mapHeight << TILE_SHIFT));
@@ -497,9 +506,9 @@ WZ_DECL_ALWAYS_INLINE static inline bool worldOnMap(int x, int y)
 
 
 /* Return whether a world coordinate is on the map */
-WZ_DECL_ALWAYS_INLINE static inline bool worldOnMap(Vector2i pos)
+static inline bool worldOnMap(IntVector2 pos)
 {
-	return worldOnMap(pos.x, pos.y);
+	return worldOnMap(pos.x_, pos.y_);
 }
 
 
@@ -512,14 +521,14 @@ bool map_Intersect(int *Cx, int *Cy, int *Vx, int *Vy, int *Sx, int *Sy);
 /// Returns UINT32_MAX if no such 0 ≤ t ≤ 1 exists, otherwise returns t*tMax, rounded down to the nearest integer.
 /// If src is strictly inside the terrain, the line segment is only considered to intersect if it exits and reenters
 /// the terrain.
-unsigned map_LineIntersect(Vector3i src, Vector3i dst, unsigned tMax);
+unsigned map_LineIntersect(IntVector3 src, IntVector3 dst, unsigned tMax);
 
 /// The max height of the terrain and water at the specified world coordinates
 int32_t map_Height(int x, int y);
 
-static inline int32_t map_Height(Vector2i const &v)
+static inline int32_t map_Height(IntVector2 const &v)
 {
-	return map_Height(v.x, v.y);
+	return map_Height(v.x_, v.y_);
 }
 
 /* returns true if object is above ground */
@@ -546,9 +555,11 @@ bool fireOnLocation(unsigned int x, unsigned int y);
  * Transitive sensor check for tile. Has to be here rather than
  * visibility.h due to header include order issues.
  */
-WZ_DECL_ALWAYS_INLINE static inline bool hasSensorOnTile(MAPTILE *psTile, unsigned player)
+static inline bool hasSensorOnTile(MAPTILE *psTile, unsigned player)
 {
-	return ((player == selectedPlayer && godMode) || (alliancebits[selectedPlayer] & (satuplinkbits | psTile->sensorBits)));
+    /*
+	return ((player == selectedPlayer && godMode) || (alliancebits[selectedPlayer] & (satuplinkbits | psTile->sensorBits)));*/
+    return false;
 }
 
 void mapInit();

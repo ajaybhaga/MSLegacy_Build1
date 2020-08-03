@@ -6,7 +6,7 @@
 #include "display.h"
 #include "display3ddef.h"	// This should be the only place including this file
 #include "objectdef.h"
-#include "message.h"
+#include "MayaScape/not-used/message.h"
 
 #define HEIGHT_TRACK_INCREMENTS (50)
 

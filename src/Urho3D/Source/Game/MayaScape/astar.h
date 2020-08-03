@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include "types.h"
+#include "movedef.h"
 #include "fpath.h"
 
 /** return codes for astar

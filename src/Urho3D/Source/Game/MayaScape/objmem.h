@@ -9,7 +9,7 @@
 #include "objectdef.h"
 
 /* The lists of objects allocated */
-extern DROID			*apsDroidLists[MAX_PLAYERS];
+//extern DROID			*apsDroidLists[MAX_PLAYERS];
 //extern STRUCTURE		*apsStructLists[MAX_PLAYERS];
 //extern FEATURE			*apsFeatureLists[MAX_PLAYERS];
 //extern FLAG_POSITION	*apsFlagPosLists[MAX_PLAYERS];
@@ -41,16 +41,16 @@ uint32_t generateSynchronisedObjectId();
 //void killDroid(DROID *psDel);
 
 /* Remove all droids */
-void freeAllDroids();
+//void freeAllDroids();
 
 /*Remove a single Droid from its list*/
 //void removeDroid(DROID *psDroidToRemove, DROID *pList[MAX_PLAYERS]);
 
 /*Removes all droids that may be stored in the mission lists*/
-void freeAllMissionDroids();
+//void freeAllMissionDroids();
 
 /*Removes all droids that may be stored in the limbo lists*/
-void freeAllLimboDroids();
+//void freeAllLimboDroids();
 
 /* add the structure to the Structure Lists */
 //void addStructure(STRUCTURE *psStructToAdd);
@@ -59,7 +59,7 @@ void freeAllLimboDroids();
 //void killStruct(STRUCTURE *psDel);
 
 /* Remove all structures */
-void freeAllStructs();
+//void freeAllStructs();
 
 /*Remove a single Structure from a list*/
 //void removeStructureFromList(STRUCTURE *psStructToRemove, STRUCTURE *pList[MAX_PLAYERS]);
@@ -71,7 +71,7 @@ void freeAllStructs();
 //void killFeature(FEATURE *psDel);
 
 /* Remove all features */
-void freeAllFeatures();
+//void freeAllFeatures();
 
 /* Create a new Flag Position */
 //bool createFlagPosition(FLAG_POSITION **ppsNew, UDWORD player);
@@ -80,8 +80,8 @@ void freeAllFeatures();
 /* Remove a Flag Position from the Lists */
 //void removeFlagPosition(FLAG_POSITION *psDel);
 // free all flag positions
-void freeAllFlagPositions();
-void freeAllAssemblyPoints();
+//void freeAllFlagPositions();
+//void freeAllAssemblyPoints();
 
 // Find a base object from it's id
 BASE_OBJECT *getBaseObjFromData(unsigned id, unsigned player, OBJECT_TYPE type);

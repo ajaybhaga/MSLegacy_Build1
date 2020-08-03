@@ -200,7 +200,7 @@ void fpathUpdate()
 	// Nothing now
 }
 
-
+/*
 bool fpathIsEquivalentBlocking(PROPULSION_TYPE propulsion1, int player1, FPATH_MOVETYPE moveType1,
                                PROPULSION_TYPE propulsion2, int player2, FPATH_MOVETYPE moveType2)
 {
@@ -236,8 +236,9 @@ bool fpathIsEquivalentBlocking(PROPULSION_TYPE propulsion1, int player1, FPATH_M
 	}
 
 	return true;
-}
+}*/
 
+/*
 static uint8_t prop2bits(PROPULSION_TYPE propulsion)
 {
 	uint8_t bits;
@@ -258,19 +259,19 @@ static uint8_t prop2bits(PROPULSION_TYPE propulsion)
 		break;
 	}
 	return bits;
-}
+}*/
 
 // Check if the map tile at a location blocks a droid
-bool fpathBaseBlockingTile(SDWORD x, SDWORD y, PROPULSION_TYPE propulsion, int mapIndex, FPATH_MOVETYPE moveType)
+/*bool fpathBaseBlockingTile(SDWORD x, SDWORD y, PROPULSION_TYPE propulsion, int mapIndex, FPATH_MOVETYPE moveType)
 {
 	/* All tiles outside of the map and on map border are blocking. */
-	if (x < 1 || y < 1 || x > mapWidth - 1 || y > mapHeight - 1)
+/*	if (x < 1 || y < 1 || x > mapWidth - 1 || y > mapHeight - 1)
 	{
 		return true;
 	}
 
 	/* Check scroll limits (used in campaign to partition the map. */
-	if (propulsion != PROPULSION_TYPE_LIFT && (x < scrollMinX + 1 || y < scrollMinY + 1 || x >= scrollMaxX - 1 || y >= scrollMaxY - 1))
+/*	if (propulsion != PROPULSION_TYPE_LIFT && (x < scrollMinX + 1 || y < scrollMinY + 1 || x >= scrollMaxX - 1 || y >= scrollMaxY - 1))
 	{
 		// coords off map - auto blocking tile
 		return true;
@@ -293,8 +294,9 @@ bool fpathBaseBlockingTile(SDWORD x, SDWORD y, PROPULSION_TYPE propulsion, int m
 
 	// the MAX hack below is because blockTile() range does not include player-specific versions...
 	return (blockTile(x, y, MAX(0, mapIndex - MAX_PLAYERS)) & unitbits) != 0;  // finally check if move is blocked by propulsion related factors
-}
+}*/
 
+/*
 bool fpathDroidBlockingTile(DROID *psDroid, int x, int y, FPATH_MOVETYPE moveType)
 {
 	return fpathBaseBlockingTile(x, y, getPropulsionStats(psDroid)->propulsionType, psDroid->player, moveType);
@@ -305,7 +307,6 @@ bool fpathBlockingTile(SDWORD x, SDWORD y, PROPULSION_TYPE propulsion)
 {
 	return fpathBaseBlockingTile(x, y, propulsion, 0, FMT_BLOCK);  // with FMT_BLOCK, it is irrelevant which player is passed in
 }
-
 
 // Returns the closest non-blocking tile to pos, or returns pos if no non-blocking tiles are present within a 2 tile distance.
 static Position findNonblockingPosition(Position pos, PROPULSION_TYPE propulsion, int player = 0, FPATH_MOVETYPE moveType = FMT_BLOCK)
@@ -336,8 +337,7 @@ static Position findNonblockingPosition(Position pos, PROPULSION_TYPE propulsion
 	Vector2i maxCoord = minCoord + Vector2i(TILE_UNITS - 1, TILE_UNITS - 1);
 
 	return Position(std::min(std::max(pos.x, minCoord.x), maxCoord.x), std::min(std::max(pos.y, minCoord.y), maxCoord.y), pos.z);
-}
-
+}*/
 
 
 static void fpathSetMove(MOVE_CONTROL *psMoveCntl, SDWORD targetX, SDWORD targetY)
@@ -347,7 +347,7 @@ static void fpathSetMove(MOVE_CONTROL *psMoveCntl, SDWORD targetX, SDWORD target
 	psMoveCntl->asPath[0] = Vector2i(targetX, targetY);
 }
 
-
+/*
 void fpathSetDirectRoute(DROID *psDroid, SDWORD targetX, SDWORD targetY)
 {
 	fpathSetMove(&psDroid->sMove, targetX, targetY);
@@ -357,8 +357,9 @@ void fpathSetDirectRoute(DROID *psDroid, SDWORD targetX, SDWORD targetY)
 void fpathRemoveDroidData(int id)
 {
 	pathResults.erase(id);
-}
+}*/
 
+/*
 static FPATH_RETVAL fpathRoute(MOVE_CONTROL *psMove, unsigned id, int startX, int startY, int tX, int tY, PROPULSION_TYPE propulsionType,
                                DROID_TYPE droidType, FPATH_MOVETYPE moveType, int owner, bool acceptNearest, StructureBounds const &dstStructure)
 {
@@ -500,6 +501,7 @@ FPATH_RETVAL fpathDroidRoute(DROID *psDroid, SDWORD tX, SDWORD tY, FPATH_MOVETYP
 	return fpathRoute(&psDroid->sMove, psDroid->id, startPos.x, startPos.y, endPos.x, endPos.y, psPropStats->propulsionType,
 	                  psDroid->droidType, moveType, psDroid->player, acceptNearest, dstStructure);
 }
+*/
 
 // Run only from path thread
 PATHRESULT fpathExecute(PATHJOB job)
@@ -662,6 +664,7 @@ void fpathTest(int x, int y, int x2, int y2)
 	(void)r;  // Squelch unused-but-set warning.
 }
 
+/*
 bool fpathCheck(Position orig, Position dest, PROPULSION_TYPE propulsion)
 {
 	// We have to be careful with this check because it is called on
@@ -696,4 +699,4 @@ bool fpathCheck(Position orig, Position dest, PROPULSION_TYPE propulsion)
 
 	ASSERT(false, "Should never get here, unknown propulsion !");
 	return false;	// should never get here
-}
+}*/

@@ -50,7 +50,7 @@ void clearSel();
 // Clear all selections and stop driver mode.
 void clearSelection();
 // deal with selecting a droid
-void dealWithDroidSelect(DROID *psDroid, bool bDragBox);
+//void dealWithDroidSelect(DROID *psDroid, bool bDragBox);
 
 bool isMouseOverRadar();
 
@@ -176,12 +176,12 @@ BASE_OBJECT	*mouseTarget();
 bool StartObjectOrbit(BASE_OBJECT *psObj);
 void CancelObjectOrbit();
 
-void cancelDeliveryRepos();
-void startDeliveryPosition(FLAG_POSITION *psFlag);
-bool deliveryReposValid();
-void processDeliveryRepos();
-void renderDeliveryRepos(const glm::mat4 &viewMatrix);
-bool deliveryReposFinished(FLAG_POSITION *psFlag = nullptr);
+//void cancelDeliveryRepos();
+//void startDeliveryPosition(FLAG_POSITION *psFlag);
+//bool deliveryReposValid();
+//void processDeliveryRepos();
+//void renderDeliveryRepos(const glm::mat4 &viewMatrix);
+//bool deliveryReposFinished(FLAG_POSITION *psFlag = nullptr);
 
 void StartTacticalScrollObj(bool driveActive, BASE_OBJECT *psObj);
 void CancelTacticalScroll();
@@ -222,5 +222,5 @@ UDWORD getTargetType();
 void setZoom(float zoomSpeed, float zoomTarget);
 void zoom();
 bool clipXYZ(int x, int y, int z, const glm::mat4 &viewMatrix);
-bool clipXYZNormalized(const Vector3i &normalizedPosition, const glm::mat4 &viewMatrix);
+bool clipXYZNormalized(const IntVector3 &normalizedPosition, const glm::mat4 &viewMatrix);
 

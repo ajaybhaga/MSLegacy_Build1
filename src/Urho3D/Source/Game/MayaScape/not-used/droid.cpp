@@ -21,7 +21,7 @@
 //#include "move.h"
 #include "MayaScape/geometry.h"
 #include "MayaScape/display.h"
-#include "MayaScape/console.h"
+#include "console.h"
 //#include "component.h"
 //#include "lighting.h"
 //#include "multiplay.h"

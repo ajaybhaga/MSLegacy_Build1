@@ -6,29 +6,29 @@
  * Routines for moving units about the map
  *
  */
-#include "console.h"
+#include "MayaScape/not-used/console.h"
 
 #include "move.h"
 
 #include "objects.h"
-#include "MayaScape/not-used/visibility.h"
+//#include "MayaScape/not-used/visibility.h"
 #include "map.h"
 #include "fpath.h"
-#include "loop.h"
+//#include "loop.h"
 #include "geometry.h"
 #include "action.h"
-#include "MayaScape/not-used/order.h"
+//#include "MayaScape/not-used/order.h"
 #include "astar.h"
 #include "mapgrid.h"
 #include "display.h"	// needed for widgetsOn flag.
-#include "effects.h"
-#include "power.h"
-#include "scores.h"
-#include "multiplay.h"
-#include "multigifts.h"
-#include "random.h"
-#include "mission.h"
-#include "qtscript.h"
+//#include "effects.h"
+//#include "power.h"
+//#include "scores.h"
+//#include "multiplay.h"
+//#include "multigifts.h"
+//#include "random.h"
+//#include "mission.h"
+//#include "qtscript.h"
 
 /* max and min vtol heights above terrain */
 #define	VTOL_HEIGHT_MIN				250

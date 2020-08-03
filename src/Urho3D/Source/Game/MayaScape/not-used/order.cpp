@@ -48,7 +48,7 @@
 //#include "warcam.h"
 //#include "fpath.h"
 #include "MayaScape/display3d.h"
-#include "MayaScape/console.h"
+#include "console.h"
 #include "MayaScape/mapgrid.h"
 
 #include "random.h"

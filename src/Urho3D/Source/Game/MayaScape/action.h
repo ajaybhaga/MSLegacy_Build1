@@ -21,10 +21,13 @@
  * Function prototypes for setting the action of a droid
  */
 
-#ifndef __INCLUDED_SRC_ACTION_H__
-#define __INCLUDED_SRC_ACTION_H__
+#pragma once
 
+#include "stringdef.h"
 #include "actiondef.h"
+#include "basedef.h"
+#include "movedef.h"
+
 //#include "droiddef.h"
 
 /**
@@ -106,5 +109,3 @@ void actionAlignTurret(BASE_OBJECT *psObj, int weapon_slot);
 #define TARGET_UPD_SKIP_FRAMES 1000
 
 /** @} */
-
-#endif // __INCLUDED_SRC_ACTION_H__

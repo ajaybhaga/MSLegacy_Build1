@@ -42,6 +42,7 @@
 
 #include "astar.h"
 #include "map.h"
+#include "mathdef.h"
 
 #include <list>
 #include <vector>
@@ -106,7 +107,7 @@ struct PathBlockingType
 {
 	uint32_t gameTime;
 
-	PROPULSION_TYPE propulsion;
+	//PROPULSION_TYPE propulsion;
 	int owner;
 	FPATH_MOVETYPE moveType;
 };
@@ -115,9 +116,15 @@ struct PathBlockingMap
 {
 	bool operator ==(PathBlockingType const &z) const
 	{
+/*
 		return type.gameTime == z.gameTime &&
 		       fpathIsEquivalentBlocking(type.propulsion, type.owner, type.moveType,
 		                                 z.propulsion,    z.owner,    z.moveType);
+
+*/
+
+        return false;
+
 	}
 
 	PathBlockingType type;
@@ -128,7 +135,7 @@ struct PathBlockingMap
 struct PathNonblockingArea
 {
 	PathNonblockingArea() {}
-	PathNonblockingArea(StructureBounds const &st) : x1(st.map.x), x2(st.map.x + st.size.x), y1(st.map.y), y2(st.map.y + st.size.y) {}
+	PathNonblockingArea(StructureBounds const &st) : x1(st.map.x_), x2(st.map.x_ + st.size.x_), y1(st.map.y_), y2(st.map.y_ + st.size.y_) {}
 	bool operator ==(PathNonblockingArea const &z) const
 	{
 		return x1 == z.x1 && x2 == z.x2 && y1 == z.y1 && y2 == z.y2;
@@ -214,16 +221,16 @@ static uint32_t fpathCurrentGameTime;
 
 // Convert a direction into an offset
 // dir 0 => x = 0, y = -1
-static const Vector2i aDirOffset[] =
+static const IntVector2 aDirOffset[] =
 {
-	Vector2i(0, 1),
-	Vector2i(-1, 1),
-	Vector2i(-1, 0),
-	Vector2i(-1, -1),
-	Vector2i(0, -1),
-	Vector2i(1, -1),
-	Vector2i(1, 0),
-	Vector2i(1, 1),
+	IntVector2(0, 1),
+	IntVector2(-1, 1),
+	IntVector2(-1, 0),
+	IntVector2(-1, -1),
+	IntVector2(0, -1),
+	IntVector2(1, -1),
+	IntVector2(1, 0),
+	IntVector2(1, 1),
 };
 
 void fpathHardTableReset()
@@ -250,13 +257,13 @@ static inline PathNode fpathTakeNode(std::vector<PathNode> &nodes)
 
 /** Estimate the distance to the target point
  */
-static inline unsigned WZ_DECL_PURE fpathEstimate(PathCoord s, PathCoord f)
+static inline unsigned fpathEstimate(PathCoord s, PathCoord f)
 {
 	// Cost of moving horizontal/vertical = 70*2, cost of moving diagonal = 99*2, 99/70 = 1.41428571... ≈ √2 = 1.41421356...
 	unsigned xDelta = abs(s.x - f.x), yDelta = abs(s.y - f.y);
 	return std::min(xDelta, yDelta) * (198 - 140) + std::max(xDelta, yDelta) * 140;
 }
-static inline unsigned WZ_DECL_PURE fpathGoodEstimate(PathCoord s, PathCoord f)
+static inline unsigned fpathGoodEstimate(PathCoord s, PathCoord f)
 {
 	// Cost of moving horizontal/vertical = 70*2, cost of moving diagonal = 99*2, 99/70 = 1.41428571... ≈ √2 = 1.41421356...
 	return iHypot((s.x - f.x) * 140, (s.y - f.y) * 140);
@@ -266,7 +273,7 @@ static inline unsigned WZ_DECL_PURE fpathGoodEstimate(PathCoord s, PathCoord f)
  */
 static inline void fpathNewNode(PathfindContext &context, PathCoord dest, PathCoord pos, unsigned prevDist, PathCoord prevPos)
 {
-	ASSERT_OR_RETURN(, (unsigned)pos.x < (unsigned)mapWidth && (unsigned)pos.y < (unsigned)mapHeight, "X (%d) or Y (%d) coordinate for path finding node is out of range!", pos.x, pos.y);
+	//ASSERT_OR_RETURN(, (unsigned)pos.x < (unsigned)mapWidth && (unsigned)pos.y < (unsigned)mapHeight, "X (%d) or Y (%d) coordinate for path finding node is out of range!", pos.x, pos.y);
 
 	// Create the node.
 	PathNode node;
@@ -275,7 +282,7 @@ static inline void fpathNewNode(PathfindContext &context, PathCoord dest, PathCo
 	node.dist = prevDist + fpathEstimate(prevPos, pos) * costFactor;
 	node.est = node.dist + fpathGoodEstimate(pos, dest);
 
-	Vector2i delta = Vector2i(pos.x - prevPos.x, pos.y - prevPos.y) * 64;
+	IntVector2 delta = IntVector2(pos.x - prevPos.x, pos.y - prevPos.y) * 64;
 	bool isDiagonal = delta.x && delta.y;
 
 	PathExploredTile &expl = context.map[pos.x + pos.y * mapWidth];
@@ -285,9 +292,9 @@ static inline void fpathNewNode(PathfindContext &context, PathCoord dest, PathCo
 		{
 			return;  // Already visited this tile. Do nothing.
 		}
-		Vector2i deltaA = delta;
-		Vector2i deltaB = Vector2i(expl.dx, expl.dy);
-		Vector2i deltaDelta = deltaA - deltaB;  // Vector pointing from current considered source tile leading to pos, to the previously considered source tile leading to pos.
+		IntVector2 deltaA = delta;
+		IntVector2 deltaB = IntVector2(expl.dx, expl.dy);
+		IntVector2 deltaDelta = deltaA - deltaB;  // Vector pointing from current considered source tile leading to pos, to the previously considered source tile leading to pos.
 		if (abs(deltaDelta.x) + abs(deltaDelta.y) == 64)
 		{
 			// prevPos is tile A or B, and pos is tile P. We were previously called with prevPos being tile B or A, and pos tile P.
@@ -507,11 +514,11 @@ ASR_RETVAL fpathAStarRoute(MOVE_CONTROL *psMove, PATHJOB *psJob)
 	}
 
 	// Get route, in reverse order.
-	static std::vector<Vector2i> path;  // Declared static to save allocations.
+	static std::vector<IntVector2> path;  // Declared static to save allocations.
 	path.clear();
 
-	Vector2i newP(0, 0);
-	for (Vector2i p(world_coord(endCoord.x) + TILE_UNITS / 2, world_coord(endCoord.y) + TILE_UNITS / 2); true; p = newP)
+	IntVector2 newP(0, 0);
+	for (IntVector2 p(world_coord(endCoord.x) + TILE_UNITS / 2, world_coord(endCoord.y) + TILE_UNITS / 2); true; p = newP)
 	{
 		ASSERT_OR_RETURN(ASR_FAILED, worldOnMap(p.x, p.y), "Assigned XY coordinates (%d, %d) not on map!", (int)p.x, (int)p.y);
 		ASSERT_OR_RETURN(ASR_FAILED, path.size() < (static_cast<size_t>(mapWidth) * static_cast<size_t>(mapHeight)), "Pathfinding got in a loop.");
@@ -519,8 +526,8 @@ ASR_RETVAL fpathAStarRoute(MOVE_CONTROL *psMove, PATHJOB *psJob)
 		path.push_back(p);
 
 		PathExploredTile &tile = context.map[map_coord(p.x) + map_coord(p.y) * mapWidth];
-		newP = p - Vector2i(tile.dx, tile.dy) * (TILE_UNITS / 64);
-		Vector2i mapP = map_coord(newP);
+		newP = p - IntVector2(tile.dx, tile.dy) * (TILE_UNITS / 64);
+		IntVector2 mapP = map_coord(newP);
 		int xSide = newP.x - world_coord(mapP.x) > TILE_UNITS / 2 ? 1 : -1; // 1 if newP is on right-hand side of the tile, or -1 if newP is on the left-hand side of the tile.
 		int ySide = newP.y - world_coord(mapP.y) > TILE_UNITS / 2 ? 1 : -1; // 1 if newP is on bottom side of the tile, or -1 if newP is on the top side of the tile.
 		if (context.isBlocked(mapP.x + xSide, mapP.y))
@@ -531,7 +538,7 @@ ASR_RETVAL fpathAStarRoute(MOVE_CONTROL *psMove, PATHJOB *psJob)
 		{
 			newP.y = world_coord(mapP.y) + TILE_UNITS / 2; // Point too close to a blocking tile on rop or bottom side, so move the point to the middle.
 		}
-		if (map_coord(p) == Vector2i(context.tileS.x, context.tileS.y) || p == newP)
+		if (map_coord(p) == IntVector2(context.tileS.x, context.tileS.y) || p == newP)
 		{
 			break;  // We stopped moving, because we reached the destination or the closest reachable tile to context.tileS. Give up now.
 		}
@@ -539,7 +546,7 @@ ASR_RETVAL fpathAStarRoute(MOVE_CONTROL *psMove, PATHJOB *psJob)
 	if (retval == ASR_OK)
 	{
 		// Found exact path, so use exact coordinates for last point, no reason to lose precision
-		Vector2i v(psJob->destX, psJob->destY);
+		IntVector2 v(psJob->destX, psJob->destY);
 		if (mustReverse)
 		{
 			path.front() = v;

@@ -20,6 +20,9 @@
 
 #pragma once
 
+#include <glm/gtx/transform.hpp>
+#include <glm/gtx/matrix_interpolation.hpp>
+
 enum RENDER_TYPE
 {
 	RENDER_DROID,

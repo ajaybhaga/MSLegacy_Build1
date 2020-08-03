@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include "types.h"
+
 enum POSITION_TYPE
 {
 	POS_DELIVERY,		//Delivery Points NOT wayPoints

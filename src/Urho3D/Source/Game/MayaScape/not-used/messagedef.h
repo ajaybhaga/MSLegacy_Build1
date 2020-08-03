@@ -25,8 +25,8 @@
 #define __INCLUDED_MESSAGEDEF_H__
 
 #include <vector>
-#include "positiondef.h"
-#include "stringdef.h"
+#include "MayaScape/positiondef.h"
+#include "MayaScape/stringdef.h"
 
 struct iIMDShape;
 struct BASE_OBJECT;

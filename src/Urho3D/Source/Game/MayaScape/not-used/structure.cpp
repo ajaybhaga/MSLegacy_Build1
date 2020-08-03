@@ -60,7 +60,7 @@
 #include "MayaScape/fpath.h"
 #include "mission.h"
 #include "levels.h"
-#include "MayaScape/console.h"
+#include "console.h"
 #include "cmddroid.h"
 #include "feature.h"
 #include "MayaScape/mapgrid.h"

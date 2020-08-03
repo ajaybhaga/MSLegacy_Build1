@@ -38,6 +38,7 @@
 #include "objmem.h"
 #include "move.h"
 //#include "cmddroid.h"
+#include "mathdef.h"
 
 /* attack run distance */
 #define	VTOL_ATTACK_LENGTH		1000
@@ -141,7 +142,7 @@ const char *getDroidActionName(DROID_ACTION action)
 		"DACTION_CIRCLE"				// (41) circling while engaging
 	};
 
-	ASSERT_OR_RETURN(nullptr, action < sizeof(name) / sizeof(name[0]), "DROID_ACTION out of range: %u", action);
+	//ASSERT_OR_RETURN(nullptr, action < sizeof(name) / sizeof(name[0]), "DROID_ACTION out of range: %u", action);
 
 	return name[action];
 }
@@ -510,8 +511,8 @@ static void actionUpdateTransporter(DROID *psDroid)
 static void actionCalcPullBackPoint(BASE_OBJECT *psObj, BASE_OBJECT *psTarget, int *px, int *py)
 {
 	// get the vector from the target to the object
-	int xdiff = psObj->pos.x - psTarget->pos.x;
-	int ydiff = psObj->pos.y - psTarget->pos.y;
+	int xdiff = psObj->pos.x_ - psTarget->pos.x_;
+	int ydiff = psObj->pos.y_ - psTarget->pos.y_;
 	const int len = iHypot(xdiff, ydiff);
 
 	if (len == 0)
@@ -526,8 +527,8 @@ static void actionCalcPullBackPoint(BASE_OBJECT *psObj, BASE_OBJECT *psTarget, i
 	}
 
 	// create the position
-	*px = psObj->pos.x + xdiff * PULL_BACK_DIST;
-	*py = psObj->pos.y + ydiff * PULL_BACK_DIST;
+	*px = psObj->pos.x_ + xdiff * PULL_BACK_DIST;
+	*py = psObj->pos.y_ + ydiff * PULL_BACK_DIST;
 
 	// make sure coordinates stay inside of the map
 	clip_world_offmap(px, py);
@@ -2610,8 +2611,8 @@ static bool vtolLandingTileSearchFunction(int x, int y, void *matchState)
 
 	if (vtolLandingTile(x, y))
 	{
-		xyCoords->x = x;
-		xyCoords->y = y;
+		xyCoords->x_ = x;
+		xyCoords->y_ = y;
 		return true;
 	}
 
