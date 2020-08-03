@@ -18,22 +18,25 @@
 	Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef __INCLUDED_SRC_GEOMETRY_H__
-#define __INCLUDED_SRC_GEOMETRY_H__
+#pragma once
 
+#include "shared_libs.h"
 #include "map.h"
+
+using namespace Urho3D;
 
 struct QUAD
 {
-	Vector2i coords[4] = {{0,0}, {0,0}, {0,0}, {0,0}};
+	Vector2 coords[4] = {{0,0}, {0,0}, {0,0}, {0,0}};
 };
 
 uint16_t calcDirection(int32_t x0, int32_t y0, int32_t x1, int32_t y1);
-bool inQuad(const Vector2i *pt, const QUAD *quad);
-Vector2i positionInQuad(Vector2i const &pt, QUAD const &quad);
+bool inQuad(const Vector2 *pt, const QUAD *quad);
+Vector2 positionInQuad(Vector2 const &pt, QUAD const &quad);
 DROID *getNearestDroid(UDWORD x, UDWORD y, bool bSelected);
 bool droidOnScreen(DROID *psDroid, SDWORD tolerance);
 
+/*
 static inline STRUCTURE *getTileStructure(UDWORD x, UDWORD y)
 {
 	BASE_OBJECT *psObj = mapTile(x, y)->psObject;
@@ -52,7 +55,7 @@ static inline FEATURE *getTileFeature(UDWORD x, UDWORD y)
 		return (FEATURE *)psObj;
 	}
 	return nullptr;
-}
+}*/
 
 /// WARNING: Returns NULL if tile not visible to selectedPlayer.
 static inline BASE_OBJECT *getTileOccupier(UDWORD x, UDWORD y)
@@ -68,5 +71,3 @@ static inline BASE_OBJECT *getTileOccupier(UDWORD x, UDWORD y)
 		return nullptr;
 	}
 }
-
-#endif // __INCLUDED_SRC_GEOMETRY_H__

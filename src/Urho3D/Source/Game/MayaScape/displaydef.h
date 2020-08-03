@@ -4,6 +4,8 @@
  *  Display structures.
  */
 
+#include "types.h"
+
 #pragma once
 
 struct iIMDShape;

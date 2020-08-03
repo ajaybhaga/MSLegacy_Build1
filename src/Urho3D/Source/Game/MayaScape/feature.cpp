@@ -8,22 +8,22 @@
 
 #include "feature.h"
 #include "map.h"
-#include "hci.h"
-#include "power.h"
+//#include "hci.h"
+//#include "power.h"
 #include "objects.h"
 #include "display.h"
 #include "order.h"
 #include "structure.h"
-#include "miscimd.h"
+//#include "miscimd.h"
 #include "visibility.h"
-#include "effects.h"
-#include "scores.h"
-#include "combat.h"
-#include "multiplay.h"
+//#include "effects.h"
+//#include "scores.h"
+//#include "combat.h"
+//#include "multiplay.h"
 
 #include "mapgrid.h"
 #include "display3d.h"
-#include "random.h"
+//#include "random.h"
 
 /* The statistics for the features */
 FEATURE_STATS	*asFeatureStats;

@@ -7,6 +7,9 @@
 #pragma once
 
 #include "types.h"
+#include "shared_libs.h"
+
+using namespace Urho3D;
 
 struct BASE_OBJECT;
 struct BASE_STATS;
@@ -19,7 +22,7 @@ struct StructureBounds
 		: map(0,0)
 		, size(0,0)
 	{}
-	StructureBounds(Vector2i const &map, Vector2i const &size) : map(map), size(size) {}
+	StructureBounds(Vector2 const &map, Vector2 const &size) : map(map), size(size) {}
 	bool valid()
 	{
 		return size.x >= 0;
@@ -47,4 +50,4 @@ void _syncDebugObject(const char *function, SIMPLE_OBJECT const *psObject, char 
 
 Vector2i getStatsSize(BASE_STATS const *pType, uint16_t direction);
 StructureBounds getStructureBounds(BASE_OBJECT const *object);
-StructureBounds getStructureBounds(BASE_STATS const *stats, Vector2i pos, uint16_t direction);
+StructureBounds getStructureBounds(BASE_STATS const *stats, Vector2 pos, uint16_t direction);

@@ -5,8 +5,6 @@
 
 #include "display.h"
 #include "display3ddef.h"	// This should be the only place including this file
-#include "lib/ivis_opengl/pietypes.h"
-#include "lib/ivis_opengl/piedef.h"
 #include "objectdef.h"
 #include "message.h"
 
@@ -57,11 +55,11 @@ void disp3d_oldView(); // for save games <= 10
 void disp3d_getView(iView *newView);
 
 void draw3DScene();
-void renderStructure(STRUCTURE *psStructure, const glm::mat4 &viewMatrix);
-void renderFeature(FEATURE *psFeature, const glm::mat4 &viewMatrix);
-void renderProximityMsg(PROXIMITY_DISPLAY	*psProxDisp, const glm::mat4 &viewMatrix);
-void renderProjectile(PROJECTILE *psCurr, const glm::mat4 &viewMatrix);
-void renderDeliveryPoint(FLAG_POSITION *psPosition, bool blueprint, const glm::mat4 &viewMatrix);
+//void renderStructure(STRUCTURE *psStructure, const glm::mat4 &viewMatrix);
+//void renderFeature(FEATURE *psFeature, const glm::mat4 &viewMatrix);
+//void renderProximityMsg(PROXIMITY_DISPLAY	*psProxDisp, const glm::mat4 &viewMatrix);
+//void renderProjectile(PROJECTILE *psCurr, const glm::mat4 &viewMatrix);
+//void renderDeliveryPoint(FLAG_POSITION *psPosition, bool blueprint, const glm::mat4 &viewMatrix);
 void debugToggleSensorDisplay();
 
 void calcScreenCoords(DROID *psDroid, const glm::mat4 &viewMatrix);

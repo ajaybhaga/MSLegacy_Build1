@@ -9,6 +9,8 @@
 //#include "intdisplay.h"
 #include "map.h"
 
+using namespace Urho3D;
+
 
 static inline uint16_t interpolateAngle(uint16_t v1, uint16_t v2, uint32_t t1, uint32_t t2, uint32_t t)
 {
@@ -180,6 +182,7 @@ StructureBounds getStructureBounds(BASE_OBJECT const *object)
 
 StructureBounds getStructureBounds(BASE_STATS const *stats, Vector2i pos, uint16_t direction)
 {
+    /*
 	if (StatIsStructure(stats))
 	{
 		return getStructureBounds(static_cast<STRUCTURE_STATS const *>(stats), pos, direction);
@@ -188,6 +191,6 @@ StructureBounds getStructureBounds(BASE_STATS const *stats, Vector2i pos, uint16
 	{
 		return getStructureBounds(static_cast<FEATURE_STATS const *>(stats), pos);
 	}
-
+*/
 	return StructureBounds(map_coord(pos), Vector2i(1, 1));  // Default to a 1×1 tile.
 }

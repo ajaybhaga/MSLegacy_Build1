@@ -8,9 +8,7 @@
  */
 
 
-#include "lib/framework/frame.h"
 #include "objects.h"
-
 
 /* Initialise the object system */
 bool objInitialise()

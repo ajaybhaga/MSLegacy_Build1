@@ -8,14 +8,14 @@
 #include "action.h"
 #include "component.h"
 #include "display3d.h"
-#include "effects.h"
-#include "intdisplay.h"
-#include "loop.h"
+//#include "effects.h"
+//#include "intdisplay.h"
+//#include "loop.h"
 #include "map.h"
-#include "miscimd.h"
+//#include "miscimd.h"
 #include "projectile.h"
-#include "transporter.h"
-#include "mission.h"
+//#include "transporter.h"
+//#include "mission.h"
 #ifndef GLM_ENABLE_EXPERIMENTAL
 	#define GLM_ENABLE_EXPERIMENTAL
 #endif

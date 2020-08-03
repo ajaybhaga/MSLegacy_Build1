@@ -22,30 +22,23 @@
  * Handles object visibility.
  * Pumpkin Studios, Eidos Interactive 1996.
  */
-#include "lib/framework/frame.h"
-#include "lib/framework/fixedpoint.h"
-
-#include "lib/gamelib/gtime.h"
-#include "lib/sound/audio.h"
-#include "lib/sound/audio_id.h"
-#include "lib/ivis_opengl/ivisdef.h"
 
 #include "visibility.h"
 
 #include "objects.h"
 #include "map.h"
-#include "loop.h"
+//#include "loop.h"
 #include "raycast.h"
 #include "geometry.h"
-#include "hci.h"
+//#include "hci.h"
 #include "mapgrid.h"
-#include "research.h"
-#include "structure.h"
-#include "projectile.h"
+//#include "research.h"
+//#include "structure.h"
+//#include "projectile.h"
 #include "display.h"
-#include "multiplay.h"
-#include "qtscript.h"
-#include "wavecast.h"
+//#include "multiplay.h"
+//#include "qtscript.h"
+//#include "wavecast.h"
 
 // accuracy for the height gradient
 #define GRAD_MUL 10000

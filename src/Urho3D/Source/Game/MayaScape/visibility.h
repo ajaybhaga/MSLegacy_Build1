@@ -18,12 +18,11 @@
 	Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef __INCLUDED_SRC_VISIBILITY__
-#define __INCLUDED_SRC_VISIBILITY__
+#pragma once
 
 #include "objectdef.h"
 #include "raycast.h"
-#include "stats.h"
+//#include "stats.h"
 
 #define LINE_OF_FIRE_MINIMUM 5
 
@@ -116,4 +115,3 @@ void removeSpotters();
 bool removeSpotter(uint32_t id);
 uint32_t addSpotter(int x, int y, int player, int radius, bool radar, uint32_t expiry = 0);
 
-#endif // __INCLUDED_SRC_VISIBILITY__

@@ -12,11 +12,10 @@
 #include "actiondef.h"
 #include "basedef.h"
 #include "movedef.h"
-#include "orderdef.h"
-#include "statsdef.h"
-#include "weapondef.h"
-#include "orderdef.h"
-#include "actiondef.h"
+//#include "statsdef.h"
+//#include "weapondef.h"
+//#include "orderdef.h"
+//#include "actiondef.h"
 
 /*!
  * The number of components in the asParts / asBits arrays.

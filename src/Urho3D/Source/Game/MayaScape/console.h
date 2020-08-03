@@ -3,6 +3,9 @@
 
 #pragma once
 
+#include "types.h"
+#include <utility>
+
 #define MAX_CONSOLE_MESSAGES			(64)
 #define MAX_CONSOLE_STRING_LENGTH		(255)
 #define MAX_CONSOLE_TMP_STRING_LENGTH	(255)

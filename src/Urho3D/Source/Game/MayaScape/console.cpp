@@ -53,13 +53,13 @@ struct CONSOLE
 
 struct CONSOLE_MESSAGE
 {
-	WzText display;
+	std::string display;
 	UDWORD	timeAdded;		// When was it added to our list?
 	UDWORD	duration;
 	CONSOLE_TEXT_JUSTIFICATION JustifyType;	// text justification
 	int		player;			// Player who sent this message or SYSTEM_MESSAGE
-	CONSOLE_MESSAGE(const std::string &text, iV_fonts fontID, UDWORD time, UDWORD duration, CONSOLE_TEXT_JUSTIFICATION justify, int plr)
-	                : display(text, fontID), timeAdded(time), duration(duration), JustifyType(justify), player(plr) {}
+	CONSOLE_MESSAGE(const std::string &text, UDWORD time, UDWORD duration, CONSOLE_TEXT_JUSTIFICATION justify, int plr)
+	                : display(text), timeAdded(time), duration(duration), JustifyType(justify), player(plr) {}
 
 	CONSOLE_MESSAGE& operator =(CONSOLE_MESSAGE&& input)
 	{
@@ -337,7 +337,7 @@ static PIELIGHT getConsoleTextColor(int player)
 	}
 }
 
-static void console_drawtext(WzText &display, PIELIGHT colour, int x, int y, CONSOLE_TEXT_JUSTIFICATION justify, int width)
+static void console_drawtext(std::string &display, PIELIGHT colour, int x, int y, CONSOLE_TEXT_JUSTIFICATION justify, int width)
 {
 	switch (justify)
 	{

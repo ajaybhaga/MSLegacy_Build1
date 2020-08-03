@@ -2,6 +2,10 @@
 
 #include <limits.h>
 #include <ctype.h>
+#include <stdint.h>
+
+#define GAME_TICKS_PER_SEC 1000
+uint32_t selectedPlayer = 0;  /**< Current player */
 
 /* Basic numeric types */
 typedef uint8_t  UBYTE;

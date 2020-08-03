@@ -6,8 +6,6 @@
 
 #pragma once
 
-#include "lib/framework/wzconfig.h"
-
 #include "objectdef.h"
 
 struct VIEWDATA;

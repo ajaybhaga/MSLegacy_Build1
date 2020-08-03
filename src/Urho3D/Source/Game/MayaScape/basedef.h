@@ -26,8 +26,8 @@
 #include <bitset>
 
 #include "displaydef.h"
-#include "statsdef.h"
-#include "weapondef.h"
+//#include "statsdef.h"
+//#include "weapondef.h"
 #include "baseobject.h"
 
 //the died flag for a droid is set to this when it gets added to the non-current list

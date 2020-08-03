@@ -2,9 +2,6 @@
 */
 #pragma once
 
-#ifndef __INCLUDED_SRC_DISPLAY3DDEF_H__
-#define __INCLUDED_SRC_DISPLAY3DDEF_H__
-
 #define TILE_WIDTH 128
 #define TILE_HEIGHT 128
 #define TILE_SIZE (TILE_WIDTH*TILE_HEIGHT)
