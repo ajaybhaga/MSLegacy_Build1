@@ -74,19 +74,19 @@ DROID	*getNearestDroid(UDWORD x, UDWORD y, bool bSelected)
 bool inQuad(const Vector2 *pt, const QUAD *quad)
 {
 	// Early out.
-	int minX = std::min(std::min(quad->coords[0].x, quad->coords[1].x), std::min(quad->coords[2].x, quad->coords[3].x)); if (pt->x < minX)
+	int minX = std::min(std::min(quad->coords[0].x_, quad->coords[1].x_), std::min(quad->coords[2].x_, quad->coords[3].x_)); if (pt->x_ < minX)
 	{
 		return false;
 	}
-	int maxX = std::max(std::max(quad->coords[0].x, quad->coords[1].x), std::max(quad->coords[2].x, quad->coords[3].x)); if (pt->x > maxX)
+	int maxX = std::max(std::max(quad->coords[0].x_, quad->coords[1].x_), std::max(quad->coords[2].x_, quad->coords[3].x_)); if (pt->x_ > maxX)
 	{
 		return false;
 	}
-	int minY = std::min(std::min(quad->coords[0].y, quad->coords[1].y), std::min(quad->coords[2].y, quad->coords[3].y)); if (pt->y < minY)
+	int minY = std::min(std::min(quad->coords[0].y_, quad->coords[1].y_), std::min(quad->coords[2].y_, quad->coords[3].y_)); if (pt->y_ < minY)
 	{
 		return false;
 	}
-	int maxY = std::max(std::max(quad->coords[0].y, quad->coords[1].y), std::max(quad->coords[2].y, quad->coords[3].y)); if (pt->y > maxY)
+	int maxY = std::max(std::max(quad->coords[0].y_, quad->coords[1].y_), std::max(quad->coords[2].y_, quad->coords[3].y_)); if (pt->y_ > maxY)
 	{
 		return false;
 	}
@@ -97,8 +97,8 @@ bool inQuad(const Vector2 *pt, const QUAD *quad)
 	{
 		Vector2 edge = quad->coords[j] - quad->coords[i];
 		Vector2 pos = *pt - quad->coords[i];
-		if ((0 <= pos.y && pos.y < edge.y && (int64_t)pos.x * (int64_t)edge.y < (int64_t)pos.y * (int64_t)edge.x) ||
-		    (edge.y <= pos.y && pos.y < 0 && (int64_t)pos.x * (int64_t)edge.y > (int64_t)pos.y * (int64_t)edge.x))
+		if ((0 <= pos.y_ && pos.y_ < edge.y_ && (int64_t)pos.x_ * (int64_t)edge.y_ < (int64_t)pos.y_ * (int64_t)edge.x_) ||
+		    (edge.y_ <= pos.y_ && pos.y_ < 0 && (int64_t)pos.x_ * (int64_t)edge.y_ > (int64_t)pos.y_ * (int64_t)edge.x_))
 		{
 			c = !c;
 		}
@@ -115,7 +115,7 @@ Vector2 positionInQuad(Vector2 const &pt, QUAD const &quad)
 	{
 		Vector2 edge = quad.coords[j] - quad.coords[i];
 		Vector2 pos  = quad.coords[j] - pt;
-		Vector2 posRot(pos.y, -pos.x);
+		Vector2 posRot(pos.y_, -pos.x_);
 		lenSq[i] = dot(edge, edge);
 		ptDot[i] = dot(posRot, edge);
 	}
@@ -130,14 +130,14 @@ Vector2 positionInQuad(Vector2 const &pt, QUAD const &quad)
 }
 
 //-----------------------------------------------------------------------------------
-bool	droidOnScreen(DROID *psDroid, SDWORD tolerance)
+/*bool	droidOnScreen(DROID *psDroid, SDWORD tolerance)
 {
 	if (DrawnInLastFrame(psDroid->sDisplay.frameNumber) == true)
 	{
 		const int dX = psDroid->sDisplay.screenX;
 		const int dY = psDroid->sDisplay.screenY;
 		/* Is it on screen */
-		if (dX > (0 - tolerance) && dY > (0 - tolerance)
+/*		if (dX > (0 - tolerance) && dY > (0 - tolerance)
 		    && dX < (SDWORD)(pie_GetVideoBufferWidth() + tolerance)
 		    && dY < (SDWORD)(pie_GetVideoBufferHeight() + tolerance))
 		{
@@ -145,4 +145,4 @@ bool	droidOnScreen(DROID *psDroid, SDWORD tolerance)
 		}
 	}
 	return false;
-}
+}*/

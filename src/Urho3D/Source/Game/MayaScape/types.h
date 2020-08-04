@@ -167,3 +167,7 @@ union PIELIGHT
 		if ((val) < (min)) (val) = (min);                                         \
 		else if ((val) > (max)) (val) = (max);                                    \
 	} while(0)
+
+
+// the size of the file loading buffer
+#define FILE_LOAD_BUFFER_SIZE (1024*1024*4)

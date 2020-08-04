@@ -39,6 +39,17 @@ static inline int dot(IntVector3 const &a, IntVector3 const &b)
     return a.x_ * b.x_ + a.y_ * b.y_ + a.z_ * b.z_;
 }
 
+static inline int dot(Vector2 const &a, Vector2 const &b)
+{
+    return a.x_ * b.x_ + a.y_ * b.y_;
+}
+
+static inline int dot(Vector3 const &a, Vector3 const &b)
+{
+    return a.x_ * b.x_ + a.y_ * b.y_ + a.z_ * b.z_;
+}
+
+
 // iSinCosR(angle, scalar) -> 2d_vector
 static inline IntVector2 iSinCosR(uint16_t a, int32_t r)
 {
