@@ -38,7 +38,7 @@
 #include "objmem.h"
 #include "move.h"
 //#include "cmddroid.h"
-#include "mathdef.h"
+//#include "mathdef.h"
 
 /* attack run distance */
 #define	VTOL_ATTACK_LENGTH		1000
@@ -59,6 +59,9 @@
 
 /* How many tiles to pull back. */
 #define PULL_BACK_DIST		10
+
+
+int32_t iHypot(int32_t x, int32_t y);
 
 // data required for any action
 struct DROID_ACTION_DATA
@@ -513,7 +516,7 @@ static void actionCalcPullBackPoint(BASE_OBJECT *psObj, BASE_OBJECT *psTarget, i
 	// get the vector from the target to the object
 	int xdiff = psObj->pos.x_ - psTarget->pos.x_;
 	int ydiff = psObj->pos.y_ - psTarget->pos.y_;
-	const int len = iHypot(xdiff, ydiff);
+	const int len = 0;//iHypot(IntVector2(xdiff, ydiff));
 
 	if (len == 0)
 	{

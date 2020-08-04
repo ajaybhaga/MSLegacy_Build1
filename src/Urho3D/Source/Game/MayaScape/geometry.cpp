@@ -23,12 +23,13 @@
 #include "geometry.h"
 #include "objectdef.h"
 #include "map.h"
-#include "display.h"
-#include "mathdef.h"
+//#include "display.h"
+//#include "mathdef.h"
 
 uint16_t calcDirection(int32_t x0, int32_t y0, int32_t x1, int32_t y1)
 {
-	return iAtan2(x1 - x0, y1 - y0);
+	//return iAtan2(x1 - x0, y1 - y0);
+
 }
 
 
@@ -106,7 +107,7 @@ bool inQuad(const Vector2 *pt, const QUAD *quad)
 
 	return c;
 }
-
+/*
 Vector2 positionInQuad(Vector2 const &pt, QUAD const &quad)
 {
 	long lenSq[4];
@@ -127,7 +128,7 @@ Vector2 positionInQuad(Vector2 const &pt, QUAD const &quad)
 		ret[i] = d1 + d2 != 0 ? (int64_t)TILE_UNITS * d1 / (d1 + d2) : TILE_UNITS / 2;
 	}
 	return Vector2(ret[0], ret[1]);
-}
+}*/
 
 //-----------------------------------------------------------------------------------
 /*bool	droidOnScreen(DROID *psDroid, SDWORD tolerance)

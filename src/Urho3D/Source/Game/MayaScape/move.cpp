@@ -20,7 +20,7 @@
 //#include "MayaScape/not-used/order.h"
 #include "astar.h"
 #include "mapgrid.h"
-#include "display.h"	// needed for widgetsOn flag.
+//#include "display.h"	// needed for widgetsOn flag.
 //#include "effects.h"
 //#include "power.h"
 //#include "scores.h"
@@ -29,7 +29,7 @@
 //#include "random.h"
 //#include "mission.h"
 //#include "qtscript.h"
-#include "mathdef.h"
+//#include "mathdef.h"
 
 /* max and min vtol heights above terrain */
 #define	VTOL_HEIGHT_MIN				250

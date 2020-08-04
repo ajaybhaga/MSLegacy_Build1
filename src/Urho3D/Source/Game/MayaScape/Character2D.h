@@ -30,7 +30,7 @@
 using namespace Urho3D;
 
 const float MOVE_SPEED = 30.0f;
-const float YAW_SENSITIVITY = 0.1f;
+const float CHAR_YAW_SENSITIVITY = 0.1f;
 const int LIFES = 3;
 
 struct PlayerState {

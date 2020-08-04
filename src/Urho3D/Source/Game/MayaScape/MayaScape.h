@@ -25,6 +25,7 @@
 #include <MayaScape/ai/evolution_manager.h>
 #include "Game.h"
 #include "Sample2D.h"
+#include "Vehicle.h"
 
 class Character2D;
 class Sample2D;
@@ -69,6 +70,9 @@ public:
 private:
     /// Construct the scene content.
     void CreateScene();
+
+    // Construct vehicle
+    void CreateVehicle();
     /// Subscribe to application-wide logic update events.
     void SubscribeToEvents();
     /// Handle the logic update event.
@@ -101,6 +105,9 @@ private:
     /// The controllable character component.
     WeakPtr<Character2D> player_;
     WeakPtr<Character2D> agents_[MAX_AGENTS];
+    /// The controllable vehicle component.
+    WeakPtr<Vehicle> vehicle_;
+
 
     /// Flag for drawing debug geometry.
     bool drawDebug_{};

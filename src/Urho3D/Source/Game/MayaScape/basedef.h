@@ -25,7 +25,7 @@
 
 #include <bitset>
 
-#include "displaydef.h"
+//#include "displaydef.h"
 //#include "statsdef.h"
 //#include "weapondef.h"
 #include "baseobject.h"
@@ -110,7 +110,7 @@ struct BASE_OBJECT : public SIMPLE_OBJECT
 	BASE_OBJECT(OBJECT_TYPE type, uint32_t id, unsigned player, float gameTime);
 	~BASE_OBJECT();
 
-	SCREEN_DISP_DATA    sDisplay;                   ///< screen coordinate details
+	//SCREEN_DISP_DATA    sDisplay;                   ///< screen coordinate details
 	UBYTE               group = 0;                  ///< Which group selection is the droid currently in?
 	UBYTE               selected;                   ///< Whether the object is selected (might want this elsewhere)
 	UBYTE               visible[MAX_PLAYERS];       ///< Whether object is visible to specific player

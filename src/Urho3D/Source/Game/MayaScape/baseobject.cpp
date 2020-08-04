@@ -95,11 +95,11 @@ BASE_OBJECT::BASE_OBJECT(OBJECT_TYPE type, uint32_t id, unsigned player, float g
 //	, animationEvent(ANIM_EVENT_NONE)
 {
 	memset(visible, 0, sizeof(visible));
-	sDisplay.imd = nullptr;
+	/*sDisplay.imd = nullptr;
 	sDisplay.frameNumber = 0;
 	sDisplay.screenX = 0;
 	sDisplay.screenY = 0;
-	sDisplay.screenR = 0;
+	sDisplay.screenR = 0;*/
 }
 
 BASE_OBJECT::~BASE_OBJECT()

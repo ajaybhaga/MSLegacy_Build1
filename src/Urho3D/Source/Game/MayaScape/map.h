@@ -8,8 +8,7 @@
 
 #include "shared_libs.h"
 #include "objects.h"
-#include "terrain.h"
-#include "display.h"
+//#include "display.h"
 //#include "ai.h"
 
 using namespace Urho3D;
@@ -483,7 +482,7 @@ static inline void setTileHeight(int32_t x, int32_t y, int32_t height)
 //	assert_OR_RETURN(, y < mapHeight && x >= 0, "y coordinate %d bigger than map height %u", y, mapHeight);
 
 	psMapTiles[x + (y * mapWidth)].height = height;
-	markTileDirty(x, y);
+	//markTileDirty(x, y);
 }
 
 /* Return whether a tile coordinate is on the map */

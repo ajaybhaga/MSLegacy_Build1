@@ -42,7 +42,7 @@
 
 #include "astar.h"
 #include "map.h"
-#include "mathdef.h"
+//#include "mathdef.h"
 
 #include <list>
 #include <vector>
@@ -266,7 +266,7 @@ static inline unsigned fpathEstimate(PathCoord s, PathCoord f)
 static inline unsigned fpathGoodEstimate(PathCoord s, PathCoord f)
 {
 	// Cost of moving horizontal/vertical = 70*2, cost of moving diagonal = 99*2, 99/70 = 1.41428571... ≈ √2 = 1.41421356...
-	return iHypot((s.x - f.x) * 140, (s.y - f.y) * 140);
+	return 0;//iHypot((s.x - f.x) * 140, (s.y - f.y) * 140);
 }
 
 /** Generate a new node

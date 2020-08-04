@@ -12,8 +12,16 @@
 #include <ctype.h>
 #include <stdint.h>
 
+
+/// The number of time units per second of the game clock.
 #define GAME_TICKS_PER_SEC 1000
-uint32_t selectedPlayer = 0;  /**< Current player */
+/// The number of game state updates per second of the game clock.
+#define GAME_UPDATES_PER_SEC 10
+/// The number of time units per game tick.
+#define GAME_TICKS_PER_UPDATE (GAME_TICKS_PER_SEC/GAME_UPDATES_PER_SEC)
+
+
+static uint32_t selectedPlayer = 0;  /**< Current player */
 
 /* Basic numeric types */
 typedef uint8_t  UBYTE;
@@ -34,6 +42,7 @@ typedef int32_t  SDWORD;
 #define SDWORD_MIN	INT32_MIN
 #define SDWORD_MAX	INT32_MAX
 
+const float CAMERA_DISTANCE = 10.0f;
 
 #define MAX_PLAYERS         11                 ///< Maximum number of players in the game.
 
@@ -171,3 +180,10 @@ union PIELIGHT
 
 // the size of the file loading buffer
 #define FILE_LOAD_BUFFER_SIZE (1024*1024*4)
+
+// these constants are adapted for fitting 256 textures of size 128x128 into a 2048x2048
+// texture page; if such large texture pages are not available, just scaled everything down
+#define TILES_IN_PAGE_COLUMN	16
+#define TILES_IN_PAGE_ROW	16
+#define TILES_IN_PAGE		(TILES_IN_PAGE_COLUMN * TILES_IN_PAGE_ROW)
+#define MAX_TILES		TILES_IN_PAGE

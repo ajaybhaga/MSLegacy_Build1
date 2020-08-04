@@ -85,7 +85,8 @@ static PATHRESULT fpathExecute(PATHJOB psJob);
 
 
 /** This runs in a separate thread */
-static int fpathThreadFunc(void *)
+//static int fpathThreadFunc(void *)
+static int fpathThreadFunc()
 {
 //	wzMutexLock(fpathMutex);
     fpathMutex.lock();
@@ -115,7 +116,7 @@ static int fpathThreadFunc(void *)
 //		wzMutexLock(fpathMutex);
 
 		waitingForResult = false;
-//		objTrace(waitingForResultId, "These are the droids you are looking for.");
+//		//objTrace(waitingForResultId, "These are the droids you are looking for.");
 //		wzSemaphorePost(waitingForResultSemaphore);
         waitingForResultSemaphore.notify();
 	}
@@ -124,6 +125,20 @@ static int fpathThreadFunc(void *)
 	return 0;
 }
 
+
+class fpathThreadClass
+{
+public:
+    void operator()()
+    {
+        for (int i = 0; i < 5; ++i) {
+            std::cout << "Thread 4 executing\n";
+            ++n;
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        }
+    }
+    int n = 0;
+};
 
 // initialise the findpath module
 bool fpathInitialise()
@@ -338,12 +353,12 @@ void fpathRemoveDroidData(int id)
 static FPATH_RETVAL fpathRoute(MOVE_CONTROL *psMove, unsigned id, int startX, int startY, int tX, int tY, PROPULSION_TYPE propulsionType,
                                DROID_TYPE droidType, FPATH_MOVETYPE moveType, int owner, bool acceptNearest, StructureBounds const &dstStructure)
 {
-	objTrace(id, "called(*,id=%d,sx=%d,sy=%d,ex=%d,ey=%d,prop=%d,type=%d,move=%d,owner=%d)", id, startX, startY, tX, tY, (int)propulsionType, (int)droidType, (int)moveType, owner);
+	//objTrace(id, "called(*,id=%d,sx=%d,sy=%d,ex=%d,ey=%d,prop=%d,type=%d,move=%d,owner=%d)", id, startX, startY, tX, tY, (int)propulsionType, (int)droidType, (int)moveType, owner);
 
 	if (!worldOnMap(startX, startY) || !worldOnMap(tX, tY))
 	{
 		debug(LOG_ERROR, "Droid trying to find path to/from invalid location (%d %d) -> (%d %d).", startX, startY, tX, tY);
-		objTrace(id, "Invalid start/end.");
+		//objTrace(id, "Invalid start/end.");
 		syncDebug("fpathRoute(..., %d, %d, %d, %d, %d, %d, %d, %d, %d) = FPR_FAILED", id, startX, startY, tX, tY, propulsionType, droidType, moveType, owner);
 		return FPR_FAILED;
 	}
@@ -352,7 +367,7 @@ static FPATH_RETVAL fpathRoute(MOVE_CONTROL *psMove, unsigned id, int startX, in
 	if (startX == tX && startY == tY)
 	{
 		// return failed to stop them moving anywhere
-		objTrace(id, "Tried to move nowhere");
+		//objTrace(id, "Tried to move nowhere");
 		syncDebug("fpathRoute(..., %d, %d, %d, %d, %d, %d, %d, %d, %d) = FPR_FAILED", id, startX, startY, tX, tY, propulsionType, droidType, moveType, owner);
 		return FPR_FAILED;
 	}
@@ -360,7 +375,7 @@ static FPATH_RETVAL fpathRoute(MOVE_CONTROL *psMove, unsigned id, int startX, in
 	// Check if waiting for a result
 	while (psMove->Status == MOVEWAITROUTE)
 	{
-		objTrace(id, "Checking if we have a path yet");
+		//objTrace(id, "Checking if we have a path yet");
 
 		auto const &I = pathResults.find(id);
 		//ASSERT(I != pathResults.end(), "Missing path result promise");
@@ -379,7 +394,7 @@ static FPATH_RETVAL fpathRoute(MOVE_CONTROL *psMove, unsigned id, int startX, in
 		// Remove it from the result list
 		pathResults.erase(id);
 
-		objTrace(id, "Got a path to (%d, %d)! Length=%d Retval=%d", psMove->destination.x, psMove->destination.y, (int)psMove->asPath.size(), (int)retval);
+		//objTrace(id, "Got a path to (%d, %d)! Length=%d Retval=%d", psMove->destination.x, psMove->destination.y, (int)psMove->asPath.size(), (int)retval);
 		syncDebug("fpathRoute(..., %d, %d, %d, %d, %d, %d, %d, %d, %d) = %d, path[%d] = %08X->(%d, %d)", id, startX, startY, tX, tY, propulsionType, droidType, moveType, owner, retval, (int)psMove->asPath.size(), ~crcSumIntVector2(0, psMove->asPath.data(), psMove->asPath.size()), psMove->destination.x, psMove->destination.y);
 
 		if (!correctDestination)
@@ -427,7 +442,7 @@ queuePathfinding:
 		fpathSemaphore.notify();
 	}
 
-	objTrace(id, "Queued up a path-finding request to (%d, %d), at least %d items earlier in queue", tX, tY, isFirstJob);
+	//objTrace(id, "Queued up a path-finding request to (%d, %d), at least %d items earlier in queue", tX, tY, isFirstJob);
 	syncDebug("fpathRoute(..., %d, %d, %d, %d, %d, %d, %d, %d, %d) = FPR_WAIT", id, startX, startY, tX, tY, propulsionType, droidType, moveType, owner);
 	return FPR_WAIT;	// wait while polling result queue
 }
@@ -457,7 +472,7 @@ FPATH_RETVAL fpathDroidRoute(DROID *psDroid, SDWORD tX, SDWORD tY, FPATH_MOVETYP
 	{
 		endPos   = findNonblockingPosition(endPos,   getPropulsionStats(psDroid)->propulsionType, psDroid->player, moveType);
 	}
-	objTrace(psDroid->id, "Want to go to (%d, %d) -> (%d, %d), going (%d, %d) -> (%d, %d)", map_coord(psDroid->pos.x), map_coord(psDroid->pos.y), map_coord(tX), map_coord(tY), map_coord(startPos.x), map_coord(startPos.y), map_coord(endPos.x), map_coord(endPos.y));
+	//objTrace(psDroid->id, "Want to go to (%d, %d) -> (%d, %d), going (%d, %d) -> (%d, %d)", map_coord(psDroid->pos.x), map_coord(psDroid->pos.y), map_coord(tX), map_coord(tY), map_coord(startPos.x), map_coord(startPos.y), map_coord(endPos.x), map_coord(endPos.y));
 	switch (psDroid->order.type)
 	{
 	case DORDER_BUILD:
@@ -494,31 +509,31 @@ PATHRESULT fpathExecute(PATHJOB job)
 	case ASR_NEAREST:
 		if (job.acceptNearest)
 		{
-			objTrace(job.droidID, "** Nearest route -- accepted **");
+			//objTrace(job.droidID, "** Nearest route -- accepted **");
 			result.retval = FPR_OK;
 		}
 		else
 		{
-			objTrace(job.droidID, "** Nearest route -- rejected **");
+			//objTrace(job.droidID, "** Nearest route -- rejected **");
 			result.retval = FPR_FAILED;
 		}
 		break;
 	case ASR_FAILED:
-		objTrace(job.droidID, "** Failed route **");
+		//objTrace(job.droidID, "** Failed route **");
 		// Is this really a good idea? Was in original code.
-		if (job.propulsion == PROPULSION_TYPE_LIFT && (job.droidType != DROID_TRANSPORTER && job.droidType != DROID_SUPERTRANSPORTER))
+	/*	if (job.propulsion == PROPULSION_TYPE_LIFT && (job.droidType != DROID_TRANSPORTER && job.droidType != DROID_SUPERTRANSPORTER))
 		{
-			objTrace(job.droidID, "Doing fallback for non-transport VTOL");
+			//objTrace(job.droidID, "Doing fallback for non-transport VTOL");
 			fpathSetMove(&result.sMove, job.destX, job.destY);
 			result.retval = FPR_OK;
-		}
-		else
+		}*/
+		/*else
 		{
 			result.retval = FPR_FAILED;
-		}
+		}*/
 		break;
 	case ASR_OK:
-		objTrace(job.droidID, "Got route of length %d", (int)result.sMove.asPath.size());
+		//objTrace(job.droidID, "Got route of length %d", (int)result.sMove.asPath.size());
 		result.retval = FPR_OK;
 		break;
 	}
@@ -530,9 +545,12 @@ static int fpathJobQueueLength()
 {
 	int count = 0;
 
-	wzMutexLock(fpathMutex);
+	//wzMutexLock(fpathMutex);
+	fpathMutex.lock();
 	count = pathJobs.size();  // O(N) function call for std::list. .empty() is faster, but this function isn't used except in tests.
-	wzMutexUnlock(fpathMutex);
+//	wzMutexUnlock(fpathMutex);
+    fpathMutex.unlock();
+
 	return count;
 }
 
@@ -542,9 +560,12 @@ static int fpathResultQueueLength()
 {
 	int count = 0;
 
-	wzMutexLock(fpathMutex);
+//	wzMutexLock(fpathMutex);
+    fpathMutex.lock();
 	count = pathResults.size();  // O(N) function call for std::list. .empty() is faster, but this function isn't used except in tests.
-	wzMutexUnlock(fpathMutex);
+//	wzMutexUnlock(fpathMutex);
+    fpathMutex.unlock();
+
 	return count;
 }
 
@@ -552,7 +573,7 @@ static int fpathResultQueueLength()
 // Only used by fpathTest.
 static FPATH_RETVAL fpathSimpleRoute(MOVE_CONTROL *psMove, int id, int startX, int startY, int tX, int tY)
 {
-	return fpathRoute(psMove, id, startX, startY, tX, tY, PROPULSION_TYPE_WHEELED, DROID_WEAPON, FMT_BLOCK, 0, true, getStructureBounds((BASE_OBJECT *)nullptr));
+//	return fpathRoute(psMove, id, startX, startY, tX, tY, PROPULSION_TYPE_WHEELED, DROID_WEAPON, FMT_BLOCK, 0, true, getStructureBounds((BASE_OBJECT *)nullptr));
 }
 
 void fpathTest(int x, int y, int x2, int y2)
@@ -570,7 +591,7 @@ void fpathTest(int x, int y, int x2, int y2)
 	//ASSERT(fpathSemaphore != nullptr);
 	//ASSERT(pathJobs.empty());
 	//ASSERT(pathResults.empty());
-	fpathRemoveDroidData(0);	// should not crash
+//	fpathRemoveDroidData(0);	// should not crash
 
 	/* This should not leak memory */
 	sMove.asPath.clear();
@@ -585,11 +606,13 @@ void fpathTest(int x, int y, int x2, int y2)
 	//ASSERT(r == FPR_WAIT);
 	sMove.Status = MOVEWAITROUTE;
 	//ASSERT(fpathJobQueueLength() == 1 || fpathResultQueueLength() == 1);
-	fpathRemoveDroidData(2);	// should not crash, nor remove our path
+//	fpathRemoveDroidData(2);	// should not crash, nor remove our path
 	//ASSERT(fpathJobQueueLength() == 1 || fpathResultQueueLength() == 1);
 	while (fpathResultQueueLength() == 0)
 	{
-		wzYieldCurrentThread();
+
+//		wzYieldCurrentThread();
+        std::this_thread::yield();
 	}
 	//ASSERT(fpathJobQueueLength() == 0);
 	//ASSERT(fpathResultQueueLength() == 1);
@@ -609,7 +632,8 @@ void fpathTest(int x, int y, int x2, int y2)
 	}
 	while (fpathResultQueueLength() != 100)
 	{
-		wzYieldCurrentThread();
+		//wzYieldCurrentThread();
+        std::this_thread::yield();
 	}
 	//ASSERT(fpathJobQueueLength() == 0);
 	for (i = 1; i <= 100; i++)
@@ -632,7 +656,7 @@ void fpathTest(int x, int y, int x2, int y2)
 	}
 	for (i = 1; i <= 100; i++)
 	{
-		fpathRemoveDroidData(i);
+//		fpathRemoveDroidData(i);
 	}
 	////ASSERT(pathJobs.empty()); // can now be marked .deleted as well
 	//ASSERT(pathResults.empty());

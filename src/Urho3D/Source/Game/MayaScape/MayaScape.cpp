@@ -59,6 +59,24 @@
 #include <Urho3D/UI/Text.h>
 
 
+#include <Urho3D/Core/CoreEvents.h>
+#include <Urho3D/Core/ProcessUtils.h>
+#include <Urho3D/Engine/Engine.h>
+#include <Urho3D/Graphics/StaticModel.h>
+#include <Urho3D/Graphics/Terrain.h>
+#include <Urho3D/Graphics/Zone.h>
+#include <Urho3D/IO/FileSystem.h>
+#include <Urho3D/Input/Input.h>
+#include <Urho3D/Physics/CollisionShape.h>
+#include <Urho3D/Physics/Constraint.h>
+#include <Urho3D/Physics/PhysicsWorld.h>
+#include <Urho3D/Physics/RaycastVehicle.h>
+#include <Urho3D/Physics/RigidBody.h>
+#include <Urho3D/Resource/ResourceCache.h>
+#include <Urho3D/Scene/Scene.h>
+#include <Urho3D/UI/Font.h>
+#include <Urho3D/UI/Text.h>
+
 #include <Urho3D/Urho2D/PhysicsEvents2D.h>
 #include <Urho3D/Urho2D/PhysicsWorld2D.h>
 #include <Urho3D/Graphics/Renderer.h>
@@ -67,15 +85,13 @@
 #include <Urho3D/Scene/Scene.h>
 #include <Urho3D/Scene/SceneEvents.h>
 #include <Urho3D/Core/StringUtils.h>
-#include <Urho3D/UI/Text.h>
 #include <Urho3D/Urho2D/TileMap2D.h>
-#include <Urho3D/Urho2D/TileMapLayer2D.h>
+//#include <Urho3D/Urho2D/TileMapLayer2D.h>
 #include <Urho3D/Urho2D/TileMap3D.h>
-#include <Urho3D/Urho2D/TileMapLayer3D.h>
+//#include <Urho3D/Urho2D/TileMapLayer3D.h>
 #include <Urho3D/Urho2D/TmxFile2D.h>
 #include <Urho3D/UI/UI.h>
 #include <Urho3D/UI/UIEvents.h>
-#include <Urho3D/Graphics/Zone.h>
 
 #include <Urho3D/Urho2D/ParticleEffect2D.h>
 #include <Urho3D/Urho2D/ParticleEmitter2D.h>
@@ -88,12 +104,14 @@
 #include "Object2D.h"
 #include "Sample2D.h"
 #include "Utilities2D/Mover.h"
+#include "Vehicle.h"
 #include "MayaScape.h"
 #include <MayaScape/ai/evolution_manager.h>
 
 
 // AgentSim shared libs
 #include "shared_libs.h"
+#include "types.h"
 
 URHO3D_DEFINE_APPLICATION_MAIN(MayaScape)
 
@@ -105,6 +123,9 @@ MayaScape::MayaScape(Context *context) :
     Object2D::RegisterObject(context);
     // Register factory and attributes for the Mover component so it can be created via CreateComponent, and loaded / saved
     Mover::RegisterObject(context);
+    // Register factory and attributes for the Vehicle component so it can be created via CreateComponent, and loaded / saved
+    Vehicle::RegisterObject(context);
+
 }
 
 void MayaScape::Setup() {
@@ -267,6 +288,17 @@ void MayaScape::ShowEvolutionManagerStats() {
     delete[] c;
 }
 
+void MayaScape::CreateVehicle()
+{
+    Node* vehicleNode = scene_->CreateChild("Vehicle");
+    vehicleNode->SetPosition(Vector3(0.0f, 25.0f, 0.0f));
+    // Create the vehicle logic component
+    vehicle_ = vehicleNode->CreateComponent<Vehicle>();
+    // Create the rendering and physics components
+    vehicle_->Init();
+}
+
+
 void MayaScape::Start() {
 
     for (int i = 0; i < sizeof(particlePool_) / sizeof(*particlePool_); i++) {
@@ -303,6 +335,7 @@ void MayaScape::Start() {
 
 }
 
+
 void MayaScape::Stop() {
 
     // Free evolution manager
@@ -314,31 +347,95 @@ void MayaScape::Stop() {
 
 
 void MayaScape::CreateScene() {
-    scene_ = new Scene(context_);
-    sample2D_->scene_ = scene_;
 
-    // Create the Octree, DebugRenderer and PhysicsWorld2D components to the scene
+
+    auto* cache = GetSubsystem<ResourceCache>();
+    scene_ = new Scene(context_);
+    // Create scene subsystem components
     scene_->CreateComponent<Octree>();
+    scene_->CreateComponent<PhysicsWorld>();
     scene_->CreateComponent<DebugRenderer>();
-    /*PhysicsWorld2D* physicsWorld =*/ scene_->CreateComponent<PhysicsWorld2D>();
+    // Create camera and define viewport. We will be doing load / save, so it's convenient to create the camera outside the scene,
+    // so that it won't be destroyed and recreated, and we don't have to redefine the viewport on load
+    cameraNode_ = new Node(context_);
+    auto* camera = cameraNode_->CreateComponent<Camera>();
+    camera->SetFarClip(500.0f);
+    GetSubsystem<Renderer>()->SetViewport(0, new Viewport(context_, scene_, camera));
+
+
+//    scene_ = new Scene(context_);
+    sample2D_->scene_ = scene_;
+    scene_->CreateComponent<PhysicsWorld2D>();
 
     // Create camera
-    cameraNode_ = scene_->CreateChild("Camera");
-    auto *camera = cameraNode_->CreateComponent<Camera>();
+//    cameraNode_ = scene_->CreateChild("Camera");
+//    auto *camera = cameraNode_->CreateComponent<Camera>();
 //    camera->SetOrthographic(true);
 
     auto *graphics = GetSubsystem<Graphics>();
+
+
+    // Create static scene content. First create a zone for ambient lighting and fog control
+    Node* zoneNode = scene_->CreateChild("Zone");
+    auto* zone = zoneNode->CreateComponent<Zone>();
+    zone->SetAmbientColor(Color(0.15f, 0.15f, 0.15f));
+    zone->SetFogColor(Color(0.5f, 0.5f, 0.7f));
+    zone->SetFogStart(300.0f);
+    zone->SetFogEnd(500.0f);
+    zone->SetBoundingBox(BoundingBox(-2000.0f, 2000.0f));
+    // Create a directional light with cascaded shadow mapping
+    Node* lightNode = scene_->CreateChild("DirectionalLight");
+    lightNode->SetDirection(Vector3(0.3f, -0.5f, 0.425f));
+    auto* light = lightNode->CreateComponent<Light>();
+    light->SetLightType(LIGHT_DIRECTIONAL);
+    light->SetCastShadows(true);
+    light->SetShadowBias(BiasParameters(0.00025f, 0.5f));
+    light->SetShadowCascade(CascadeParameters(10.0f, 50.0f, 200.0f, 0.0f, 0.8f));
+    light->SetSpecularIntensity(0.5f);
+    // Create heightmap terrain with collision
+    Node* terrainNode = scene_->CreateChild("Terrain");
+    terrainNode->SetPosition(Vector3::ZERO);
+    auto* terrain = terrainNode->CreateComponent<Terrain>();
+    terrain->SetPatchSize(64);
+    terrain->SetSpacing(Vector3(3.0f, 0.1f, 3.0f)); // Spacing between vertices and vertical resolution of the height map
+    terrain->SetSmoothing(true);
+    terrain->SetHeightMap(cache->GetResource<Image>("Textures/HeightMap.png"));
+    terrain->SetMaterial(cache->GetResource<Material>("Materials/Terrain.xml"));
+    // The terrain consists of large triangles, which fits well for occlusion rendering, as a hill can occlude all
+    // terrain patches and other objects behind it
+    terrain->SetOccluder(true);
+    auto* body = terrainNode->CreateComponent<RigidBody>();
+    body->SetCollisionLayer(2); // Use layer bitmask 2 for static geometry
+    auto* shape =
+            terrainNode->CreateComponent<CollisionShape>();
+    shape->SetTerrain();
+    // Create 1000 mushrooms in the terrain. Always face outward along the terrain normal
+    const unsigned NUM_MUSHROOMS = 1000;
+    for (unsigned i = 0; i < NUM_MUSHROOMS; ++i)
+    {
+        Node* objectNode = scene_->CreateChild("Mushroom");
+        Vector3 position(Random(2000.0f) - 1000.0f, 0.0f, Random(2000.0f) - 1000.0f);
+        position.y_ = terrain->GetHeight(position) - 0.1f;
+        objectNode->SetPosition(position);
+        // Create a rotation quaternion from up vector to terrain normal
+        objectNode->SetRotation(Quaternion(Vector3::UP, terrain->GetNormal(position)));
+        objectNode->SetScale(3.0f);
+        auto* object = objectNode->CreateComponent<StaticModel>();
+        object->SetModel(cache->GetResource<Model>("Models/Mushroom.mdl"));
+        object->SetMaterial(cache->GetResource<Material>("Materials/Mushroom.xml"));
+        object->SetCastShadows(true);
+        auto* body = objectNode->CreateComponent<RigidBody>();
+        body->SetCollisionLayer(2);
+        auto* shape = objectNode->CreateComponent<CollisionShape>();
+        shape->SetTriangleMesh(object->GetModel(), 0);
+    }
+
+
     //   camera->SetOrthoSize((float)graphics->GetHeight() * PIXEL_SIZE);
     camera->SetZoom(4.0f * Min((float) graphics->GetWidth() / 1280.0f, (float) graphics->GetHeight() /
                                                                        800.0f)); // Set zoom according to user's resolution to ensure full visibility (initial zoom (2.0) is set for full visibility at 1280x800 resolution)
     camera->SetFarClip(300.0f);
 
-    // Setup the viewport for displaying the scene
-    SharedPtr<Viewport> viewport(new Viewport(context_, scene_, camera));
-    auto *renderer = GetSubsystem<Renderer>();
-    renderer->SetViewport(0, viewport);
-
-    ResourceCache *cache = GetSubsystem<ResourceCache>();
     UI *ui = GetSubsystem<UI>();
 
     // Set the default UI style and font
@@ -443,7 +540,7 @@ void MayaScape::CreateScene() {
     using namespace std;
 
 
-
+/*
     // Set background color for the scene
     Zone *zone = renderer->GetDefaultZone();
     zone->SetFogColor(Color(0.2f, 0.2f, 0.2f));
@@ -459,7 +556,7 @@ void MayaScape::CreateScene() {
 
     tileMap->SetTmxFile(cache->GetResource<TmxFile2D>("Urho2D/Tilesets/MayaSpace_Level0.tmx"));
     const TileMapInfo2D &info = tileMap->GetInfo();
-
+*/
 /*
     // Create balloon object
     for (int i = 0; i < 4; i++) {
@@ -481,7 +578,7 @@ void MayaScape::CreateScene() {
         obj_->type_ = 2;
     }
 */
-
+/*
     // Create pumpkin object
     for (int i = 0; i < 10; i++) {
         Node *pumpkinNode = sample2D_->CreateObject(info, 0.0f, Vector3(Random(0.0f, 14.0f), 10.0f, 0.0f), 0.5f, 3);
@@ -491,11 +588,11 @@ void MayaScape::CreateScene() {
         obj_->id_ = i;
         obj_->type_ = 3;
     }
-
+*/
 
     // Create player character
 //    Node* modelNode = sample2D_->CreateCharacter(info, 0.0f, Vector3(2.5f, 16.0f, 0.0f), 1.0f, 1);
-    Node *modelNode = sample2D_->CreateCharacter(info, 0.0f, Vector3(2.5f, 2.0f, 0.0f), 0.1f, 1);
+    Node *modelNode = sample2D_->CreateCharacter(0.0f, Vector3(2.5f, 2.0f, 0.0f), 0.1f, 1);
     player_ = modelNode->CreateComponent<Character2D>(); // Create a logic component to handle character behavior
     player_->GetNode()->SetName("Bear-P1");
     player_->isAI_ = false;
@@ -506,7 +603,7 @@ void MayaScape::CreateScene() {
     for (int i = 0; i < EvolutionManager::getInstance()->getAgents().size(); i++) {
 
         // Create AI player character
-        modelNode = sample2D_->CreateCharacter(info, 0.0f, Vector3(3.5f + Random(-2.0f, 2.0f), 16.0f, 0.0f), 0.1f, 2);
+        modelNode = sample2D_->CreateCharacter(0.0f, Vector3(3.5f + Random(-2.0f, 2.0f), 16.0f, 0.0f), 0.1f, 2);
         agents_[i] = modelNode->CreateComponent<Character2D>(); // Create a logic component to handle character behavior
         agents_[i]->agentIndex = i;
         String name = String("AI-Bear-P") + String(i);
@@ -645,18 +742,18 @@ void MayaScape::CreateScene() {
     }
 
 // Generate physics collision shapes from the tmx file's objects located in "Physics" (top) layer
-    TileMapLayer3D *tileMapLayer = tileMap->GetLayer(tileMap->GetNumLayers() - 1);
+    /*TileMapLayer3D *tileMapLayer = tileMap->GetLayer(tileMap->GetNumLayers() - 1);
     if (tileMapLayer)
         sample2D_->CreateCollisionShapesFromTMXObjects(tileMapNode, tileMapLayer, info);
-
+*/
     // Create a directional light to the world so that we can see something. The light scene node's orientation controls the
     // light direction; we will use the SetDirection() function which calculates the orientation from a forward direction vector.
     // The light will use default settings (white light, no shadows)
-    Node *lightNode = scene_->CreateChild("DirectionalLight");
+/*    Node *lightNode = scene_->CreateChild("DirectionalLight");
     lightNode->SetPosition(Vector3(1.0f, 8.0f, 0.0f));
     lightNode->SetDirection(Vector3(0.6f, -1.0f, 0.8f)); // The direction vector does not need to be normalized
     auto *light = lightNode->CreateComponent<Light>();
-    light->SetLightType(LIGHT_DIRECTIONAL);
+    light->SetLightType(LIGHT_DIRECTIONAL);*/
     // Set an initial position for the camera scene node above the plane
     //   mushroomNode->SetRotation(Quaternion(0.0f, Random(360.0f), 0.0f));
     // mushroomNode->SetScale(0.5f + Random(2.0f));
@@ -675,7 +772,7 @@ void MayaScape::CreateScene() {
     //sample2D_->PopulateTriggers(tileMap->GetLayer(tileMap->GetNumLayers() - 4));
 
     // Create background
-    sample2D_->CreateBackgroundSprite(info, 6.0, "Textures/HeightMap.png", true);
+//    sample2D_->CreateBackgroundSprite(info, 6.0, "Textures/HeightMap.png", true);
 
 
 
@@ -854,7 +951,7 @@ void MayaScape::HandleCollisionBegin(StringHash eventType, VariantMap &eventData
             float timeStep = eventData[P_TIMESTEP].GetFloat();
             SetParticleEmitter(hitNode->GetID(), contactPosition.x_, contactPosition.y_, 0, timeStep);
             sample2D_->PlaySoundEffect("explosion-sm.wav");
-            sample2D_->PlaySoundEffect("bam-motherfucker.wav");
+            sample2D_->PlaySoundEffect("bam-mf.wav");
 
 
         }
@@ -1307,6 +1404,71 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 
     //URHO3D_LOGINFOF("player_ position x=%f, y=%f, z=%f", player_->GetNode()->GetPosition().x_, player_->GetNode()->GetPosition().y_, player_->GetNode()->GetPosition().z_);
 
+    //
+
+    if (vehicle_)
+    {
+        auto* ui = GetSubsystem<UI>();
+        // Get movement controls and assign them to the vehicle component. If UI has a focused element, clear controls
+        if (!ui->GetFocusElement())
+        {
+            vehicle_->controls_.Set(CTRL_FORWARD, input->GetKeyDown(KEY_W));
+            vehicle_->controls_.Set(CTRL_BACK, input->GetKeyDown(KEY_S));
+            vehicle_->controls_.Set(CTRL_LEFT, input->GetKeyDown(KEY_A));
+            vehicle_->controls_.Set(CTRL_RIGHT, input->GetKeyDown(KEY_D));
+            vehicle_->controls_.Set(CTRL_BRAKE, input->GetKeyDown(KEY_F));
+            // Add yaw & pitch from the mouse motion or touch input. Used only for the camera, does not affect motion
+            if (touchEnabled_)
+            {
+                for (unsigned i = 0; i < input->GetNumTouches(); ++i)
+                {
+                    TouchState* state = input->GetTouch(i);
+                    if (!state->touchedElement_) // Touch on empty space
+                    {
+                        auto* camera = cameraNode_->GetComponent<Camera>();
+                        if (!camera)
+                        {
+                            return;
+                        }
+                        auto* graphics = GetSubsystem<Graphics>();
+                        vehicle_->controls_.yaw_ += TOUCH_SENSITIVITY * camera->GetFov() / graphics->GetHeight() * state->delta_.x_;
+                        vehicle_->controls_.pitch_ += TOUCH_SENSITIVITY * camera->GetFov() / graphics->GetHeight() * state->delta_.y_;
+                    }
+                }
+            }
+            else
+            {
+                vehicle_->controls_.yaw_ += (float)input->GetMouseMoveX() * YAW_SENSITIVITY;
+                vehicle_->controls_.pitch_ += (float)input->GetMouseMoveY() * YAW_SENSITIVITY;
+            }
+            // Limit pitch
+            vehicle_->controls_.pitch_ = Clamp(vehicle_->controls_.pitch_, 0.0f, 80.0f);
+            // Check for loading / saving the scene
+            if (input->GetKeyPress(KEY_F5))
+            {
+                File saveFile(context_, GetSubsystem<FileSystem>()->GetProgramDir() + "Data/Scenes/RaycastVehicleDemo.xml",
+                              FILE_WRITE);
+                scene_->SaveXML(saveFile);
+            }
+            if (input->GetKeyPress(KEY_F7))
+            {
+                File loadFile(context_, GetSubsystem<FileSystem>()->GetProgramDir() + "Data/Scenes/RaycastVehicleDemo.xml",
+                              FILE_READ);
+                scene_->LoadXML(loadFile);
+                // After loading we have to reacquire the weak pointer to the Vehicle component, as it has been recreated
+                // Simply find the vehicle's scene node by name as there's only one of them
+                Node* vehicleNode = scene_->GetChild("Vehicle", true);
+                if (vehicleNode)
+                {
+                    vehicle_ = vehicleNode->GetComponent<Vehicle>();
+                }
+            }
+        }
+        else
+        {
+            vehicle_->controls_.Set(CTRL_FORWARD | CTRL_BACK | CTRL_LEFT | CTRL_RIGHT | CTRL_BRAKE, false);
+        }
+    }
 }
 
 void MayaScape::HandlePostUpdate(StringHash eventType, VariantMap &eventData) {
@@ -1316,6 +1478,32 @@ void MayaScape::HandlePostUpdate(StringHash eventType, VariantMap &eventData) {
     Node *character2DNode = player_->GetNode();
     cameraNode_->SetPosition(Vector3(character2DNode->GetPosition().x_, character2DNode->GetPosition().y_,
                                      -10.0f)); // Camera tracks character
+
+     //
+    if (!vehicle_)
+    {
+        return;
+    }
+    Node* vehicleNode = vehicle_->GetNode();
+    // Physics update has completed. Position camera behind vehicle
+    Quaternion dir(vehicleNode->GetRotation().YawAngle(), Vector3::UP);
+    dir = dir * Quaternion(vehicle_->controls_.yaw_, Vector3::UP);
+    dir = dir * Quaternion(vehicle_->controls_.pitch_, Vector3::RIGHT);
+    Vector3 cameraTargetPos =
+            vehicleNode->GetPosition() - dir * Vector3(0.0f, 0.0f, CAMERA_DISTANCE);
+    Vector3 cameraStartPos = vehicleNode->GetPosition();
+    // Raycast camera against static objects (physics collision mask 2)
+    // and move it closer to the vehicle if something in between
+    Ray cameraRay(cameraStartPos, cameraTargetPos - cameraStartPos);
+    float cameraRayLength = (cameraTargetPos - cameraStartPos).Length();
+    PhysicsRaycastResult result;
+    scene_->GetComponent<PhysicsWorld>()->RaycastSingle(result, cameraRay, cameraRayLength, 2);
+    if (result.body_)
+    {
+        cameraTargetPos = cameraStartPos + cameraRay.direction_ * (result.distance_ - 0.5f);
+    }
+    cameraNode_->SetPosition(cameraTargetPos);
+    cameraNode_->SetRotation(dir);
 }
 
 void MayaScape::HandlePostRenderUpdate(StringHash eventType, VariantMap &eventData) {
