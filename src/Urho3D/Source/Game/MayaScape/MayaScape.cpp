@@ -409,10 +409,17 @@ void MayaScape::CreateScene() {
         objectNode->SetPosition(position);
         // Create a rotation quaternion from up vector to terrain normal
         objectNode->SetRotation(Quaternion(Vector3::UP, terrain->GetNormal(position)));
+        Node* adjNode = objectNode->CreateChild("AdjNode");
+        adjNode->SetRotation(Quaternion(0.0, 0.0, -90.0f));
+
         objectNode->SetScale(3.0f);
-        auto* object = objectNode->CreateComponent<StaticModel>();
-        object->SetModel(cache->GetResource<Model>("Models/Mushroom.mdl"));
-        object->SetMaterial(cache->GetResource<Material>("Materials/Mushroom.xml"));
+
+
+
+        auto* object = adjNode->CreateComponent<StaticModel>();
+        object->SetModel(cache->GetResource<Model>("Models/AssetPack/tree-baobab_orange.mdl"));
+ //       object->SetMaterial(cache->GetResource<Material>("Materials/LOWPOLY_COLORS.xml")
+        object->SetMaterial(cache->GetResource<Material>("Materials/LOWPOLY-COLORS.xml"));
         object->SetCastShadows(true);
         auto* body = objectNode->CreateComponent<RigidBody>();
         body->SetCollisionLayer(2);
@@ -600,7 +607,7 @@ void MayaScape::CreateScene() {
 //    startBone->initialScale_ = Vector3(0.2, 0.2, 0.2);
 
 
-    model_->GetNode()->SetScale(0.4f);
+    model_->GetNode()->SetScale(0.1f);
 //    model_->GetNode()->SetRotation(Quaternion(0.0, 90.0f, 0.0));
 
 //    rootBone->initialRotation_ = Quaternion(180, Vector3(0.0, 1.0, 0.0));

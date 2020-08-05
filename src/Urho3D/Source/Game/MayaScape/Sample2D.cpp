@@ -208,11 +208,11 @@ Node* Sample2D::CreateCharacter(float friction, Vector3 position, int type)
 //    Quaternion qAdjRot(0, Vector3(1,0,0) ); // rotate it by 180
 
 
-    adjustNode->SetRotation( Quaternion(90.0, 0.0,0.0) );
+    adjustNode->SetRotation( Quaternion(40.0, 0.0,0.0) );
     // Set dog in front of cart
-    adjustNode->SetPosition(Vector3(0.3f, 2.5f, 4.0f));
+    adjustNode->SetPosition(Vector3(0.3f, 0.8f, 1.4f));
 
-//    adjustNode->SetScale(4.0f);
+//    adjustNode->SetScale(0.5f);
 
     // Create the rendering component + animation controller
     auto* modelObject = adjustNode->CreateComponent<AnimatedModel>();
@@ -770,16 +770,16 @@ void Sample2D::CreateUIContent(const String& demoTitle, int remainingLifes, int 
     fullUI->SetEnabled(false); // Do not react to input, only the 'Exit' and 'Play' buttons will
 
     // Create the title
-    auto* title = fullUI->CreateChild<BorderImage>("Title");
+/*    auto* title = fullUI->CreateChild<BorderImage>("Title");
     title->SetMinSize(fullUI->GetWidth(), 50);
     //title->SetTexture(cache->GetResource<Texture2D>("Textures/HeightMap.png"));
     title->SetFullImageRect();
     title->SetAlignment(HA_CENTER, VA_TOP);
-    auto* titleText = title->CreateChild<Text>("TitleText");
-    titleText->SetAlignment(HA_CENTER, VA_CENTER);
-    titleText->SetFont(font, 24);
-    titleText->SetText(demoTitle);
-
+    //auto* titleText = title->CreateChild<Text>("TitleText");
+    //titleText->SetAlignment(HA_CENTER, VA_CENTER);
+    //titleText->SetFont(font, 24);
+    //titleText->SetText(demoTitle);
+*/
     // Create the image
     auto* spriteUI = fullUI->CreateChild<BorderImage>("Sprite");
     spriteUI->SetTexture(cache->GetResource<Texture2D>("Textures/logo.png"));
@@ -791,12 +791,12 @@ void Sample2D::CreateUIContent(const String& demoTitle, int remainingLifes, int 
     auto* playButton = ui->GetRoot()->CreateChild<Button>("PlayButton");
     playButton->SetStyleAuto();
     playButton->SetFocusMode(FM_RESETFOCUS);
-    playButton->SetSize(100, 50);
+    playButton->SetSize(100, 28);
     playButton->SetAlignment(HA_CENTER, VA_CENTER);
     playButton->SetPosition(-100, 0);
     auto* playText = playButton->CreateChild<Text>("PlayText");
     playText->SetAlignment(HA_CENTER, VA_CENTER);
-    playText->SetFont(font, 24);
+    playText->SetFont(font, 12);
     playText->SetText("PLAY");
 //  SubscribeToEvent(playButton, E_RELEASED, HANDLER(Urho2DPlatformer, HandlePlayButton));
 
@@ -805,19 +805,19 @@ void Sample2D::CreateUIContent(const String& demoTitle, int remainingLifes, int 
     auto* exitButton = ui->GetRoot()->CreateChild<Button>("ExitButton");
     exitButton->SetStyleAuto();
     exitButton->SetFocusMode(FM_RESETFOCUS);
-    exitButton->SetSize(100, 50);
+    exitButton->SetSize(100, 28);
     exitButton->SetAlignment(HA_CENTER, VA_CENTER);
     exitButton->SetPosition(100, 0);
     auto* exitText = exitButton->CreateChild<Text>("ExitText");
     exitText->SetAlignment(HA_CENTER, VA_CENTER);
-    exitText->SetFont(font, 24);
+    exitText->SetFont(font, 12);
     exitText->SetText("EXIT");
     SubscribeToEvent(exitButton, E_RELEASED, URHO3D_HANDLER(Sample2D, HandleExitButton));
 
 
     // Create the instructions
     auto* instructionText = ui->GetRoot()->CreateChild<Text>("Instructions");
-    instructionText->SetText("Get ready.");
+    instructionText->SetText("Developed by Ajay Bhaga 2020");
     instructionText->SetFont(cache->GetResource<Font>("Fonts/Anonymous Pro.ttf"), 15);
     instructionText->SetTextAlignment(HA_CENTER); // Center rows in relation to each other
     instructionText->SetAlignment(HA_CENTER, VA_CENTER);
