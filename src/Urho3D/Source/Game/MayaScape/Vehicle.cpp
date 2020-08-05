@@ -77,7 +77,9 @@ void Vehicle::Init()
     auto* vehicle = node_->CreateComponent<RaycastVehicle>();
     vehicle->Init();
     auto* hullBody = node_->GetComponent<RigidBody>();
+//    hullBody->SetMass(800.0f);
     hullBody->SetMass(800.0f);
+
     hullBody->SetLinearDamping(0.2f); // Some air resistance
     hullBody->SetAngularDamping(0.5f);
     hullBody->SetCollisionLayer(1);

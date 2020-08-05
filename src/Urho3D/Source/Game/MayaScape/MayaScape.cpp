@@ -43,6 +43,7 @@
 #include <Urho3D/Graphics/AnimatedModel.h>
 #include <Urho3D/Graphics/Animation.h>
 #include <Urho3D/Graphics/AnimationState.h>
+#include <Urho3D/Graphics/AnimationController.h>
 #include <Urho3D/Graphics/BillboardSet.h>
 #include <Urho3D/Graphics/Camera.h>
 #include <Urho3D/Graphics/Graphics.h>
@@ -288,17 +289,6 @@ void MayaScape::ShowEvolutionManagerStats() {
     delete[] c;
 }
 
-void MayaScape::CreateVehicle()
-{
-    Node* vehicleNode = scene_->CreateChild("Vehicle");
-    vehicleNode->SetPosition(Vector3(0.0f, 25.0f, 0.0f));
-    // Create the vehicle logic component
-    vehicle_ = vehicleNode->CreateComponent<Vehicle>();
-    // Create the rendering and physics components
-    vehicle_->Init();
-}
-
-
 void MayaScape::Start() {
 
     for (int i = 0; i < sizeof(particlePool_) / sizeof(*particlePool_); i++) {
@@ -321,7 +311,7 @@ void MayaScape::Start() {
 
     // Create the scene content
     CreateScene();
-
+    
     UI *ui = GetSubsystem<UI>();
 
     // Create the UI content
@@ -365,7 +355,7 @@ void MayaScape::CreateScene() {
 
 //    scene_ = new Scene(context_);
     sample2D_->scene_ = scene_;
-    scene_->CreateComponent<PhysicsWorld2D>();
+//    scene_->CreateComponent<PhysicsWorld2D>();
 
     // Create camera
 //    cameraNode_ = scene_->CreateChild("Camera");
@@ -431,8 +421,9 @@ void MayaScape::CreateScene() {
     }
 
 
-    //   camera->SetOrthoSize((float)graphics->GetHeight() * PIXEL_SIZE);
-    camera->SetZoom(4.0f * Min((float) graphics->GetWidth() / 1280.0f, (float) graphics->GetHeight() /
+    //camera->SetOrthographic(true);
+    //camera->SetOrthoSize((float)graphics->GetHeight() * PIXEL_SIZE);
+    camera->SetZoom(0.1f * Min((float) graphics->GetWidth() / 1280.0f, (float) graphics->GetHeight() /
                                                                        800.0f)); // Set zoom according to user's resolution to ensure full visibility (initial zoom (2.0) is set for full visibility at 1280x800 resolution)
     camera->SetFarClip(300.0f);
 
@@ -592,8 +583,19 @@ void MayaScape::CreateScene() {
 
     // Create player character
 //    Node* modelNode = sample2D_->CreateCharacter(info, 0.0f, Vector3(2.5f, 16.0f, 0.0f), 1.0f, 1);
-    Node *modelNode = sample2D_->CreateCharacter(0.0f, Vector3(2.5f, 2.0f, 0.0f), 0.1f, 1);
+    Node *modelNode = sample2D_->CreateCharacter(0.0f, Vector3(2.5f, 2.0f, -40.0f), 1);
     player_ = modelNode->CreateComponent<Character2D>(); // Create a logic component to handle character behavior
+    // Store animation controller
+    player_->animCtrl_ = modelNode->CreateComponent<AnimationController>();
+
+
+    //        Node* vehicleNode = scene_->CreateChild("Vehicle");
+//        vehicleNode->SetPosition(Vector3(0.0f, 25.0f, 0.0f));
+    // Create the vehicle logic component
+    player_->vehicle_ = modelNode->CreateComponent<Vehicle>();
+    // Create the rendering and physics components
+    player_->vehicle_->Init();
+
     player_->GetNode()->SetName("Bear-P1");
     player_->isAI_ = false;
     player_->life_ = 100;
@@ -603,9 +605,15 @@ void MayaScape::CreateScene() {
     for (int i = 0; i < EvolutionManager::getInstance()->getAgents().size(); i++) {
 
         // Create AI player character
-        modelNode = sample2D_->CreateCharacter(0.0f, Vector3(3.5f + Random(-2.0f, 2.0f), 16.0f, 0.0f), 0.1f, 2);
+        modelNode = sample2D_->CreateCharacter(0.0f, Vector3(3.5f + Random(-2.0f, 2.0f), 80.0f, 0.0f), 2);
         agents_[i] = modelNode->CreateComponent<Character2D>(); // Create a logic component to handle character behavior
         agents_[i]->agentIndex = i;
+
+        // Create the vehicle logic component
+        agents_[i]->vehicle_ = modelNode->CreateComponent<Vehicle>();
+        // Create the rendering and physics components
+        agents_[i]->vehicle_->Init();
+
         String name = String("AI-Bear-P") + String(i);
         agents_[i]->GetNode()->SetName(name.CString());
         agents_[i]->isAI_ = true;
@@ -1406,17 +1414,17 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 
     //
 
-    if (vehicle_)
+    if (player_->vehicle_)
     {
         auto* ui = GetSubsystem<UI>();
         // Get movement controls and assign them to the vehicle component. If UI has a focused element, clear controls
         if (!ui->GetFocusElement())
         {
-            vehicle_->controls_.Set(CTRL_FORWARD, input->GetKeyDown(KEY_W));
-            vehicle_->controls_.Set(CTRL_BACK, input->GetKeyDown(KEY_S));
-            vehicle_->controls_.Set(CTRL_LEFT, input->GetKeyDown(KEY_A));
-            vehicle_->controls_.Set(CTRL_RIGHT, input->GetKeyDown(KEY_D));
-            vehicle_->controls_.Set(CTRL_BRAKE, input->GetKeyDown(KEY_F));
+            player_->vehicle_->controls_.Set(CTRL_FORWARD, input->GetKeyDown(KEY_W));
+            player_->vehicle_->controls_.Set(CTRL_BACK, input->GetKeyDown(KEY_S));
+            player_->vehicle_->controls_.Set(CTRL_LEFT, input->GetKeyDown(KEY_A));
+            player_->vehicle_->controls_.Set(CTRL_RIGHT, input->GetKeyDown(KEY_D));
+            player_->vehicle_->controls_.Set(CTRL_BRAKE, input->GetKeyDown(KEY_F));
             // Add yaw & pitch from the mouse motion or touch input. Used only for the camera, does not affect motion
             if (touchEnabled_)
             {
@@ -1431,18 +1439,18 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
                             return;
                         }
                         auto* graphics = GetSubsystem<Graphics>();
-                        vehicle_->controls_.yaw_ += TOUCH_SENSITIVITY * camera->GetFov() / graphics->GetHeight() * state->delta_.x_;
-                        vehicle_->controls_.pitch_ += TOUCH_SENSITIVITY * camera->GetFov() / graphics->GetHeight() * state->delta_.y_;
+                        player_->vehicle_->controls_.yaw_ += TOUCH_SENSITIVITY * camera->GetFov() / graphics->GetHeight() * state->delta_.x_;
+                        player_->vehicle_->controls_.pitch_ += TOUCH_SENSITIVITY * camera->GetFov() / graphics->GetHeight() * state->delta_.y_;
                     }
                 }
             }
             else
             {
-                vehicle_->controls_.yaw_ += (float)input->GetMouseMoveX() * YAW_SENSITIVITY;
-                vehicle_->controls_.pitch_ += (float)input->GetMouseMoveY() * YAW_SENSITIVITY;
+                player_->vehicle_->controls_.yaw_ += (float)input->GetMouseMoveX() * YAW_SENSITIVITY;
+                player_->vehicle_->controls_.pitch_ += (float)input->GetMouseMoveY() * YAW_SENSITIVITY;
             }
             // Limit pitch
-            vehicle_->controls_.pitch_ = Clamp(vehicle_->controls_.pitch_, 0.0f, 80.0f);
+            player_->vehicle_->controls_.pitch_ = Clamp(player_->vehicle_->controls_.pitch_, 0.0f, 80.0f);
             // Check for loading / saving the scene
             if (input->GetKeyPress(KEY_F5))
             {
@@ -1460,13 +1468,13 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
                 Node* vehicleNode = scene_->GetChild("Vehicle", true);
                 if (vehicleNode)
                 {
-                    vehicle_ = vehicleNode->GetComponent<Vehicle>();
+                    player_->vehicle_ = vehicleNode->GetComponent<Vehicle>();
                 }
             }
         }
         else
         {
-            vehicle_->controls_.Set(CTRL_FORWARD | CTRL_BACK | CTRL_LEFT | CTRL_RIGHT | CTRL_BRAKE, false);
+            player_->vehicle_->controls_.Set(CTRL_FORWARD | CTRL_BACK | CTRL_LEFT | CTRL_RIGHT | CTRL_BRAKE, false);
         }
     }
 }
@@ -1476,19 +1484,19 @@ void MayaScape::HandlePostUpdate(StringHash eventType, VariantMap &eventData) {
         return;
 
     Node *character2DNode = player_->GetNode();
-    cameraNode_->SetPosition(Vector3(character2DNode->GetPosition().x_, character2DNode->GetPosition().y_,
+   /* cameraNode_->SetPosition(Vector3(character2DNode->GetPosition().x_, character2DNode->GetPosition().y_,
                                      -10.0f)); // Camera tracks character
-
+*/
      //
-    if (!vehicle_)
+    if (!player_->vehicle_)
     {
         return;
     }
-    Node* vehicleNode = vehicle_->GetNode();
+    Node* vehicleNode = player_->vehicle_->GetNode();
     // Physics update has completed. Position camera behind vehicle
     Quaternion dir(vehicleNode->GetRotation().YawAngle(), Vector3::UP);
-    dir = dir * Quaternion(vehicle_->controls_.yaw_, Vector3::UP);
-    dir = dir * Quaternion(vehicle_->controls_.pitch_, Vector3::RIGHT);
+    dir = dir * Quaternion(player_->vehicle_->controls_.yaw_, Vector3::UP);
+    dir = dir * Quaternion(player_->vehicle_->controls_.pitch_, Vector3::RIGHT);
     Vector3 cameraTargetPos =
             vehicleNode->GetPosition() - dir * Vector3(0.0f, 0.0f, CAMERA_DISTANCE);
     Vector3 cameraStartPos = vehicleNode->GetPosition();
@@ -1527,7 +1535,7 @@ void MayaScape::HandlePostRenderUpdate(StringHash eventType, VariantMap &eventDa
 //    startBone->initialScale_(Vector3(0.01f, 0.01f, 0.01f));
 
     if (drawDebug_) {
-        auto *physicsWorld = scene_->GetComponent<PhysicsWorld2D>();
+/*        auto *physicsWorld = scene_->GetComponent<PhysicsWorld2D>();
         physicsWorld->DrawDebugGeometry();
 
         Node *tileMapNode = scene_->GetChild("TileMap", true);
@@ -1537,6 +1545,7 @@ void MayaScape::HandlePostRenderUpdate(StringHash eventType, VariantMap &eventDa
         // bones. Note that debug geometry has to be separately requested each frame. Disable depth test so that we can see the
         // bones properly
         GetSubsystem<Renderer>()->DrawDebugGeometry(false);
+        */
     }
 }
 

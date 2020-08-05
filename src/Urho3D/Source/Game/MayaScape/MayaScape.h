@@ -71,8 +71,6 @@ private:
     /// Construct the scene content.
     void CreateScene();
 
-    // Construct vehicle
-    void CreateVehicle();
     /// Subscribe to application-wide logic update events.
     void SubscribeToEvents();
     /// Handle the logic update event.
@@ -105,8 +103,6 @@ private:
     /// The controllable character component.
     WeakPtr<Character2D> player_;
     WeakPtr<Character2D> agents_[MAX_AGENTS];
-    /// The controllable vehicle component.
-    WeakPtr<Vehicle> vehicle_;
 
 
     /// Flag for drawing debug geometry.

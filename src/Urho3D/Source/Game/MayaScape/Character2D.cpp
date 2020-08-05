@@ -34,6 +34,7 @@
 #include <Urho3D/Graphics/AnimatedModel.h>
 #include <Urho3D/Graphics/Animation.h>
 #include <Urho3D/Graphics/AnimationState.h>
+#include <Urho3D/Graphics/AnimationController.h>
 
 
 #include <Urho3D/DebugNew.h>
@@ -98,7 +99,7 @@ void Character2D::Update(float timeStep) {
     auto *animatedModel = GetComponent<AnimatedModel>();
 
     // Collision detection (AABB query)
-    Vector2 characterHalfSize = Vector2(0.05f, 0.05f);
+/*    Vector2 characterHalfSize = Vector2(0.05f, 0.05f);
     auto *physicsWorld = GetScene()->GetComponent<PhysicsWorld2D>();
     PODVector<RigidBody2D *> collidingBodies;
     physicsWorld->GetRigidBodies(collidingBodies,
@@ -108,17 +109,18 @@ void Character2D::Update(float timeStep) {
     if (collidingBodies.Size() > 1 && !isClimbing_) {
         currState_.onGround = true;
     }
-
+*/
 
 //    URHO3D_LOGINFOF("CHAR[%d] POS [x=%f, y=%f]", id_, node_->GetWorldPosition2D().x_,node_->GetWorldPosition2D().y_);
 
+/*
     // Handle controller to update character state
     if (isAI_) {
         currState_ = HandleAIController(timeStep);
     } else {
         currState_ = HandleP1Controller(timeStep);
     }
-
+*/
     // Player mechanics
     if (currState_.onGround) {
         if (doJump_) {
@@ -160,13 +162,67 @@ void Character2D::Update(float timeStep) {
     //sprite1_0008_Walking0010008_Walking001.ani
     //sprite1_0008_Walking0010018_DanceTurns001.ani
 
+
+    static const char* WALKING_ANI = "Models/Animals/Dog/Models/Walking.ani";
+
+    //using namespace CrowdAgentReposition;
+    
+/*
+    if (currState_.walk) {
+
+        // The state would fail to create (return null) if the animation was not found
+        if (walkState_) {
+            // Enable full blending weight and looping
+            walkState_->SetWeight(1.0f);
+            walkState_->AddTime(timeStep);
+            walkState_->SetLooped(true);
+
+
+*/
+
+
+    node_->SetScale(1.0f);
+//    SetScale(4.0f);
+
+    if (animCtrl_)
+    {
+        animCtrl_->SetStartBone(WALKING_ANI, "Bone");
+        URHO3D_LOGINFOF("Terrain anims [%d] time [%f]", animCtrl_->GetAnimations().Size(), animCtrl_->GetTime(WALKING_ANI));
+
+        float speed = 1.0;//velocity.Length();
+        if (animCtrl_->IsPlaying(WALKING_ANI))
+        {
+            float speedRatio = 0.8; //speed / agent->GetMaxSpeed();
+            // Face the direction of its velocity but moderate the turning speed based on the speed ratio and timeStep
+//            SetRotation(GetRotation().Slerp(Quaternion(Vector3::FORWARD, velocity), 10.0f * timeStep * speedRatio));
+            // Throttle the animation speed based on agent speed ratio (ratio = 1 is full throttle)
+            animCtrl_->SetSpeed(WALKING_ANI, speedRatio * 1.5f);
+        }
+        else
+            animCtrl_->Play(WALKING_ANI, 0, true, 0.1f);
+
+        //        animCtrl_->SetAnimationEnabled(true);
+        animCtrl_->SetWeight(WALKING_ANI, 1.0f);
+//        animCtrl_->SetTime(WALKING_ANI, timeStep);
+
+        // If speed is too low then stop the animation
+        //if (speed < agent->GetRadius())
+        //    animCtrl_->Stop(WALKING_ANI, 0.5f);
+    } else {
+        URHO3D_LOGINFOF("No animation controller at time [%f]", timeStep);
+
+    }
+
+    /*
     switch (type_) {
         case 1:
 
             ///code/dev/MayaSpace/src/Urho3D/bin/Data/Models/spriteBase/Models/0008_Walking001_0008_Walking001_0018_DanceTurns001_0008_Walking.ani
-            walkAnimStr = "Models/spriteBase/Models/Movements.ani";
+            //walkAnimStr = "Models/spriteBase/Models/Movements.ani";
 
-            idleAnimStr = jumpAnimStr = attackAnimStr = walkAnimStr;
+//            static const char* WALKING_ANI = "Models/Animals/Dog/Models/Walking.ani";
+
+            idleAnimStr = jumpAnimStr = attackAnimStr = WALKING_ANI;
             //  walkAnimStr = "Models/spritePlayerA/sprite1_0008_Walking0010008_Walking001.ani";
 //            idleAnimStr = "Models/spritePlayerA/sprite1_0008_Walking0010008_Walking001.ani";
             //           jumpAnimStr = "Models/spritePlayerA/sprite1_0008_Walking0010018_DanceTurns001.ani";
@@ -174,9 +230,10 @@ void Character2D::Update(float timeStep) {
             break;
         case 2:
 //            walkAnimStr = "Models/spriteBase/Models/0008_Walking001_0008_Walking001_0018_DanceTurns001_0008_Walking.ani";
-            walkAnimStr = "Models/spriteBase/Models/Movements.ani";
+//            walkAnimStr = "Models/spriteBase/Models/Movements.ani";
+            walkAnimStr = "Models/Animals/Dog/Models/Walking.ani";
 
-            idleAnimStr = jumpAnimStr = attackAnimStr = walkAnimStr;
+            idleAnimStr = jumpAnimStr = attackAnimStr = WALKING_ANI;
 
             // walkAnimStr = "Models/spritePlayerA/sprite1_0008_Walking0010008_Walking001.ani";
 //            idleAnimStr = "Models/spritePlayerA/sprite1_0008_Walking0010008_Walking001.ani";
@@ -184,8 +241,8 @@ void Character2D::Update(float timeStep) {
             //           attackAnimStr = "Models/spritePlayerA/sprite1_0008_Walking0010017_WushuKicks001.ani";
             break;
 
-    }
-
+    }*/
+/*
     auto *walkAnimation = cache->GetResource<Animation>(walkAnimStr);
     auto *idleAnimation = cache->GetResource<Animation>(idleAnimStr);
     auto *jumpAnimation = cache->GetResource<Animation>(jumpAnimStr);
@@ -198,8 +255,8 @@ void Character2D::Update(float timeStep) {
     idleState_ = model->AddAnimationState(idleAnimation);
     jumpState_ = model->AddAnimationState(jumpAnimation);
     kickState_ = model->AddAnimationState(kickAnimation);
-
-
+*/
+/*
     if (currState_.walk) {
 
         // The state would fail to create (return null) if the animation was not found
@@ -219,7 +276,7 @@ void Character2D::Update(float timeStep) {
             walkState_->SetTime(0.0f);
         }
     }
-
+*/
     /*
     if (idle) {
 
@@ -296,7 +353,9 @@ void Character2D::Update(float timeStep) {
 
     }*/
 
-    // Move character
+
+    // DISABLE CHARACTER MOVE - Vehicle will control
+/*    // Move character
     if (!currState_.moveDir.Equals(Vector3::ZERO) || currState_.jump) {
 
         //URHO3D_LOGINFOF("AI[%d] MOVE DIR [x=%f, y=%f, z=%f]", id_, currState_.moveDir.x_,currState_.moveDir.y_, currState_.moveDir.z_);
@@ -317,10 +376,9 @@ void Character2D::Update(float timeStep) {
         //    node_->SetScale(0.0024f);
         //     node_->SetScale(0.4f);
 
-
         if (currState_.jump)
             body->ApplyLinearImpulse(Vector2(0.0f, 0.005f) * MOVE_SPEED, body->GetMassCenter(), true);
-    }
+    }*/
 }
 
 PlayerState Character2D::HandleP1Controller(float timeStep) {

@@ -25,6 +25,7 @@
 #include <Urho3D/Input/Controls.h>
 #include <Urho3D/Scene/LogicComponent.h>
 #include <Urho3D/Graphics/BillboardSet.h>
+#include "Vehicle.h"
 
 // All Urho3D classes reside in namespace Urho3D
 using namespace Urho3D;
@@ -85,6 +86,12 @@ public:
     int life_;
 
     bool doJump_;
+
+    /// The controllable vehicle component.
+    WeakPtr<Vehicle> vehicle_;
+
+    WeakPtr<AnimationController> animCtrl_;
+
     AnimationState* walkState_; 
     AnimationState* idleState_;
     AnimationState* jumpState_;

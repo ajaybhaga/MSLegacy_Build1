@@ -23,6 +23,7 @@
 #include <Urho3D/Graphics/AnimatedModel.h>
 #include <Urho3D/Graphics/Animation.h>
 #include <Urho3D/Graphics/AnimationState.h>
+#include <Urho3D/Graphics/AnimationController.h>
 #include <Urho3D/Urho2D/AnimatedSprite2D.h>
 #include <Urho3D/Urho2D/AnimationSet2D.h>
 #include <Urho3D/UI/BorderImage.h>
@@ -238,6 +239,7 @@ Node* Sample2D::CreateCharacter(TileMapInfo2D info, float friction, Vector3 posi
         modelObject->SetCastShadows(true);
 
 
+        /*
     auto* impBody = modelNode->CreateComponent<RigidBody2D>();
     //impBody->SetBodyType(BT_STATIC);
 //    impBody->SetMassCenter()
@@ -245,7 +247,7 @@ Node* Sample2D::CreateCharacter(TileMapInfo2D info, float friction, Vector3 posi
     impBody->SetBodyType(BT_DYNAMIC);
     impBody->SetAllowSleep(false);
     URHO3D_LOGINFOF("CREATE BODY HIT id=%d, name=%s", impBody->GetNode()->GetID(), impBody->GetNode()->GetName());
-
+*/
 
     auto* shape = modelNode->CreateComponent<CollisionCircle2D>();
     /*
@@ -265,6 +267,8 @@ Node* Sample2D::CreateCharacter(TileMapInfo2D info, float friction, Vector3 posi
     shape->SetRestitution(0.1f); // Bounce
     URHO3D_LOGINFOF("CREATE HIT id=%d, name=%s", shape->GetNode()->GetID(), shape->GetNode()->GetName());
 */
+
+    /*
         switch (type) {
             case 1:
             // player
@@ -295,7 +299,7 @@ Node* Sample2D::CreateCharacter(TileMapInfo2D info, float friction, Vector3 posi
             break;
         }
 
-
+*/
 
 
     Vector2 min, max, center;
@@ -391,13 +395,15 @@ Node* Sample2D::CreateCharacter(TileMapInfo2D info, float friction, Vector3 posi
     return modelNode;
 }
 
-Node* Sample2D::CreateCharacter(float friction, Vector3 position, float scale, int type)
+Node* Sample2D::CreateCharacter(float friction, Vector3 position, int type)
 {
     auto* cache = GetSubsystem<ResourceCache>();
     Node* modelNode = scene_->CreateChild("CharNode");
 
+    // CharNode (modelNode)
+
     modelNode->SetPosition(position);
-    modelNode->SetScale(scale);
+    modelNode->SetScale(1.0);
 
     // Create animated models
     const float MODEL_MOVE_SPEED = 2.0f;
@@ -406,8 +412,13 @@ Node* Sample2D::CreateCharacter(float friction, Vector3 position, float scale, i
 
     // rotate model by 180 ****************************
     Node* adjustNode = modelNode->CreateChild("AdjNode");
-    Quaternion qAdjRot(90, Vector3(1,0,0) ); // rotate it by 180
+//    Quaternion qAdjRot(90, Vector3(1,0,0) ); // rotate it by 180
+    Quaternion qAdjRot(0, Vector3(1,0,0) ); // rotate it by 180
+
+
     adjustNode->SetRotation( qAdjRot );
+    adjustNode->SetPosition(Vector3(0.0, 2.5f, 0.0));
+
 
     // Create the rendering component + animation controller
     auto* modelObject = adjustNode->CreateComponent<AnimatedModel>();
@@ -416,12 +427,16 @@ Node* Sample2D::CreateCharacter(float friction, Vector3 position, float scale, i
     ///code/dev/MayaSpace/src/Urho3D/bin/Data/Models/spriteBase/Models/BodyFrame.002.mdl
     switch (type) {
         case 1:
-            modelObject->SetModel(cache->GetResource<Model>("Models/spriteBase/Models/spriteBase01.mdl"));
+//            modelObject->SetModel(cache->GetResource<Model>("Models/spriteBase/Models/spriteBase01.mdl"));
+            modelObject->SetModel(cache->GetResource<Model>("Models/Animals/Dog/Models/Dog.mdl"));
+
             modelObject->SetMaterial(cache->GetResource<Material>("Material;Models/spriteBase/Materials/Material.011.xml;Models/spriteBase/Materials/Material.012.xml;Models/spriteBase/Materials/Material.019.xml"));
 
             break;
         case 2:
-            modelObject->SetModel(cache->GetResource<Model>("Models/spriteBase/Models/spriteBase01.mdl"));
+            modelObject->SetModel(cache->GetResource<Model>("Models/Animals/Dog/Models/Dog.mdl"));
+
+  //          modelObject->SetModel(cache->GetResource<Model>("Models/spriteBase/Models/spriteBase01.mdl"));
             //modelObject->SetMaterial(cache->GetResource<Material>("Models/bear2/Materials/Material.xml"));
             modelObject->SetMaterial(cache->GetResource<Material>("Material;Models/spriteBase/Materials/Material.011.xml;Models/spriteBase/Materials/Material.012.xml;Models/spriteBase/Materials/Material.019.xml"));
 
@@ -442,7 +457,7 @@ Node* Sample2D::CreateCharacter(float friction, Vector3 position, float scale, i
 
     modelObject->SetCastShadows(true);
 
-
+/*
     auto* impBody = modelNode->CreateComponent<RigidBody2D>();
     //impBody->SetBodyType(BT_STATIC);
 //    impBody->SetMassCenter()
@@ -450,9 +465,9 @@ Node* Sample2D::CreateCharacter(float friction, Vector3 position, float scale, i
     impBody->SetBodyType(BT_DYNAMIC);
     impBody->SetAllowSleep(false);
     URHO3D_LOGINFOF("CREATE BODY HIT id=%d, name=%s", impBody->GetNode()->GetID(), impBody->GetNode()->GetName());
+*/
 
-
-    auto* shape = modelNode->CreateComponent<CollisionCircle2D>();
+  //  auto* shape = modelNode->CreateComponent<CollisionCircle2D>();
     /*
     shape = modelNode->CreateComponent<CollisionCircle2D>();
     shape->GetNode()->SetName("hit a");
@@ -470,6 +485,7 @@ Node* Sample2D::CreateCharacter(float friction, Vector3 position, float scale, i
     shape->SetRestitution(0.1f); // Bounce
     URHO3D_LOGINFOF("CREATE HIT id=%d, name=%s", shape->GetNode()->GetID(), shape->GetNode()->GetName());
 */
+    /*
     switch (type) {
         case 1:
             // player
@@ -499,7 +515,7 @@ Node* Sample2D::CreateCharacter(float friction, Vector3 position, float scale, i
 
             break;
     }
-
+*/
 
 
 
@@ -524,6 +540,8 @@ Node* Sample2D::CreateCharacter(float friction, Vector3 position, float scale, i
 
         //        bone.boundingBox_.max_.x_ - , bone.boundingBox_.max_.y_ - bone.boundingBox_.min_.y_)
     }
+
+ //   modelNode->
 
 
 /* PLAYER HIT TESTS
