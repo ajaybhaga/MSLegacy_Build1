@@ -127,7 +127,7 @@ void Vehicle::Init()
         vehicle->SetWheelDampingCompression(id, suspensionCompression_);
         vehicle->SetWheelFrictionSlip(id, wheelFriction_);
         vehicle->SetWheelRollInfluence(id, rollInfluence_);
-        wheelNode->SetScale(Vector3(1.0f, 0.65f, 1.0f));
+        wheelNode->SetScale(Vector3(1.0f, 0.2f, 1.0f));
         auto* pWheel = wheelNode->CreateComponent<StaticModel>();
         pWheel->SetModel(cache->GetResource<Model>("Models/Cylinder.mdl"));
         pWheel->SetMaterial(cache->GetResource<Material>("Materials/Stone.xml"));

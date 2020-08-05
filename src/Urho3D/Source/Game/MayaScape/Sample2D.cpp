@@ -417,7 +417,8 @@ Node* Sample2D::CreateCharacter(float friction, Vector3 position, int type)
 
 
     adjustNode->SetRotation( qAdjRot );
-    adjustNode->SetPosition(Vector3(0.0, 2.5f, 0.0));
+    // Set dog in front of cart
+    adjustNode->SetPosition(Vector3(0.3f, -1.2f, 4.0f));
 
 
     // Create the rendering component + animation controller

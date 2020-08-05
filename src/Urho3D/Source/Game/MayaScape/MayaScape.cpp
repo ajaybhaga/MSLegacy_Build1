@@ -602,10 +602,11 @@ void MayaScape::CreateScene() {
     player_->id_ = 0;
     player_->type_ = 1;
 
+    float agentDropBoxSize = 200.0f;
     for (int i = 0; i < EvolutionManager::getInstance()->getAgents().size(); i++) {
 
         // Create AI player character
-        modelNode = sample2D_->CreateCharacter(0.0f, Vector3(3.5f + Random(-2.0f, 2.0f), 80.0f, 0.0f), 2);
+        modelNode = sample2D_->CreateCharacter(0.0f, Vector3(3.5f + Random(-agentDropBoxSize, agentDropBoxSize), 80.0f, 0.0f + Random(-agentDropBoxSize, agentDropBoxSize)), 2);
         agents_[i] = modelNode->CreateComponent<Character2D>(); // Create a logic component to handle character behavior
         agents_[i]->agentIndex = i;
 
