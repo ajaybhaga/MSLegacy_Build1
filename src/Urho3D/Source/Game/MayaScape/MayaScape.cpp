@@ -583,10 +583,28 @@ void MayaScape::CreateScene() {
 
     // Create player character
 //    Node* modelNode = sample2D_->CreateCharacter(info, 0.0f, Vector3(2.5f, 16.0f, 0.0f), 1.0f, 1);
-    Node *modelNode = sample2D_->CreateCharacter(0.0f, Vector3(2.5f, 2.0f, -40.0f), 1);
+    Node *modelNode = sample2D_->CreateCharacter(0.0f, Vector3(2.5f, 2.0f, -40.0f), 2);
     player_ = modelNode->CreateComponent<Character2D>(); // Create a logic component to handle character behavior
     // Store animation controller
     player_->animCtrl_ = modelNode->CreateComponent<AnimationController>();
+//    player_->animCtrl_->Get
+//    player_->GetNode()->SetRotation(Quaternion(0.0f, player_->heading_, 0.0));
+//    player_->GetNode()->SetRotation(Quaternion(0.0f, player_->heading_, 0.0));
+
+    auto *model_ = player_->GetNode()->GetComponent<AnimatedModel>(true);
+    Skeleton &skeleton = model_->GetSkeleton();
+  //  model_->GetNode()->SetScale(0.2);
+    Bone *rootBone = skeleton.GetRootBone();
+    Bone *startBone = rootBone;
+
+//    startBone->initialScale_ = Vector3(0.2, 0.2, 0.2);
+
+
+    model_->GetNode()->SetScale(0.4f);
+//    model_->GetNode()->SetRotation(Quaternion(0.0, 90.0f, 0.0));
+
+//    rootBone->initialRotation_ = Quaternion(180, Vector3(0.0, 1.0, 0.0));
+
 
 
     //        Node* vehicleNode = scene_->CreateChild("Vehicle");
@@ -1059,7 +1077,7 @@ void MayaScape::HandleCollisionBegin(StringHash eventType, VariantMap &eventData
         instructions->SetPosition(IntVector2(0, 0));
         // Put the character outside of the scene and magnify him
         character2DNode->SetPosition(Vector3(-20.0f, 0.0f, 0.0f));
-        character2DNode->SetScale(1.5f);
+       // character2DNode->SetScale(1.5f);
     }
 
     // Handle falling into lava
@@ -1228,6 +1246,10 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
     if (input->GetKeyPress(KEY_Z))
         drawDebug_ = !drawDebug_;
 
+    // Toggle debug geometry with 'C' key
+    if (input->GetKeyPress(KEY_C))
+        doSpecial_ = !doSpecial_;
+
 
     // Check for loading / saving the scene
     if (input->GetKeyPress(KEY_F5))
@@ -1260,6 +1282,7 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
         player_->GetNode()->SetRotation(Quaternion(0.0f, player_->heading_, 0.0));
         auto *model_ = player_->GetNode()->GetComponent<AnimatedModel>(true);
 
+//        model_->GetNode()->SetRotation(Quaternion(0, 90, 0));
         Skeleton &skeleton = model_->GetSkeleton();
         Bone *rootBone = skeleton.GetRootBone();
         Bone *startBone = rootBone;
@@ -1274,6 +1297,10 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
     if (player_->life_ < 0) {
         player_->life_ = 0;
     }
+
+
+    // Set animal scale
+  //  player_->GetNode()->GetChildren()[0]->SetScale(20.0f);
 
     // AI
     if (agents_) {
@@ -1542,12 +1569,17 @@ void MayaScape::HandlePostRenderUpdate(StringHash eventType, VariantMap &eventDa
         Node *tileMapNode = scene_->GetChild("TileMap", true);
         auto *map = tileMapNode->GetComponent<TileMap3D>();
         map->DrawDebugGeometry(scene_->GetComponent<DebugRenderer>(), false);
-
+*/
         // bones. Note that debug geometry has to be separately requested each frame. Disable depth test so that we can see the
         // bones properly
         GetSubsystem<Renderer>()->DrawDebugGeometry(false);
-        */
+
     }
+
+    if (doSpecial_){
+  //   player_->animCtrl_->GetTime(WA)
+    }
+
 }
 
 void MayaScape::ReloadScene(bool reInit) {

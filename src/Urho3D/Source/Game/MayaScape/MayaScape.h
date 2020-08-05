@@ -107,6 +107,7 @@ private:
 
     /// Flag for drawing debug geometry.
     bool drawDebug_{};
+    bool doSpecial_{};
     /// Scaling factor based on tiles' aspect ratio.
     float moveSpeedScale_{};
 

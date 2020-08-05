@@ -76,7 +76,6 @@ public:
     /// Build collision shape from Tiled 'Poly Line' objects.
     CollisionChain2D* CreatePolyLineShape(Node* node, TileMapObject2D* object);
     /// Create Player character.
-    Node* CreateCharacter(TileMapInfo2D info, float friction, Vector3 position, float scale, int type);
     Node* CreateCharacter(float friction, Vector3 position, int type);
     /// Create Object.
     Node* CreateObject(TileMapInfo2D info, float friction, Vector3 position, float scale, int type);

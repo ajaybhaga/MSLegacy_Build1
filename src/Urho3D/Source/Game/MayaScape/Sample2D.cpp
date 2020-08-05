@@ -187,214 +187,6 @@ CollisionChain2D* Sample2D::CreatePolyLineShape(Node* node, TileMapObject2D* obj
     return shape;
 }
 
-Node* Sample2D::CreateCharacter(TileMapInfo2D info, float friction, Vector3 position, float scale, int type)
-{
-    auto* cache = GetSubsystem<ResourceCache>();
-    Node* modelNode = scene_->CreateChild("CharNode");
-
-    modelNode->SetPosition(position);
-    modelNode->SetScale(scale);
-
-    // Create animated models
-    const float MODEL_MOVE_SPEED = 2.0f;
-    const float MODEL_ROTATE_SPEED = 100.0f;
-
-
-    // rotate model by 180 ****************************
-    Node* adjustNode = modelNode->CreateChild("AdjNode");
-    Quaternion qAdjRot(90, Vector3(1,0,0) ); // rotate it by 180
-    adjustNode->SetRotation( qAdjRot );
-
-    // Create the rendering component + animation controller
-    auto* modelObject = adjustNode->CreateComponent<AnimatedModel>();
-    //auto* modelObject = modelNode->CreateComponent<AnimatedModel>();
-
-    ///code/dev/MayaSpace/src/Urho3D/bin/Data/Models/spriteBase/Models/BodyFrame.002.mdl
-        switch (type) {
-            case 1:
-            modelObject->SetModel(cache->GetResource<Model>("Models/spriteBase/Models/spriteBase01.mdl"));
-            modelObject->SetMaterial(cache->GetResource<Material>("Material;Models/spriteBase/Materials/Material.011.xml;Models/spriteBase/Materials/Material.012.xml;Models/spriteBase/Materials/Material.019.xml"));
-
-            break;
-            case 2:
-            modelObject->SetModel(cache->GetResource<Model>("Models/spriteBase/Models/spriteBase01.mdl"));
-            //modelObject->SetMaterial(cache->GetResource<Material>("Models/bear2/Materials/Material.xml"));
-            modelObject->SetMaterial(cache->GetResource<Material>("Material;Models/spriteBase/Materials/Material.011.xml;Models/spriteBase/Materials/Material.012.xml;Models/spriteBase/Materials/Material.019.xml"));
-
-            break;
-            case 3:
-            modelObject->SetModel(cache->GetResource<Model>("Models/spriteBase/Models/spriteBase01.mdl"));
-            //modelObject->SetMaterial(cache->GetResource<Material>("Models/bear3/Materials/Material.xml"));
-            modelObject->SetMaterial(cache->GetResource<Material>("Material;Models/spriteBase/Materials/Material.011.xml;Models/spriteBase/Materials/Material.012.xml;Models/spriteBase/Materials/Material.019.xml"));
-
-            break;
-            case 4:
-            modelObject->SetModel(cache->GetResource<Model>("Models/spriteBase/Models/spriteBase01.mdl"));
-            //modelObject->SetMaterial(cache->GetResource<Material>("Models/bear4/Materials/Material.xml"));
-            modelObject->SetMaterial(cache->GetResource<Material>("Material;Models/spriteBase/Materials/Material.011.xml;Models/spriteBase/Materials/Material.012.xml;Models/spriteBase/Materials/Material.019.xml"));
-            break;
-        }
-
-
-        modelObject->SetCastShadows(true);
-
-
-        /*
-    auto* impBody = modelNode->CreateComponent<RigidBody2D>();
-    //impBody->SetBodyType(BT_STATIC);
-//    impBody->SetMassCenter()
-    impBody->GetNode()->SetName("hit r");
-    impBody->SetBodyType(BT_DYNAMIC);
-    impBody->SetAllowSleep(false);
-    URHO3D_LOGINFOF("CREATE BODY HIT id=%d, name=%s", impBody->GetNode()->GetID(), impBody->GetNode()->GetName());
-*/
-
-    auto* shape = modelNode->CreateComponent<CollisionCircle2D>();
-    /*
-    shape = modelNode->CreateComponent<CollisionCircle2D>();
-    shape->GetNode()->SetName("hit a");
-    //shape->SetCenter(Vector2(position.x_, position.y_)); 
-    shape->SetRadius(0.04f); // Set shape size
-    shape->SetFriction(friction); // Set friction
-    shape->SetRestitution(0.1f); // Bounce
-    URHO3D_LOGINFOF("CREATE HIT id=%d, name=%s", shape->GetNode()->GetID(), shape->GetNode()->GetName());
-
-    shape = modelNode->CreateComponent<CollisionCircle2D>();
-    shape->GetNode()->SetName("hit b");
-    shape->SetCenter(shape->GetCenter()+Vector2(0,-1.2f));
-    shape->SetRadius(4.12f); // Set shape size
-    shape->SetFriction(friction); // Set friction
-    shape->SetRestitution(0.1f); // Bounce
-    URHO3D_LOGINFOF("CREATE HIT id=%d, name=%s", shape->GetNode()->GetID(), shape->GetNode()->GetName());
-*/
-
-    /*
-        switch (type) {
-            case 1:
-            // player
-            // Main bounding circle
-            shape = modelNode->CreateComponent<CollisionCircle2D>();
-            shape->GetNode()->SetName("hit c");
-            shape->SetCenter(shape->GetCenter()+Vector2(0.0f,0.0f));
-            shape->SetRadius(2.0f); // Set shape size
-            shape->SetFriction(friction); // Set friction
-            shape->SetRestitution(0.1f); // Bounce
-            //URHO3D_LOGINFOF("CREATE HIT id=%d, name=%s", shape->GetNode()->GetID(), shape->GetNode()->GetName());
-
-            break;
-
-            case 2:
-            // enemy
-            // Main bounding circle
-            shape = modelNode->CreateComponent<CollisionCircle2D>();
-            shape->GetNode()->SetName("hit c");
-//            shape->SetCenter(shape->GetCenter()+Vector2(0,-0.8f)); 
-            shape->SetCenter(shape->GetCenter()+Vector2(0,0.0f));
-
-            shape->SetRadius(2.0); // Set shape size
-            shape->SetFriction(friction); // Set friction
-            shape->SetRestitution(0.1f); // Bounce
-            //URHO3D_LOGINFOF("CREATE HIT id=%d, name=%s", shape->GetNode()->GetID(), shape->GetNode()->GetName());
-
-            break;
-        }
-
-*/
-
-
-    Vector2 min, max, center;
-    auto& bones = modelObject->GetSkeleton().GetBones();
-		for (auto& bone : bones) {
-			auto& name = bone.name_;
-            
-                //URHO3D_LOGINFOF("bone=%d", bone.name_);
-//            center = Vector2(bone.boundingBox_.max_.x_-bone.boundingBox_.min_.x_, bone.boundingBox_.max_.y_-bone.boundingBox_.min_.y_);
-/*
-             center = Vector2(bone.boundingBox_.max_.x_-bone.boundingBox_.min_.x_, bone.boundingBox_.max_.y_-bone.boundingBox_.min_.y_);
-            max = Vector2(std::max(max.x_, bone.boundingBox_.max_.x_), std::max(max.y_, bone.boundingBox_.max_.y_));
-            min = Vector2(std::min(min.x_, bone.boundingBox_.min_.x_), std::min(min.y_, bone.boundingBox_.min_.y_));
-*/
-
-            center = Vector2(bone.boundingBox_.max_.x_-bone.boundingBox_.min_.x_, bone.boundingBox_.max_.z_-bone.boundingBox_.min_.z_);
-            max = Vector2(std::max(max.x_, bone.boundingBox_.max_.x_), std::max(max.y_, bone.boundingBox_.max_.z_));
-            min = Vector2(std::min(min.x_, bone.boundingBox_.min_.x_), std::min(min.y_, bone.boundingBox_.min_.z_));
-
-                //URHO3D_LOGINFOF("center=(%f, %f)", center.x_, center.y_);
-
-        //        bone.boundingBox_.max_.x_ - , bone.boundingBox_.max_.y_ - bone.boundingBox_.min_.y_)
-        }
-
-
-/* PLAYER HIT TESTS
-                shape = modelNode->CreateComponent<CollisionCircle2D>();
-                shape->GetNode()->SetName("hit-right");
-                shape->SetCenter(Vector2((max.x_),center.y_+0.4f));
-                shape->SetRadius(0.3f); // Set shape size
-                shape->SetFriction(friction); // Set friction
-                shape->SetRestitution(0.1f); // Bounce
-                URHO3D_LOGINFOF("CREATE HIT id=%d, name=%s", shape->GetNode()->GetID(), shape->GetNode()->GetName());
-
-                shape = modelNode->CreateComponent<CollisionCircle2D>();
-                shape->GetNode()->SetName("hit-left");
-                shape->SetCenter(Vector2((center.x_-max.x_),center.y_+0.4f));
-                shape->SetRadius(0.3f); // Set shape size
-                shape->SetFriction(friction); // Set friction
-                shape->SetRestitution(0.1f); // Bounce
-                URHO3D_LOGINFOF("CREATE HIT id=%d, name=%s", shape->GetNode()->GetID(), shape->GetNode()->GetName());
-
-                */
-
-
-
-//        boneNode1->SetPosition(skeleton.GetRootBone()-->initialPosition_);
-/*
-    auto& bones = modelObject->GetSkeleton().GetBones();
-		for (auto& bone : bones) {
-			auto& name = bone.name_;
-//                URHO3D_LOGINFOF("bone=%s", name);
-
-			if (name == "Bip01_Head" || name == "Bip01_L_UpperArm" ||
-				name == "Bip01_L_Forearm" || name == "Bip01_L_Thigh" ||
-				name == "Bip01_L_Calf") {
-				//CreateRagdollBone(name, SHAPE_BOX, Vector3(bone.boundingBox_.max_.x_ - bone.boundingBox_.min_.x_, bone.boundingBox_.max_.y_ - bone.boundingBox_.min_.y_, bone.boundingBox_.max_.z_ - bone.boundingBox_.min_.z_), bone.initialPosition_, bone.initialRotation_);
-                auto* shape = modelNode->CreateComponent<CollisionCircle2D>();
-                shape->SetCenter(Vector2(bone.boundingBox_.max_.x_ - bone.boundingBox_.min_.x_, bone.boundingBox_.max_.y_ - bone.boundingBox_.min_.y_)); 
-                shape->SetRadius(0.04f); // Set shape size
-                shape->SetFriction(friction); // Set friction
-                shape->SetRestitution(0.1f); // Bounce
-
-
-			//}
-//		}
-*/
-    // Create rigid body to the root node
- //   auto* body = modelNode->CreateComponent<RigidBody2D>();
- //   body->SetBodyType(BT_STATIC);
-//    body->SetBodyType(BT_DYNAMIC);
-//    body->SetAllowSleep(false);
-
-/*
-    auto* shape = modelNode->CreateComponent<CollisionCircle2D>();
-    shape->SetCenter(Vector2(position.x_, position.y_)); 
-    shape->SetRadius(0.04f);
-    shape->SetFriction(0.8f);
-
-*/
-/*
-    auto* impBody2 = boneNode1->CreateComponent<RigidBody2D>();
-    impBody2->SetBodyType(BT_DYNAMIC);
-    impBody2->SetAllowSleep(false);
-*/
-/*
-    auto* shape2 = modelNode->CreateComponent<CollisionCircle2D>();
-    shape2->SetRadius(1.00f); // Set shape size
-    shape2->SetFriction(friction); // Set friction
-    shape2->SetRestitution(0.1f); // Bounce
-*/
-
-    return modelNode;
-}
-
 Node* Sample2D::CreateCharacter(float friction, Vector3 position, int type)
 {
     auto* cache = GetSubsystem<ResourceCache>();
@@ -416,10 +208,11 @@ Node* Sample2D::CreateCharacter(float friction, Vector3 position, int type)
     Quaternion qAdjRot(0, Vector3(1,0,0) ); // rotate it by 180
 
 
-    adjustNode->SetRotation( qAdjRot );
+//    adjustNode->SetRotation( Quaternion(180, 0.0,0.0) );
     // Set dog in front of cart
     adjustNode->SetPosition(Vector3(0.3f, -1.2f, 4.0f));
 
+//    adjustNode->SetScale(4.0f);
 
     // Create the rendering component + animation controller
     auto* modelObject = adjustNode->CreateComponent<AnimatedModel>();
@@ -430,16 +223,14 @@ Node* Sample2D::CreateCharacter(float friction, Vector3 position, int type)
         case 1:
 //            modelObject->SetModel(cache->GetResource<Model>("Models/spriteBase/Models/spriteBase01.mdl"));
             modelObject->SetModel(cache->GetResource<Model>("Models/Animals/Dog/Models/Dog.mdl"));
-
             modelObject->SetMaterial(cache->GetResource<Material>("Material;Models/spriteBase/Materials/Material.011.xml;Models/spriteBase/Materials/Material.012.xml;Models/spriteBase/Materials/Material.019.xml"));
 
             break;
         case 2:
-            modelObject->SetModel(cache->GetResource<Model>("Models/Animals/Dog/Models/Dog.mdl"));
-
+            modelObject->SetModel(cache->GetResource<Model>("Models/Animals/Monkey/Models/monkey.mdl"));
   //          modelObject->SetModel(cache->GetResource<Model>("Models/spriteBase/Models/spriteBase01.mdl"));
             //modelObject->SetMaterial(cache->GetResource<Material>("Models/bear2/Materials/Material.xml"));
-            modelObject->SetMaterial(cache->GetResource<Material>("Material;Models/spriteBase/Materials/Material.011.xml;Models/spriteBase/Materials/Material.012.xml;Models/spriteBase/Materials/Material.019.xml"));
+            modelObject->SetMaterial(cache->GetResource<Material>("Materials/None__01_png.xml"));
 
             break;
         case 3:
@@ -457,6 +248,8 @@ Node* Sample2D::CreateCharacter(float friction, Vector3 position, int type)
 
 
     modelObject->SetCastShadows(true);
+
+
 
 /*
     auto* impBody = modelNode->CreateComponent<RigidBody2D>();
@@ -523,6 +316,7 @@ Node* Sample2D::CreateCharacter(float friction, Vector3 position, int type)
     Vector2 min, max, center;
     auto& bones = modelObject->GetSkeleton().GetBones();
     for (auto& bone : bones) {
+
         auto& name = bone.name_;
 
         //URHO3D_LOGINFOF("bone=%d", bone.name_);

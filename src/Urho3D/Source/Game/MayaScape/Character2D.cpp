@@ -163,8 +163,10 @@ void Character2D::Update(float timeStep) {
     //sprite1_0008_Walking0010018_DanceTurns001.ani
 
 
-    static const char* WALKING_ANI = "Models/Animals/Dog/Models/Walking.ani";
+    static const char* DOG_WALKING_ANI = "Models/Animals/Dog/Models/Walking.ani";
+    static const char* MONKEY_WALKING_ANI = "Models/Animals/Monkey/Models/Bip001_Take 001_BaseLayer.ani";
 
+    static const char* WALKING_ANI = MONKEY_WALKING_ANI;
     //using namespace CrowdAgentReposition;
     
 /*
@@ -180,14 +182,18 @@ void Character2D::Update(float timeStep) {
 
 */
 
-
-    node_->SetScale(1.0f);
-//    SetScale(4.0f);
-
     if (animCtrl_)
     {
-        animCtrl_->SetStartBone(WALKING_ANI, "Bone");
-        URHO3D_LOGINFOF("Terrain anims [%d] time [%f]", animCtrl_->GetAnimations().Size(), animCtrl_->GetTime(WALKING_ANI));
+//        animCtrl_->SetStartBone(WALKING_ANI, "Bone");
+
+
+        if (WALKING_ANI == MONKEY_WALKING_ANI) {
+            animCtrl_->SetStartBone(WALKING_ANI, "Bip001 Pelvis");
+        } else {
+            animCtrl_->SetStartBone(WALKING_ANI, "Bone");
+        }
+
+     //r   URHO3D_LOGINFOF("Terrain anims [%d] time [%f]", animCtrl_->GetAnimations().Size(), animCtrl_->GetTime(WALKING_ANI));
 
         float speed = 1.0;//velocity.Length();
         if (animCtrl_->IsPlaying(WALKING_ANI))
@@ -209,7 +215,7 @@ void Character2D::Update(float timeStep) {
         //if (speed < agent->GetRadius())
         //    animCtrl_->Stop(WALKING_ANI, 0.5f);
     } else {
-        URHO3D_LOGINFOF("No animation controller at time [%f]", timeStep);
+        //URHO3D_LOGINFOF("No animation controller at time [%f]", timeStep);
 
     }
 
@@ -374,7 +380,7 @@ void Character2D::Update(float timeStep) {
 
 //                node_->SetPosition(Vector3(-10.0f, 0.0f, 0.0f));
         //    node_->SetScale(0.0024f);
-        //     node_->SetScale(0.4f);
+             node_->SetScale(0.4f);
 
         if (currState_.jump)
             body->ApplyLinearImpulse(Vector2(0.0f, 0.005f) * MOVE_SPEED, body->GetMassCenter(), true);
