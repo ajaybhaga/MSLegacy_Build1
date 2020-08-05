@@ -193,7 +193,13 @@ void Character2D::Update(float timeStep) {
             animCtrl_->SetStartBone(WALKING_ANI, "Bone");
         }
 
-     //r   URHO3D_LOGINFOF("Terrain anims [%d] time [%f]", animCtrl_->GetAnimations().Size(), animCtrl_->GetTime(WALKING_ANI));
+     //URHO3D_LOGINFOF("Terrain anims [%d] time [%f]", animCtrl_->GetAnimations().Size(), animCtrl_->GetTime(WALKING_ANI));
+
+        URHO3D_LOGINFOF("Terrain anims [%d] time [%f]", animCtrl_->GetAnimations().Size(), animCtrl_->GetTime(WALKING_ANI));
+
+        if (animCtrl_->GetTime(WALKING_ANI) > 1.3f) {
+            animCtrl_->SetTime(WALKING_ANI, 0.0f);
+        }
 
         float speed = 1.0;//velocity.Length();
         if (animCtrl_->IsPlaying(WALKING_ANI))
@@ -206,6 +212,19 @@ void Character2D::Update(float timeStep) {
         }
         else
             animCtrl_->Play(WALKING_ANI, 0, true, 0.1f);
+
+
+        /*
+         *
+         * Walk (0-40)
+Running (41-60)
+Rest (62-130)
+Eat (131-180)
+to scale (181-280)
+Interact (301-490)
+Die (491-520)
+         */
+
 
         //        animCtrl_->SetAnimationEnabled(true);
         animCtrl_->SetWeight(WALKING_ANI, 1.0f);
