@@ -40,7 +40,7 @@
 
 using namespace Urho3D;
 
-const float CHASSIS_WIDTH = 2.6f;
+const float CHASSIS_WIDTH = 4.2f;
 
 void Vehicle::RegisterObject(Context* context)
 {
@@ -85,14 +85,25 @@ void Vehicle::Init()
     hullBody->SetCollisionLayer(1);
     // This function is called only from the main program when initially creating the vehicle, not on scene load
     auto* cache = GetSubsystem<ResourceCache>();
-    auto* hullObject = node_->CreateComponent<StaticModel>();
+    auto* adjNode_ = node_->CreateChild();
+    adjNode_->SetRotation(Quaternion(0.0f, 90.0f, 0.0f));
+    adjNode_->SetPosition(Vector3(0.0f, 0.0f, -2.0f));
+    adjNode_->SetScale(Vector3(1.5f, 1.0f, 1.0f));
+    auto* hullObject = adjNode_->CreateComponent<StaticModel>();
     // Setting-up collision shape
     auto* hullColShape = node_->CreateComponent<CollisionShape>();
     Vector3 v3BoxExtents = Vector3::ONE;
     hullColShape->SetBox(v3BoxExtents);
     node_->SetScale(Vector3(2.3f, 1.0f, 4.0f));
-    hullObject->SetModel(cache->GetResource<Model>("Models/Box.mdl"));
-    hullObject->SetMaterial(cache->GetResource<Material>("Materials/Stone.xml"));
+
+//    pWheel->SetModel(cache->GetResource<Model>("Models/AssetPack/sun.mdl"));
+//        pWheel->SetModel(cache->GetResource<Model>("Models/Cylinder.mdl"));
+//    pWheel->SetMaterial(cache->GetResource<Material>("Materials/LOWPOLY-COLORS.xml"));
+    hullObject->SetModel(cache->GetResource<Model>("Models/AssetPack/surf.mdl"));
+    hullObject->SetMaterial(cache->GetResource<Material>("Materials/LOWPOLY-COLORS.xml"));
+
+//    hullObject->SetModel(cache->GetResource<Model>("Models/Box.mdl"));
+//    hullObject->SetMaterial(cache->GetResource<Material>("Materials/Stone.xml"));
     hullObject->SetCastShadows(true);
     float connectionHeight = -0.4f;
     bool isFrontWheel = true;
@@ -103,13 +114,13 @@ void Vehicle::Init()
     // Note we don't set wheel nodes as children of hull (while we could) to avoid scaling to affect them.
     float wheelX = CHASSIS_WIDTH / 2.0f - wheelWidth_;
     // Front left
-    connectionPoints_[0] = Vector3(-wheelX, connectionHeight, 2.5f - GetWheelRadius() * 2.0f);
+    connectionPoints_[0] = Vector3(-wheelX, connectionHeight, 4.5f - GetWheelRadius() * 2.0f);
     // Front right
-    connectionPoints_[1] = Vector3(wheelX, connectionHeight, 2.5f - GetWheelRadius() * 2.0f);
+    connectionPoints_[1] = Vector3(wheelX, connectionHeight, 4.5f - GetWheelRadius() * 2.0f);
     // Back left
-    connectionPoints_[2] = Vector3(-wheelX, connectionHeight, -2.5f + GetWheelRadius() * 2.0f);
+    connectionPoints_[2] = Vector3(-wheelX, connectionHeight, -4.5f + GetWheelRadius() * 2.0f);
     // Back right
-    connectionPoints_[3] = Vector3(wheelX, connectionHeight, -2.5f + GetWheelRadius() * 2.0f);
+    connectionPoints_[3] = Vector3(wheelX, connectionHeight, -4.5f + GetWheelRadius() * 2.0f);
     const Color LtBrown(0.972f, 0.780f, 0.412f);
     for (int id = 0; id < sizeof(connectionPoints_) / sizeof(connectionPoints_[0]); id++)
     {
@@ -127,10 +138,12 @@ void Vehicle::Init()
         vehicle->SetWheelDampingCompression(id, suspensionCompression_);
         vehicle->SetWheelFrictionSlip(id, wheelFriction_);
         vehicle->SetWheelRollInfluence(id, rollInfluence_);
-        wheelNode->SetScale(Vector3(1.0f, 0.2f, 1.0f));
+        wheelNode->SetScale(Vector3(0.3f, 0.22f, 0.3f));
         auto* pWheel = wheelNode->CreateComponent<StaticModel>();
-        pWheel->SetModel(cache->GetResource<Model>("Models/Cylinder.mdl"));
-        pWheel->SetMaterial(cache->GetResource<Material>("Materials/Stone.xml"));
+
+        pWheel->SetModel(cache->GetResource<Model>("Models/AssetPack/sun.mdl"));
+//        pWheel->SetModel(cache->GetResource<Model>("Models/Cylinder.mdl"));
+        pWheel->SetMaterial(cache->GetResource<Material>("Materials/LOWPOLY-COLORS.xml"));
         pWheel->SetCastShadows(true);
         CreateEmitter(connectionPoints_[id]);
     }

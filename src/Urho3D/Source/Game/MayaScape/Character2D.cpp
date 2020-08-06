@@ -147,6 +147,8 @@ void Character2D::Update(float timeStep) {
         if (heading_ > 90.0f) { heading_ -= 2.4f; };
     }
 
+
+
     bool idle = (!currState_.walk && !currState_.jump);
 
     // Set animation state
@@ -181,6 +183,9 @@ void Character2D::Update(float timeStep) {
 
 
 */
+
+//      node_->SetPosition(Vector3(this->vehicle_->GetNode()->GetPosition().y_, this->vehicle_->GetNode()->GetChildren()[0]->GetPosition().y_, this->vehicle_->GetNode()->GetPosition().z_));
+
 
     if (animCtrl_)
     {
@@ -228,6 +233,8 @@ Die (491-520)
 
         //        animCtrl_->SetAnimationEnabled(true);
         animCtrl_->SetWeight(WALKING_ANI, 1.0f);
+
+
 //        animCtrl_->SetTime(WALKING_ANI, timeStep);
 
         // If speed is too low then stop the animation

@@ -607,8 +607,7 @@ void MayaScape::CreateScene() {
 //    startBone->initialScale_ = Vector3(0.2, 0.2, 0.2);
 
 
-    model_->GetNode()->SetScale(0.1f);
-//    model_->GetNode()->SetRotation(Quaternion(0.0, 90.0f, 0.0));
+    model_->GetNode()->SetScale(0.3f);
 
 //    rootBone->initialRotation_ = Quaternion(180, Vector3(0.0, 1.0, 0.0));
 
@@ -823,7 +822,7 @@ void MayaScape::HandleSceneRendered(StringHash eventType, VariantMap &eventData)
 }
 
 void MayaScape::SubscribeToEvents() {
-    // Subscribe HandleUpdate() function for processing update events
+    // Subscribe Materials/LOWPOLY-COLORS.xml function for processing update events
     SubscribeToEvent(E_UPDATE, URHO3D_HANDLER(MayaScape, HandleUpdate));
 
     // Subscribe HandlePostUpdate() function for processing post update events
@@ -1451,6 +1450,8 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 
     if (player_->vehicle_)
     {
+
+
         auto* ui = GetSubsystem<UI>();
         // Get movement controls and assign them to the vehicle component. If UI has a focused element, clear controls
         if (!ui->GetFocusElement())
@@ -1511,6 +1512,9 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
         {
             player_->vehicle_->controls_.Set(CTRL_FORWARD | CTRL_BACK | CTRL_LEFT | CTRL_RIGHT | CTRL_BRAKE, false);
         }
+
+        player_->GetNode()->SetRotation(Quaternion(0.0, player_->vehicle_->GetSteering()*180.0, 0.0));
+
     }
 }
 

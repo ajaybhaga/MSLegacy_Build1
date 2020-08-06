@@ -208,7 +208,7 @@ Node* Sample2D::CreateCharacter(float friction, Vector3 position, int type)
 //    Quaternion qAdjRot(0, Vector3(1,0,0) ); // rotate it by 180
 
 
-    adjustNode->SetRotation( Quaternion(40.0, 0.0,0.0) );
+    adjustNode->SetRotation( Quaternion(20.0, 0.0,0.0) );
     // Set dog in front of cart
     adjustNode->SetPosition(Vector3(0.3f, 0.8f, 1.4f));
 
