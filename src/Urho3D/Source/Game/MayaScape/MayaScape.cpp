@@ -412,12 +412,33 @@ void MayaScape::CreateScene() {
         Node* adjNode = objectNode->CreateChild("AdjNode");
         adjNode->SetRotation(Quaternion(0.0, 0.0, -90.0f));
 
-        objectNode->SetScale(3.0f);
-
-
+        objectNode->SetScale(3.5f);
 
         auto* object = adjNode->CreateComponent<StaticModel>();
-        object->SetModel(cache->GetResource<Model>("Models/AssetPack/tree-baobab_orange.mdl"));
+
+        // Random
+        int r = std::round(Random(0.0f, 5.0f));
+        switch (r) {
+            case 0:
+                object->SetModel(cache->GetResource<Model>("Models/AssetPack/tree-baobab_orange.mdl"));
+                break;
+            case 1:
+                object->SetModel(cache->GetResource<Model>("Models/AssetPack/tree-birch02.mdl"));
+                break;
+            case 2:
+                object->SetModel(cache->GetResource<Model>("Models/AssetPack/tree-elipse.mdl"));
+                break;
+            case 3:
+                object->SetModel(cache->GetResource<Model>("Models/AssetPack/tree-fir.mdl"));
+                break;
+            case 4:
+                object->SetModel(cache->GetResource<Model>("Models/AssetPack/tree-oak.mdl"));
+                break;
+            case 5:
+                object->SetModel(cache->GetResource<Model>("Models/AssetPack/tree-lime.mdl"));
+                break;
+        }
+
  //       object->SetMaterial(cache->GetResource<Material>("Materials/LOWPOLY_COLORS.xml")
         object->SetMaterial(cache->GetResource<Material>("Materials/LOWPOLY-COLORS.xml"));
         object->SetCastShadows(true);
@@ -430,9 +451,9 @@ void MayaScape::CreateScene() {
 
     //camera->SetOrthographic(true);
     //camera->SetOrthoSize((float)graphics->GetHeight() * PIXEL_SIZE);
-    camera->SetZoom(0.1f * Min((float) graphics->GetWidth() / 1280.0f, (float) graphics->GetHeight() /
-                                                                       800.0f)); // Set zoom according to user's resolution to ensure full visibility (initial zoom (2.0) is set for full visibility at 1280x800 resolution)
-    camera->SetFarClip(300.0f);
+    camera->SetZoom(0.1f * Min((float) graphics->GetWidth() / 1080.0f, (float) graphics->GetHeight() /
+                                                                       768.0f)); // Set zoom according to user's resolution to ensure full visibility (initial zoom (2.0) is set for full visibility at 1280x800 resolution)
+    camera->SetFarClip(400.0f);
 
     UI *ui = GetSubsystem<UI>();
 
@@ -633,6 +654,7 @@ void MayaScape::CreateScene() {
         modelNode = sample2D_->CreateCharacter(0.0f, Vector3(3.5f + Random(-agentDropBoxSize, agentDropBoxSize), 80.0f, 0.0f + Random(-agentDropBoxSize, agentDropBoxSize)), 2);
         agents_[i] = modelNode->CreateComponent<Character2D>(); // Create a logic component to handle character behavior
         agents_[i]->agentIndex = i;
+
 
         // Create the vehicle logic component
         agents_[i]->vehicle_ = modelNode->CreateComponent<Vehicle>();
@@ -1537,7 +1559,7 @@ void MayaScape::HandlePostUpdate(StringHash eventType, VariantMap &eventData) {
     dir = dir * Quaternion(player_->vehicle_->controls_.yaw_, Vector3::UP);
     dir = dir * Quaternion(player_->vehicle_->controls_.pitch_, Vector3::RIGHT);
     Vector3 cameraTargetPos =
-            vehicleNode->GetPosition() - dir * Vector3(0.0f, 0.0f, CAMERA_DISTANCE);
+            vehicleNode->GetPosition() - dir * Vector3(0.0f, -4.0f, CAMERA_DISTANCE);
     Vector3 cameraStartPos = vehicleNode->GetPosition();
     // Raycast camera against static objects (physics collision mask 2)
     // and move it closer to the vehicle if something in between
