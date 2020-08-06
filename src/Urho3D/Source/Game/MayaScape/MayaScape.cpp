@@ -1452,12 +1452,15 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 
     i++;
     playerInfo.clear();
-    sprintf(str, "%.2f, %.2f, %.2f", EvolutionManager::getInstance()->getAgents()[0]->getPosition().x_,
-            EvolutionManager::getInstance()->getAgents()[0]->getPosition().y_,
-            EvolutionManager::getInstance()->getAgents()[0]->getPosition().z_);
-    playerInfo.append("Evolution Manager: agent[0]->position -> ").append(str);
-    debugText_[i]->SetText(playerInfo.c_str());
-
+/*
+    if (player_->vehicle_->rvehicle_) {
+        sprintf(str, "%.2f, %.2f, %.2f, %.2f", player_->vehicle_->rvehicle_->GetEngineForce(3),
+                player_->vehicle_->rvehicle_->GetEngineForce(4),
+                player_->vehicle_->rvehicle_->WheelIsGrounded(3), player_->vehicle_->rvehicle_->WheelIsGrounded(4));
+        playerInfo.append("Vehicle [engine. ground] -> ").append(str);
+        debugText_[i]->SetText(playerInfo.c_str());
+    }
+*/
 
     i++;
     playerInfo.clear();
@@ -1473,6 +1476,12 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
     if (player_->vehicle_)
     {
 
+        if (player_->vehicle_->vehicleCreated_) {
+        /*    sprintf(str, "%.2f, %.2f, %.2f, %.2f", player_->vehicle_->rvehicle_->GetEngineForce(3),
+                    player_->vehicle_->rvehicle_->GetEngineForce(4),
+                    player_->vehicle_->rvehicle_->WheelIsGrounded(3), player_->vehicle_->rvehicle_->WheelIsGrounded(4));
+        */
+         }
 
         auto* ui = GetSubsystem<UI>();
         // Get movement controls and assign them to the vehicle component. If UI has a focused element, clear controls

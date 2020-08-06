@@ -40,7 +40,7 @@
 
 using namespace Urho3D;
 
-const float CHASSIS_WIDTH = 4.2f;
+const float CHASSIS_WIDTH = 5.0f;
 
 void Vehicle::RegisterObject(Context* context)
 {
@@ -58,7 +58,7 @@ Vehicle::Vehicle(Urho3D::Context* context)
     engineForce_ = 0.0f;
     brakingForce_ = 50.0f;
     vehicleSteering_ = 0.0f;
-    maxEngineForce_ = 2500.0f;
+    maxEngineForce_ = 4500.0f;
     wheelRadius_ = 0.5f;
     suspensionRestLength_ = 0.6f;
     wheelWidth_ = 0.4f;
@@ -67,7 +67,8 @@ Vehicle::Vehicle(Urho3D::Context* context)
     suspensionCompression_ = 4.0f;
     wheelFriction_ = 1000.0f;
     rollInfluence_ = 0.12f;
-    emittersCreated = false;
+    emittersCreated_ = false;
+    vehicleCreated_ = false;
 }
 
 Vehicle::~Vehicle() = default;
@@ -75,6 +76,8 @@ Vehicle::~Vehicle() = default;
 void Vehicle::Init()
 {
     auto* vehicle = node_->CreateComponent<RaycastVehicle>();
+    rvehicle_ = vehicle;
+
     vehicle->Init();
     auto* hullBody = node_->GetComponent<RigidBody>();
 //    hullBody->SetMass(800.0f);
@@ -86,26 +89,26 @@ void Vehicle::Init()
     // This function is called only from the main program when initially creating the vehicle, not on scene load
     auto* cache = GetSubsystem<ResourceCache>();
     auto* adjNode_ = node_->CreateChild();
-    adjNode_->SetRotation(Quaternion(0.0f, 90.0f, 0.0f));
+    adjNode_->SetRotation(Quaternion(0.0f, 90.0f, -90.0f));
     adjNode_->SetPosition(Vector3(0.0f, 0.0f, -2.0f));
-    adjNode_->SetScale(Vector3(1.5f, 1.0f, 1.0f));
+    adjNode_->SetScale(Vector3(1.0f, 1.0f, 1.0f));
     auto* hullObject = adjNode_->CreateComponent<StaticModel>();
     // Setting-up collision shape
     auto* hullColShape = node_->CreateComponent<CollisionShape>();
     Vector3 v3BoxExtents = Vector3::ONE;
     hullColShape->SetBox(v3BoxExtents);
-    node_->SetScale(Vector3(2.3f, 1.0f, 4.0f));
+    node_->SetScale(Vector3(3.0f, 3.0f, 3.0f));
 
 //    pWheel->SetModel(cache->GetResource<Model>("Models/AssetPack/sun.mdl"));
 //        pWheel->SetModel(cache->GetResource<Model>("Models/Cylinder.mdl"));
 //    pWheel->SetMaterial(cache->GetResource<Material>("Materials/LOWPOLY-COLORS.xml"));
-    hullObject->SetModel(cache->GetResource<Model>("Models/AssetPack/surf.mdl"));
+    hullObject->SetModel(cache->GetResource<Model>("Models/AssetPack/car-baywatch.mdl"));
     hullObject->SetMaterial(cache->GetResource<Material>("Materials/LOWPOLY-COLORS.xml"));
 
 //    hullObject->SetModel(cache->GetResource<Model>("Models/Box.mdl"));
 //    hullObject->SetMaterial(cache->GetResource<Material>("Materials/Stone.xml"));
     hullObject->SetCastShadows(true);
-    float connectionHeight = -0.4f;
+    float connectionHeight = 1.3f;
     bool isFrontWheel = true;
     Vector3 wheelDirection(0, -1, 0);
     Vector3 wheelAxle(-1, 0, 0);
@@ -114,13 +117,13 @@ void Vehicle::Init()
     // Note we don't set wheel nodes as children of hull (while we could) to avoid scaling to affect them.
     float wheelX = CHASSIS_WIDTH / 2.0f - wheelWidth_;
     // Front left
-    connectionPoints_[0] = Vector3(-wheelX, connectionHeight, 4.5f - GetWheelRadius() * 2.0f);
+    connectionPoints_[0] = Vector3(-wheelX, connectionHeight, 0.2f - GetWheelRadius() * 2.0f);
     // Front right
-    connectionPoints_[1] = Vector3(wheelX, connectionHeight, 4.5f - GetWheelRadius() * 2.0f);
+    connectionPoints_[1] = Vector3(wheelX, connectionHeight, 0.2f - GetWheelRadius() * 2.0f);
     // Back left
-    connectionPoints_[2] = Vector3(-wheelX, connectionHeight, -4.5f + GetWheelRadius() * 2.0f);
+    connectionPoints_[2] = Vector3(-wheelX, connectionHeight, -11.5f + GetWheelRadius() * 2.0f);
     // Back right
-    connectionPoints_[3] = Vector3(wheelX, connectionHeight, -4.5f + GetWheelRadius() * 2.0f);
+    connectionPoints_[3] = Vector3(wheelX, connectionHeight, -11.5f + GetWheelRadius() * 2.0f);
     const Color LtBrown(0.972f, 0.780f, 0.412f);
     for (int id = 0; id < sizeof(connectionPoints_) / sizeof(connectionPoints_[0]); id++)
     {
@@ -130,7 +133,7 @@ void Vehicle::Init()
         // back wheels are at z < 0
         // Setting rotation according to wheel position
         bool isFrontWheel = connectionPoints_[id].z_ > 0.0f;
-        wheelNode->SetRotation(connectionPoint.x_ >= 0.0 ? Quaternion(0.0f, 0.0f, -90.0f) : Quaternion(0.0f, 0.0f, 90.0f));
+        wheelNode->SetRotation(connectionPoint.x_ >= 0.0 ? Quaternion(0.0f, 0.0f, -180.0f) : Quaternion(0.0f, 0.0f, 180.0f));
         wheelNode->SetWorldPosition(node_->GetWorldPosition() + node_->GetWorldRotation() * connectionPoints_[id]);
         vehicle->AddWheel(wheelNode, wheelDirection, wheelAxle, suspensionRestLength_, wheelRadius_, isFrontWheel);
         vehicle->SetWheelSuspensionStiffness(id, suspensionStiffness_);
@@ -138,17 +141,42 @@ void Vehicle::Init()
         vehicle->SetWheelDampingCompression(id, suspensionCompression_);
         vehicle->SetWheelFrictionSlip(id, wheelFriction_);
         vehicle->SetWheelRollInfluence(id, rollInfluence_);
-        wheelNode->SetScale(Vector3(0.3f, 0.22f, 0.3f));
-        auto* pWheel = wheelNode->CreateComponent<StaticModel>();
+//        wheelNode->SetScale(Vector3(1.0f, 1.0f, 1.0f));
+        wheelNode->SetScale(Vector3(3.0f, 3.0f, 3.0f));
 
-        pWheel->SetModel(cache->GetResource<Model>("Models/AssetPack/sun.mdl"));
+        auto* adjNode_ = wheelNode->CreateChild();
+        adjNode_->SetRotation(Quaternion(0.0f, 90.0f, 0.0f));
+//        adjNode_->SetPosition(Vector3(0.0f, 0.0f, 0.0f));
+//        adjNode_->SetScale(Vector3(4.0f, 4.0f, 4.0f));
+
+        auto* pWheel = adjNode_->CreateComponent<StaticModel>();
+
+        if (isFrontWheel) {
+            if (connectionPoint.x_ < 0.0)
+                pWheel->SetModel(cache->GetResource<Model>("Models/AssetPack/car-baywatch-wheelFrontRight.mdl"));
+
+            if (connectionPoint.x_ >= 0.0)
+                pWheel->SetModel(cache->GetResource<Model>("Models/AssetPack/car-baywatch-wheelFrontLeft.mdl"));
+
+        } else {
+
+            if (connectionPoint.x_ < 0.0)
+                pWheel->SetModel(cache->GetResource<Model>("Models/AssetPack/car-baywatch-wheelBackRight.mdl"));
+
+            if (connectionPoint.x_ >= 0.0)
+                pWheel->SetModel(cache->GetResource<Model>("Models/AssetPack/car-baywatch-wheelBackLeft.mdl"));
+
+        }
+//        pWheel->SetModel(cache->GetResource<Model>("Models/AssetPack/sun.mdl"));
 //        pWheel->SetModel(cache->GetResource<Model>("Models/Cylinder.mdl"));
         pWheel->SetMaterial(cache->GetResource<Material>("Materials/LOWPOLY-COLORS.xml"));
         pWheel->SetCastShadows(true);
         CreateEmitter(connectionPoints_[id]);
     }
-    emittersCreated = true;
+    emittersCreated_ = true;
     vehicle->ResetWheels();
+
+    vehicleCreated_ = true;
 }
 
 void Vehicle::CreateEmitter(Vector3 place)
@@ -167,13 +195,13 @@ void Vehicle::CreateEmitter(Vector3 place)
 void Vehicle::ApplyAttributes()
 {
     auto* vehicle = node_->GetOrCreateComponent<RaycastVehicle>();
-    if (emittersCreated)
+    if (emittersCreated_)
         return;
     for (const auto& connectionPoint : connectionPoints_)
     {
         CreateEmitter(connectionPoint);
     }
-    emittersCreated = true;
+    emittersCreated_ = true;
 }
 
 void Vehicle::FixedUpdate(float timeStep)

@@ -180,6 +180,12 @@
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Sample2D.h">
 			<Option target="MayaScape"/>
 		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Vehicle.cpp">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Vehicle.h">
+			<Option target="MayaScape"/>
+		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/action.cpp">
 			<Option target="MayaScape"/>
 		</Unit>
@@ -285,30 +291,6 @@
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/block.h">
 			<Option target="MayaScape"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/bucket3d.cpp">
-			<Option target="MayaScape"/>
-		</Unit>
-		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/bucket3d.h">
-			<Option target="MayaScape"/>
-		</Unit>
-		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/display.cpp">
-			<Option target="MayaScape"/>
-		</Unit>
-		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/display.h">
-			<Option target="MayaScape"/>
-		</Unit>
-		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/display3d.cpp">
-			<Option target="MayaScape"/>
-		</Unit>
-		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/display3d.h">
-			<Option target="MayaScape"/>
-		</Unit>
-		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/display3ddef.h">
-			<Option target="MayaScape"/>
-		</Unit>
-		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/displaydef.h">
-			<Option target="MayaScape"/>
-		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/fpath.cpp">
 			<Option target="MayaScape"/>
 		</Unit>
@@ -331,9 +313,6 @@
 			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/mapgrid.h">
-			<Option target="MayaScape"/>
-		</Unit>
-		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/mathdef.h">
 			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/move.cpp">
@@ -373,12 +352,6 @@
 			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/stringdef.h">
-			<Option target="MayaScape"/>
-		</Unit>
-		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/terrain.cpp">
-			<Option target="MayaScape"/>
-		</Unit>
-		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/terrain.h">
 			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/terrain/CrowdNavigation.cpp">

@@ -25,6 +25,7 @@
 #include <Urho3D/Input/Controls.h>
 #include <Urho3D/Physics/PhysicsUtils.h>
 #include <Urho3D/Scene/LogicComponent.h>
+#include <Urho3D/Physics/RaycastVehicle.h>
 
 namespace Urho3D
 {
@@ -84,6 +85,10 @@ public :
 
     /// Get wheel width.
     float GetWheelWidth() { return wheelWidth_; }
+    WeakPtr<RaycastVehicle> rvehicle_;
+
+    bool vehicleCreated_;
+
 
 private:
     /// Creates particle emitter.
@@ -115,6 +120,8 @@ private:
     float wheelFriction_;
     /// Wheel roll influence (how much car will turn sidewise)
     float rollInfluence_;
+
+
     /// Emitter data for saving.
     Vector<Node*> particleEmitterNodeList_;
     /// Value to calculate acceleration.
@@ -122,5 +129,6 @@ private:
     /// Storing points for emitters
     Vector3 connectionPoints_[4];
     /// Do not recreate emitters if they are already created.
-    bool emittersCreated;
+    bool emittersCreated_;
+
 };
