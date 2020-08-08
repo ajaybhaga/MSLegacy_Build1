@@ -25,7 +25,7 @@
 #include <Urho3D/Input/Controls.h>
 #include <Urho3D/Scene/LogicComponent.h>
 #include <Urho3D/Graphics/BillboardSet.h>
-#include "Vehicle.h"
+//#include "MayaScape/Vehicle.h"
 
 // All Urho3D classes reside in namespace Urho3D
 using namespace Urho3D;
@@ -88,7 +88,7 @@ public:
     bool doJump_;
 
     /// The controllable vehicle component.
-    WeakPtr<Vehicle> vehicle_;
+//    WeakPtr<Vehicle> vehicle_;
 
     WeakPtr<AnimationController> animCtrl_;
 

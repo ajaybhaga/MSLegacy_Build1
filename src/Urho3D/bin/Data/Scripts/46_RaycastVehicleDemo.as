@@ -296,7 +296,7 @@ class Vehicle:ScriptObject
         hullBody.linearDamping = 0.2f; // Some air resistance
         hullBody.angularDamping = 0.5f;
         hullBody.collisionLayer = 1;
-        RaycastVehicle@ raycastVehicle = node.CreateComponent("RaycastVehicle");
+        RaycastVehicle@ raycastVehicle = node.CreateComponent("BaseVehicle");
         raycastVehicle.Init();
         connectionPoints.Reserve(4);
         float connectionHeight = -0.4f;      //1.2f;
@@ -353,7 +353,7 @@ class Vehicle:ScriptObject
     void CreateEmitters()
     {
         particleEmitterNodeList.Clear();
-        RaycastVehicle@ raycastVehicle = node.GetComponent("RaycastVehicle");
+        RaycastVehicle@ raycastVehicle = node.GetComponent("BaseVehicle");
         for (int id = 0; id < raycastVehicle.numWheels; id++)
         {
             Vector3 connectionPoint = raycastVehicle.GetWheelConnectionPoint(id);
@@ -366,7 +366,7 @@ class Vehicle:ScriptObject
         float newSteering = 0.0f;
         float accelerator = 0.0f;
         bool brake = false;
-        RaycastVehicle@ raycastVehicle = node.GetComponent("RaycastVehicle");
+        RaycastVehicle@ raycastVehicle = node.GetComponent("BaseVehicle");
         if (controls.IsDown(CTRL_LEFT))
             newSteering = -1.0f;
         if (controls.IsDown(CTRL_RIGHT))
@@ -409,7 +409,7 @@ class Vehicle:ScriptObject
     {
         if (particleEmitterNodeList.length == 0)
             return;
-        RaycastVehicle@ raycastVehicle = node.GetComponent("RaycastVehicle");
+        RaycastVehicle@ raycastVehicle = node.GetComponent("BaseVehicle");
         RigidBody@ vehicleBody = node.GetComponent("RigidBody");
         Vector3 velocity = hullBody.linearVelocity;
         Vector3 accel = (velocity - prevVelocity) / timeStep;

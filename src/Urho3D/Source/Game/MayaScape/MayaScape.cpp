@@ -71,7 +71,7 @@
 #include <Urho3D/Physics/CollisionShape.h>
 #include <Urho3D/Physics/Constraint.h>
 #include <Urho3D/Physics/PhysicsWorld.h>
-#include <Urho3D/Physics/RaycastVehicle.h>
+#include <Urho3D/Physics/BaseVehicle.h>
 #include <Urho3D/Physics/RigidBody.h>
 #include <Urho3D/Resource/ResourceCache.h>
 #include <Urho3D/Scene/Scene.h>
@@ -105,9 +105,12 @@
 #include "Object2D.h"
 #include "Sample2D.h"
 #include "Utilities2D/Mover.h"
-#include "Vehicle.h"
 #include "MayaScape.h"
 #include <MayaScape/ai/evolution_manager.h>
+#include "vehicle/63_OffroadVehicle/RaycastVehicle.h"
+#include "MayaScape/Vehicle.h"
+#include "WheelTrackModel.h"
+#include "SmoothStep.h"
 
 
 // AgentSim shared libs
@@ -126,7 +129,9 @@ MayaScape::MayaScape(Context *context) :
     Mover::RegisterObject(context);
     // Register factory and attributes for the Vehicle component so it can be created via CreateComponent, and loaded / saved
     Vehicle::RegisterObject(context);
-
+    // Register factory and attributes for the Vehicle component so it can be created via CreateComponent, and loaded / saved
+    RaycastVehicle::RegisterObject(context);
+    WheelTrackModel::RegisterObject(context);
 }
 
 void MayaScape::Setup() {
@@ -311,6 +316,11 @@ void MayaScape::Start() {
 
     // Create the scene content
     CreateScene();
+
+    CreateVehicle();
+
+    fpsTimer_.Reset();
+    framesCount_ = 0;
     
     UI *ui = GetSubsystem<UI>();
 
@@ -335,16 +345,34 @@ void MayaScape::Stop() {
     Game::Stop();
 }
 
+void MayaScape::CreateVehicle() {
+    Node* vehicleNode = scene_->CreateChild("Vehicle");
+    vehicleNode->SetPosition(Vector3(273.0f, 7.0f, 77.0f));
+
+    // Create the vehicle logic component
+    vehicle_ = vehicleNode->CreateComponent<Vehicle>();
+    vehicle_->Init();
+
+    // smooth step
+    vehicleRot_ = vehicleNode->GetRotation();
+    Quaternion dir(vehicleRot_.YawAngle(), Vector3::UP);
+    dir = dir * Quaternion(vehicle_->controls_.yaw_, Vector3::UP);
+    dir = dir * Quaternion(vehicle_->controls_.pitch_, Vector3::RIGHT);
+    targetCameraPos_ = vehicleNode->GetPosition() - dir * Vector3(0.0f, 0.0f, CAMERA_DISTANCE);
+}
 
 void MayaScape::CreateScene() {
 
 
-    auto* cache = GetSubsystem<ResourceCache>();
+    ResourceCache* cache = GetSubsystem<ResourceCache>();
     scene_ = new Scene(context_);
     // Create scene subsystem components
     scene_->CreateComponent<Octree>();
-    scene_->CreateComponent<PhysicsWorld>();
-    scene_->CreateComponent<DebugRenderer>();
+
+    PhysicsWorld *pPhysicsWorld = scene_->CreateComponent<PhysicsWorld>();
+    DebugRenderer *dbgRenderer = scene_->CreateComponent<DebugRenderer>();
+    pPhysicsWorld->SetDebugRenderer(dbgRenderer);
+
     // Create camera and define viewport. We will be doing load / save, so it's convenient to create the camera outside the scene,
     // so that it won't be destroyed and recreated, and we don't have to redefine the viewport on load
     cameraNode_ = new Node(context_);
@@ -352,53 +380,57 @@ void MayaScape::CreateScene() {
     camera->SetFarClip(500.0f);
     GetSubsystem<Renderer>()->SetViewport(0, new Viewport(context_, scene_, camera));
 
-
-//    scene_ = new Scene(context_);
-    sample2D_->scene_ = scene_;
-//    scene_->CreateComponent<PhysicsWorld2D>();
-
-    // Create camera
-//    cameraNode_ = scene_->CreateChild("Camera");
-//    auto *camera = cameraNode_->CreateComponent<Camera>();
-//    camera->SetOrthographic(true);
-
-    auto *graphics = GetSubsystem<Graphics>();
-
-
     // Create static scene content. First create a zone for ambient lighting and fog control
     Node* zoneNode = scene_->CreateChild("Zone");
-    auto* zone = zoneNode->CreateComponent<Zone>();
+    Zone* zone = zoneNode->CreateComponent<Zone>();
     zone->SetAmbientColor(Color(0.15f, 0.15f, 0.15f));
     zone->SetFogColor(Color(0.5f, 0.5f, 0.7f));
     zone->SetFogStart(300.0f);
     zone->SetFogEnd(500.0f);
     zone->SetBoundingBox(BoundingBox(-2000.0f, 2000.0f));
+
     // Create a directional light with cascaded shadow mapping
     Node* lightNode = scene_->CreateChild("DirectionalLight");
     lightNode->SetDirection(Vector3(0.3f, -0.5f, 0.425f));
-    auto* light = lightNode->CreateComponent<Light>();
+    Light* light = lightNode->CreateComponent<Light>();
     light->SetLightType(LIGHT_DIRECTIONAL);
     light->SetCastShadows(true);
     light->SetShadowBias(BiasParameters(0.00025f, 0.5f));
     light->SetShadowCascade(CascadeParameters(10.0f, 50.0f, 200.0f, 0.0f, 0.8f));
     light->SetSpecularIntensity(0.5f);
+
+    sample2D_->scene_ = scene_;
+///
+
     // Create heightmap terrain with collision
     Node* terrainNode = scene_->CreateChild("Terrain");
     terrainNode->SetPosition(Vector3::ZERO);
-    auto* terrain = terrainNode->CreateComponent<Terrain>();
+    Terrain* terrain = terrainNode->CreateComponent<Terrain>();
     terrain->SetPatchSize(64);
-    terrain->SetSpacing(Vector3(3.0f, 0.1f, 3.0f)); // Spacing between vertices and vertical resolution of the height map
-    terrain->SetSmoothing(true);
+    terrain->SetSpacing(Vector3(2.8f, 0.12f, 2.8f));
+//    terrain->SetSpacing(Vector3(3.0f, 0.1f, 3.0f)); // Spacing between vertices and vertical resolution of the height map
+
+    //    terrain->SetHeightMap(cache->GetResource<Image>("Offroad/Terrain/HeightMapRace-257.png"));
+//    terrain->SetMaterial(cache->GetResource<Material>("Offroad/Terrain/TerrainRace-256.xml"));
     terrain->SetHeightMap(cache->GetResource<Image>("Textures/HeightMap.png"));
     terrain->SetMaterial(cache->GetResource<Material>("Materials/Terrain.xml"));
-    // The terrain consists of large triangles, which fits well for occlusion rendering, as a hill can occlude all
-    // terrain patches and other objects behind it
+
     terrain->SetOccluder(true);
+
+    RigidBody* body = terrainNode->CreateComponent<RigidBody>();
+    body->SetCollisionLayer(2); // Use layer bitmask 2 for static geometry
+    CollisionShape* shape = terrainNode->CreateComponent<CollisionShape>();
+    shape->SetTerrain();
+///
+    auto *graphics = GetSubsystem<Graphics>();
+
+    /*
     auto* body = terrainNode->CreateComponent<RigidBody>();
     body->SetCollisionLayer(2); // Use layer bitmask 2 for static geometry
     auto* shape =
             terrainNode->CreateComponent<CollisionShape>();
-    shape->SetTerrain();
+    shape->SetTerrain();*/
+
     // Create 1000 mushrooms in the terrain. Always face outward along the terrain normal
     const unsigned NUM_MUSHROOMS = 1000;
     for (unsigned i = 0; i < NUM_MUSHROOMS; ++i)
@@ -637,9 +669,9 @@ void MayaScape::CreateScene() {
     //        Node* vehicleNode = scene_->CreateChild("Vehicle");
 //        vehicleNode->SetPosition(Vector3(0.0f, 25.0f, 0.0f));
     // Create the vehicle logic component
-    player_->vehicle_ = modelNode->CreateComponent<Vehicle>();
+//    player_->vehicle_ = modelNode->CreateComponent<Vehicle>();
     // Create the rendering and physics components
-    player_->vehicle_->Init();
+ //   player_->vehicle_->Init();
 
     player_->GetNode()->SetName("Bear-P1");
     player_->isAI_ = false;
@@ -657,9 +689,9 @@ void MayaScape::CreateScene() {
 
 
         // Create the vehicle logic component
-        agents_[i]->vehicle_ = modelNode->CreateComponent<Vehicle>();
+     //   agents_[i]->vehicle_ = modelNode->CreateComponent<Vehicle>();
         // Create the rendering and physics components
-        agents_[i]->vehicle_->Init();
+    //    agents_[i]->vehicle_->Init();
 
         String name = String("AI-Bear-P") + String(i);
         agents_[i]->GetNode()->SetName(name.CString());
@@ -1452,36 +1484,168 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 
     i++;
     playerInfo.clear();
-/*
-    if (player_->vehicle_->rvehicle_) {
-        sprintf(str, "%.2f, %.2f, %.2f, %.2f", player_->vehicle_->rvehicle_->GetEngineForce(3),
-                player_->vehicle_->rvehicle_->GetEngineForce(4),
-                player_->vehicle_->rvehicle_->WheelIsGrounded(3), player_->vehicle_->rvehicle_->WheelIsGrounded(4));
-        playerInfo.append("Vehicle [engine. ground] -> ").append(str);
-        debugText_[i]->SetText(playerInfo.c_str());
-    }
-*/
-
-    i++;
-    playerInfo.clear();
-    sprintf(str, "%d", EvolutionManager::getInstance()->agentsAliveCount);
-    playerInfo.append("Evolution Manager: agentsAliveCount -> ").append(str);
-    debugText_[i]->SetText(playerInfo.c_str());
 
 
     //URHO3D_LOGINFOF("player_ position x=%f, y=%f, z=%f", player_->GetNode()->GetPosition().x_, player_->GetNode()->GetPosition().y_, player_->GetNode()->GetPosition().z_);
 
     //
 
-    if (player_->vehicle_)
-    {
 
-        if (player_->vehicle_->vehicleCreated_) {
-        /*    sprintf(str, "%.2f, %.2f, %.2f, %.2f", player_->vehicle_->rvehicle_->GetEngineForce(3),
-                    player_->vehicle_->rvehicle_->GetEngineForce(4),
-                    player_->vehicle_->rvehicle_->WheelIsGrounded(3), player_->vehicle_->rvehicle_->WheelIsGrounded(4));
+
+    using namespace Update;
+
+    if (vehicle_)
+    {
+        UI* ui = GetSubsystem<UI>();
+
+        // Get movement controls and assign them to the vehicle component. If UI has a focused element, clear controls
+        if (!ui->GetFocusElement())
+        {
+            const int CTRL_SPACE = 16;
+
+            vehicle_->controls_.Set(CTRL_FORWARD, input->GetKeyDown(KEY_W));
+            vehicle_->controls_.Set(CTRL_BACK, input->GetKeyDown(KEY_S));
+            vehicle_->controls_.Set(CTRL_LEFT, input->GetKeyDown(KEY_A));
+            vehicle_->controls_.Set(CTRL_RIGHT, input->GetKeyDown(KEY_D));
+            vehicle_->controls_.Set(CTRL_SPACE, input->GetKeyDown(KEY_SPACE));
+
+            // Add yaw & pitch from the mouse motion or touch input. Used only for the camera, does not affect motion
+            if (touchEnabled_)
+            {
+                for (unsigned i = 0; i < input->GetNumTouches(); ++i)
+                {
+                    TouchState* state = input->GetTouch(i);
+                    if (!state->touchedElement_)    // Touch on empty space
+                    {
+                        Camera* camera = cameraNode_->GetComponent<Camera>();
+                        if (!camera)
+                            return;
+
+                        Graphics* graphics = GetSubsystem<Graphics>();
+                        vehicle_->controls_.yaw_ += TOUCH_SENSITIVITY * camera->GetFov() / graphics->GetHeight() * state->delta_.x_;
+                        vehicle_->controls_.pitch_ += TOUCH_SENSITIVITY * camera->GetFov() / graphics->GetHeight() * state->delta_.y_;
+                    }
+                }
+            }
+            else
+            {
+                vehicle_->controls_.yaw_ += (float)input->GetMouseMoveX() * YAW_SENSITIVITY;
+                vehicle_->controls_.pitch_ += (float)input->GetMouseMoveY() * YAW_SENSITIVITY;
+            }
+            // Limit pitch
+            vehicle_->controls_.pitch_ = Clamp(vehicle_->controls_.pitch_, 0.0f, 80.0f);
+
+        }
+        else
+            vehicle_->controls_.Set(CTRL_FORWARD | CTRL_BACK | CTRL_LEFT | CTRL_RIGHT, false);
+
+        // speed
+        char buff[20];
+
+        if (1)
+        {
+            float spd = vehicle_->GetSpeedKmH();
+            if (spd<0.0f) spd = 0.0f;
+            sprintf(buff, "%.0f KmH", spd);
+        }
+        else
+        {
+            float spd = vehicle_->GetSpeedMPH();
+            if (spd<0.0f) spd = 0.0f;
+            sprintf(buff, "%.0f MPH", spd);
+        }
+        String data(buff);
+        int gear = vehicle_->GetCurrentGear() + 1;
+        data += String("\ngear: ") + String(gear);
+        float rpm = vehicle_->GetCurrentRPM();
+        sprintf(buff, ", %.0f RPM", rpm);
+        data += String(buff);
+        textKmH_->SetText( data );
+
+
+/*        sprintf(str, "%.2f, %.2f, %.2f, %.2f", player_->,
+                player_->vehicle_->rvehicle_->GetEngineForce(4),
+                player_->vehicle_->rvehicle_->WheelIsGrounded(3), player_->vehicle_->rvehicle_->WheelIsGrounded(4));
+        playerInfo.append("Vehicle [engine. ground] -> ").append(str);*/
+        debugText_[i]->SetText(data);
+
+        /*
+        i++;
+        playerInfo.clear();
+        sprintf(str, "%d", EvolutionManager::getInstance()->agentsAliveCount);
+        playerInfo.append("Evolution Manager: agentsAliveCount -> ").append(str);
+        debugText_[i]->SetText(playerInfo.c_str());
+
         */
-         }
+
+
+
+
+
+        // up right
+        if (input->GetKeyPress(KEY_BACKSPACE))
+        {
+            Node* vehicleNode = vehicle_->GetNode();
+
+            // qualify vehicle orientation
+            Vector3 v3Up = vehicleNode->GetWorldUp();
+            float fUp = v3Up.DotProduct( Vector3::UP );
+
+            if ( v3Up.y_ < 0.1f )
+            {
+                // maintain its orientation
+                Vector3 vPos = vehicleNode->GetWorldPosition();
+                Vector3 vForward = vehicle_->GetNode()->GetDirection();
+                Quaternion qRot;
+                qRot.FromLookRotation( vForward );
+
+                vPos += Vector3::UP * 3.0f;
+                vehicleNode->SetTransform( vPos, qRot );
+                vehicle_->ResetForces();
+            }
+        }
+
+    }
+
+    // Toggle physics debug geometry with space
+    if ( input->GetKeyPress(KEY_F5))
+    {
+        drawDebug_ = !drawDebug_;
+    }
+
+    // stat
+#ifdef SHOW_STATS
+    framesCount_++;
+    if ( fpsTimer_.GetMSec(false) >= ONE_SEC_DURATION )
+    {
+        Renderer *renderer = GetSubsystem<Renderer>();
+        String stat;
+
+        stat.AppendWithFormat( "tris: %d fps: %d",
+                               renderer->GetNumPrimitives(),
+                               framesCount_);
+
+        #ifdef SHOW_CAM_POS
+        String x, y, z;
+        char buff[20];
+        sprintf(buff, ", cam: %.1f, ", cameraNode_->GetPosition().x_);
+        x = String(buff);
+        sprintf(buff, "%.1f, ", cameraNode_->GetPosition().y_);
+        y = String(buff);
+        sprintf(buff, "%.1f", cameraNode_->GetPosition().z_);
+        z = String(buff);
+        stat += x + y + z;
+        #endif
+
+        textStatus_->SetText(stat);
+        framesCount_ = 0;
+        fpsTimer_.Reset();
+    }
+#endif
+
+/*
+    if (player_->vehicle_)
+        {
 
         auto* ui = GetSubsystem<UI>();
         // Get movement controls and assign them to the vehicle component. If UI has a focused element, clear controls
@@ -1546,7 +1710,7 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 
         player_->GetNode()->SetRotation(Quaternion(0.0, player_->vehicle_->GetSteering()*180.0, 0.0));
 
-    }
+    }*/
 }
 
 void MayaScape::HandlePostUpdate(StringHash eventType, VariantMap &eventData) {
@@ -1557,7 +1721,57 @@ void MayaScape::HandlePostUpdate(StringHash eventType, VariantMap &eventData) {
    /* cameraNode_->SetPosition(Vector3(character2DNode->GetPosition().x_, character2DNode->GetPosition().y_,
                                      -10.0f)); // Camera tracks character
 */
-     //
+
+
+    if (vehicle_) {
+
+        using namespace Update;
+        float timeStep = eventData[P_TIMESTEP].GetFloat();
+
+        Node *vehicleNode = vehicle_->GetNode();
+
+        // smooth step
+        const float rotLerpRate = 10.0f;
+        const float maxVel = 50.0f;
+        const float damping = 0.2f;
+
+        // Physics update has completed. Position camera behind vehicle
+        vehicleRot_ = SmoothStepAngle(vehicleRot_, vehicleNode->GetRotation(), timeStep * rotLerpRate);
+        Quaternion dir(vehicleRot_.YawAngle(), Vector3::UP);
+        dir = dir * Quaternion(vehicle_->controls_.yaw_, Vector3::UP);
+        dir = dir * Quaternion(vehicle_->controls_.pitch_, Vector3::RIGHT);
+
+        Vector3 vehiclePos = vehicleNode->GetPosition();
+        float curDist = (vehiclePos - targetCameraPos_).Length();
+
+        curDist = SpringDamping(curDist, CAMERA_DISTANCE, springVelocity_, damping, maxVel, timeStep);
+        targetCameraPos_ = vehiclePos - dir * Vector3(0.0f, 0.0f, curDist);
+
+        Vector3 cameraTargetPos = targetCameraPos_;
+        Vector3 cameraStartPos = vehiclePos;
+
+        // Raycast camera against static objects (physics collision mask 2)
+        // and move it closer to the vehicle if something in between
+        Ray cameraRay(cameraStartPos, cameraTargetPos - cameraStartPos);
+        float cameraRayLength = (cameraTargetPos - cameraStartPos).Length();
+        PhysicsRaycastResult result;
+        scene_->GetComponent<PhysicsWorld>()->RaycastSingle(result, cameraRay, cameraRayLength, 2);
+        if (result.body_)
+            cameraTargetPos = cameraStartPos + cameraRay.direction_ * (result.distance_ - 0.5f);
+
+        cameraNode_->SetPosition(cameraTargetPos);
+        cameraNode_->SetRotation(dir);
+
+        if (drawDebug_) {
+            scene_->GetComponent<PhysicsWorld>()->DrawDebugGeometry(true);
+
+            vehicle_->DebugDraw(Color::MAGENTA);
+        }
+
+    }
+
+/*
+    //
     if (!player_->vehicle_)
     {
         return;
@@ -1581,7 +1795,8 @@ void MayaScape::HandlePostUpdate(StringHash eventType, VariantMap &eventData) {
         cameraTargetPos = cameraStartPos + cameraRay.direction_ * (result.distance_ - 0.5f);
     }
     cameraNode_->SetPosition(cameraTargetPos);
-    cameraNode_->SetRotation(dir);
+    cameraNode_->SetRotation(dir);*/
+
 }
 
 void MayaScape::HandlePostRenderUpdate(StringHash eventType, VariantMap &eventData) {

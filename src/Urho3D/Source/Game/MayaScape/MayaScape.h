@@ -71,6 +71,8 @@ private:
     /// Construct the scene content.
     void CreateScene();
 
+    void CreateVehicle();
+
     /// Subscribe to application-wide logic update events.
     void SubscribeToEvents();
     /// Handle the logic update event.
@@ -124,4 +126,21 @@ private:
     #define NUM_DEBUG_FIELDS 8
     // Debug text
     Text* debugText_[NUM_DEBUG_FIELDS];
+
+
+    /// The controllable vehicle component.
+    WeakPtr<Vehicle> vehicle_;
+
+    WeakPtr<Text>  textKmH_;
+
+    // smooth step
+    Quaternion     vehicleRot_;
+    Vector3        targetCameraPos_;
+    float          springVelocity_;
+
+    // dbg
+    WeakPtr<Text>  textStatus_;
+    Timer          fpsTimer_;
+    int            framesCount_;
+
 };

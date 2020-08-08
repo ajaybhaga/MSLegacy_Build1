@@ -39,9 +39,8 @@
 #include <Urho3D/Audio/SoundSource3D.h>
 #include <Urho3D/Audio/Sound.h>
 
-#include "vehicle/63_OffroadVehicle/RaycastVehicle.h"
 #include "Vehicle.h"
-
+#include "RaycastVehicle.h"
 #include "WheelTrackModel.h"
 
 #include <SDL/SDL_log.h>
@@ -169,7 +168,7 @@ void Vehicle::Init()
 {
     ResourceCache* cache = GetSubsystem<ResourceCache>();
    
-    auto raycastVehicle_ = node_->CreateComponent<RaycastVehicle>();
+    raycastVehicle_ = node_->CreateComponent<BaseVehicle>();
     CollisionShape* hullColShape = node_->CreateComponent<CollisionShape>();
     StaticModel* hullObject = node_->CreateComponent<StaticModel>();
 
@@ -177,8 +176,7 @@ void Vehicle::Init()
     raycastVehicle_->SetLinearDamping(0.2f);
     raycastVehicle_->SetAngularDamping(0.1f);
     raycastVehicle_->SetCollisionLayer(1);
-    raycastVehicle_->AddBodyToWorld();
-
+   
 //    Model *vehModel = cache->GetResource<Model>("Offroad/Models/offroadVehicle.mdl");
     Model *vehModel = cache->GetResource<Model>("Models/Vehicles/Offroad/Models/offroadVehicle.mdl");
 
@@ -254,7 +252,7 @@ void Vehicle::Init()
 
         float wheelDim = m_fwheelRadius*2.0f;
         float wheelThickness = 1.0f;
-        Model *tireModel = cache->GetResource<Model>("Models/Vehicles/Offroad/Models/tire.mdl");
+        Model *tireModel = cache->GetResource<Model>("Offroad/Models/tire.mdl");
         BoundingBox tirebbox = tireModel->GetBoundingBox();
         float tireScaleXZ = wheelDim/tirebbox.Size().x_;
 
@@ -310,7 +308,7 @@ void Vehicle::Init()
     }
 
     // init sound
-    /*engineSoundSrc_ = node_->CreateComponent<SoundSource3D>();
+    engineSoundSrc_ = node_->CreateComponent<SoundSource3D>();
     engineSnd_ = cache->GetResource<Sound>("Offroad/Sounds/engine-prototype.ogg");
     engineSnd_->SetLooped(true);
 
@@ -332,7 +330,7 @@ void Vehicle::Init()
     shockSoundSrc_->SetSoundType(SOUND_EFFECT);
     shockSoundSrc_->SetGain(0.7f);
     shockSoundSrc_->SetDistanceAttenuation( 1.0f, 30.0f, 0.1f );
-*/
+
     // acceleration sound while in air - most probably want this on
     playAccelerationSoundInAir_ = false;
 }
@@ -802,7 +800,7 @@ void Vehicle::PostUpdateSound(float timeStep)
     // -if shifting rmps sounds off then change the normalization value. for the engine prototype sound, 
     // the pitch sound is low, so it's normalized by diving by 8k instead of 10k
     const float rpmNormalizedForEnginePrototype = 8000.0f;
-    /*engineSoundSrc_->SetFrequency(AUDIO_FIXED_FREQ_44K * curRPM_/rpmNormalizedForEnginePrototype);
+    engineSoundSrc_->SetFrequency(AUDIO_FIXED_FREQ_44K * curRPM_/rpmNormalizedForEnginePrototype);
 
     // shock impact when transitioning from partially off ground (or air borne) to landing
     if ( prevWheelContacts_ <= 2 && playShockImpactSound )
@@ -824,7 +822,7 @@ void Vehicle::PostUpdateSound(float timeStep)
     else
     {
         skidSoundSrc_->Stop();
-    }*/
+    }
 }
 
 void Vehicle::PostUpdateWheelEffects()

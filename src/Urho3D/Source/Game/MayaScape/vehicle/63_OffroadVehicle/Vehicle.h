@@ -23,9 +23,7 @@
 
 #include <Urho3D/Input/Controls.h>
 #include <Urho3D/Scene/LogicComponent.h>
-#include "vehicle/63_OffroadVehicle/RaycastVehicle.h"
-//#include "Character2D.h"
-
+#include "RaycastVehicle.h"
 
 namespace Urho3D
 {
@@ -38,7 +36,7 @@ class SoundSource3D;
 using namespace Urho3D;
 
 class WheelTrackModel;
-//class BaseVehicle;
+class BaseVehicle;
 
 //=============================================================================
 //=============================================================================
@@ -60,18 +58,18 @@ const float MAX_WHEEL_ANGLE = 22.5f;
 //=============================================================================
 // Vehicle component, responsible for physical movement according to controls.
 //=============================================================================
-class Vehicle : public LogicComponent {
-URHO3D_OBJECT(Vehicle, LogicComponent)
+class Vehicle : public LogicComponent
+{
+    URHO3D_OBJECT(Vehicle, LogicComponent)
 
 public:
     /// Construct.
-    Vehicle(Context *context);
-
+    Vehicle(Context* context);
     ~Vehicle();
-
+   
     /// Register object factory and attributes.
-    static void RegisterObject(Context *context);
-
+    static void RegisterObject(Context* context);
+   
     /// Perform post-load after deserialization. Acquire the components from the scene nodes.
     virtual void ApplyAttributes();
 
@@ -80,55 +78,41 @@ public:
 
     /// Handle physics world update. Called by LogicComponent base class.
     virtual void FixedUpdate(float timeStep);
-
     virtual void FixedPostUpdate(float timeStep);
-
     virtual void PostUpdate(float timeStep);
-
-    void ResetForces() {/*
-        raycastVehicle_->ResetForces();
-        raycastVehicle_->SetAngularVelocity( Vector3::ZERO );*/
+   
+    void ResetForces()
+    {
+        raycastVehicle_->ResetForces(); 
+        raycastVehicle_->SetAngularVelocity( Vector3::ZERO );
     }
 
-    float GetSpeedKmH() const { return 0; } //raycastVehicle_->GetCurrentSpeedKmHour(); }
-    float GetSpeedMPH() const { return 0; } //raycastVehicle_->GetCurrentSpeedKmHour()*KMH_TO_MPH; }
-    void SetDbgRender(bool enable) { dbgRender_ = enable; }
-
-    int GetCurrentGear() const { return curGearIdx_; }
-
-    float GetCurrentRPM() const { return curRPM_; }
+    float GetSpeedKmH() const       { return raycastVehicle_->GetCurrentSpeedKmHour(); }
+    float GetSpeedMPH() const       { return raycastVehicle_->GetCurrentSpeedKmHour()*KMH_TO_MPH; }
+    void SetDbgRender(bool enable)  { dbgRender_ = enable; }
+    int GetCurrentGear() const      { return curGearIdx_; }
+    float GetCurrentRPM() const     { return curRPM_; }
 
     void DebugDraw(const Color &color);
 
     /// Movement controls.
     Controls controls_;
-
+   
 protected:
     void UpdateSteering(float newSteering);
-
     void ApplyEngineForces(float accelerator, bool braking);
-
     bool ApplyStiction(float steering, float acceleration, bool braking);
-
     void ApplyDownwardForce();
-
     void AutoCorrectPitchRoll();
-
     void UpdateGear();
-
     void UpdateDrift();
-
     void LimitLinearAndAngularVelocity();
-
     void PostUpdateSound(float timeStep);
-
     void PostUpdateWheelEffects();
 
 protected:
-
-//
-    WeakPtr<RaycastVehicle> raycastVehicle_;
-
+    WeakPtr<BaseVehicle> raycastVehicle_;
+   
     /// Current left/right steering amount (-1 to 1.)
     float steering_;
 

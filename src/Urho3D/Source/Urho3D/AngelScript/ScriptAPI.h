@@ -62,7 +62,7 @@ void RegisterIKAPI(asIScriptEngine* engine);
 #ifdef URHO3D_PHYSICS
 /// Register the Physics library to script.
 void RegisterPhysicsAPI(asIScriptEngine* engine);
-/// Register RaycastVehicle component to script.
+/// Register BaseVehicle component to script.
 void RegisterRaycastVehicleAPI(asIScriptEngine* engine);
 #endif
 #ifdef URHO3D_NAVIGATION
