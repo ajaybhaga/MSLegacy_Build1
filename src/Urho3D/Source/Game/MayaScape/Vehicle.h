@@ -127,7 +127,7 @@ protected:
 protected:
 
 //
-    WeakPtr<RaycastVehicle> raycastVehicle_;
+    SharedPtr<RaycastVehicle> raycastVehicle_;
 
     /// Current left/right steering amount (-1 to 1.)
     float steering_;

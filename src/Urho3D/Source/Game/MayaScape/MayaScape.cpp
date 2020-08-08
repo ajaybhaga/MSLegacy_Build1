@@ -347,7 +347,7 @@ void MayaScape::Stop() {
 
 void MayaScape::CreateVehicle() {
     Node* vehicleNode = scene_->CreateChild("Vehicle");
-    vehicleNode->SetPosition(Vector3(273.0f, 7.0f, 77.0f));
+    vehicleNode->SetPosition(Vector3(273.0f, 40.0f, 77.0f));
 
     // Create the vehicle logic component
     vehicle_ = vehicleNode->CreateComponent<Vehicle>();
@@ -1560,7 +1560,13 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
         float rpm = vehicle_->GetCurrentRPM();
         sprintf(buff, ", %.0f RPM", rpm);
         data += String(buff);
-        textKmH_->SetText( data );
+
+        vehicle_->DebugDraw(Color(1.0, 0.0, 1.0));
+
+       // sprintf(buff, ", %.0f RPM", rpm);
+       // data += String(buff);
+
+        //        textKmH_->SetText( data );
 
 
 /*        sprintf(str, "%.2f, %.2f, %.2f, %.2f", player_->,

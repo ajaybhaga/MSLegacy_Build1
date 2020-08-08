@@ -254,8 +254,16 @@ void Vehicle::Init()
 
         float wheelDim = m_fwheelRadius*2.0f;
         float wheelThickness = 1.0f;
-        Model *tireModel = cache->GetResource<Model>("Models/Vehicles/Offroad/Models/tire.mdl");
+
+
+  //        pWheel->SetModel(cache->GetResource<Model>("Models/AssetPack/sun.mdl"));
+//        pWheel->SetModel(cache->GetResource<Model>("Models/Cylinder.mdl"));
+//        pWheel->SetMaterial(cache->GetResource<Material>("Materials/LOWPOLY-COLORS.xml"));
+
+        Model *tireModel = cache->GetResource<Model>("Offroad/Models/tire.mdl");
         BoundingBox tirebbox = tireModel->GetBoundingBox();
+
+
         float tireScaleXZ = wheelDim/tirebbox.Size().x_;
 
         const Color LtBrown(0.972f,0.780f,0.412f );
@@ -393,6 +401,9 @@ void Vehicle::FixedUpdate(float timeStep)
 //=============================================================================
 void Vehicle::FixedPostUpdate(float timeStep)
 {
+    if (!raycastVehicle_)
+        return;
+
     float curSpdMph = GetSpeedMPH();
 
     // clear contact states
@@ -506,6 +517,8 @@ void Vehicle::FixedPostUpdate(float timeStep)
 //=============================================================================
 void Vehicle::PostUpdate(float timeStep)
 {
+    if (!raycastVehicle_)
+        return;
     float curSpdMph = GetSpeedMPH();
 
     for ( int i = 0; i < raycastVehicle_->GetNumWheels(); i++ )
@@ -561,9 +574,10 @@ void Vehicle::UpdateSteering(float newSteering)
     // apply value
     m_fVehicleSteering = steering_;
 
-    for ( int i = 0; i < 2; ++i )
-    {
-        raycastVehicle_->SetSteeringValue( m_fVehicleSteering, i );
+    if (raycastVehicle_) {
+        for (int i = 0; i < 2; ++i) {
+            raycastVehicle_->SetSteeringValue(m_fVehicleSteering, i);
+        }
     }
 }
 
@@ -578,20 +592,23 @@ void Vehicle::ApplyEngineForces(float accelerator, bool braking)
     m_fBreakingForce = braking?m_fmaxBreakingForce*0.5f:0.0f;
     m_fEngineForce = m_fmaxEngineForce * accelerator * invNumDriveTrains;
 
-    for ( int i = 0; i < numWheels_; ++i )
-    {
-        raycastVehicle_->ApplyEngineForce( m_fEngineForce, i );
+    if (raycastVehicle_) {
+        for (int i = 0; i < numWheels_; ++i) {
+            raycastVehicle_->ApplyEngineForce(m_fEngineForce, i);
 
-        // apply brake to rear wheels only
-        if (i > 1)
-        {
-            raycastVehicle_->SetBrake(m_fBreakingForce, i);
+            // apply brake to rear wheels only
+            if (i > 1) {
+                raycastVehicle_->SetBrake(m_fBreakingForce, i);
+            }
         }
     }
 }
 
 bool Vehicle::ApplyStiction(float steering, float acceleration, bool braking)
 {
+    if (!raycastVehicle_)
+        return false;
+
     const float vel = raycastVehicle_->GetLinearVelocity().Length();
     const float absAccel = Abs(acceleration);
     const float absSteer = Abs(steering);
@@ -603,23 +620,20 @@ bool Vehicle::ApplyStiction(float steering, float acceleration, bool braking)
         setStiction = true;
     }
 
-    // slow down and change rolling friction on stiction
-    for ( int i = 0; i < numWheels_; ++i )
-    {
-        btWheelInfo &wheel = raycastVehicle_->GetWheelInfo( i );
+    if (raycastVehicle_) {
+        // slow down and change rolling friction on stiction
+        for (int i = 0; i < numWheels_; ++i) {
+            btWheelInfo &wheel = raycastVehicle_->GetWheelInfo(i);
 
-        if ( absAccel < M_EPSILON && !braking && vel < MIN_SLOW_DOWN_VEL )
-        {
-            raycastVehicle_->SetBrake( MIN_BRAKE_FORCE, i );
-        }
+            if (absAccel < M_EPSILON && !braking && vel < MIN_SLOW_DOWN_VEL) {
+                raycastVehicle_->SetBrake(MIN_BRAKE_FORCE, i);
+            }
 
-        if ( setStiction )
-        {
-            wheel.m_rollInfluence = Lerp(m_frollInfluence, 1.0f, 1.0f - vel/MIN_STICTION_VEL);
-        }
-        else
-        {
-            wheel.m_rollInfluence = m_frollInfluence;
+            if (setStiction) {
+                wheel.m_rollInfluence = Lerp(m_frollInfluence, 1.0f, 1.0f - vel / MIN_STICTION_VEL);
+            } else {
+                wheel.m_rollInfluence = m_frollInfluence;
+            }
         }
     }
 
@@ -628,20 +642,24 @@ bool Vehicle::ApplyStiction(float steering, float acceleration, bool braking)
 
 void Vehicle::ApplyDownwardForce()
 {
-    // apply downward force when some wheels are grounded
-    if ( numWheelContacts_ > 0 && numWheelContacts_ != numWheels_ )
-    {
-        // small arbitrary multiplier
-        const float velocityMultiplyer = 0.5f;
-        Vector3 downNormal = node_->GetUp() * -1.0f;
-        float velocityMag = raycastVehicle_->GetLinearVelocity().LengthSquared() * velocityMultiplyer;
-        velocityMag = Clamp( velocityMag, MIN_DOWN_FORCE, MAX_DOWN_FORCE );
-        raycastVehicle_->ApplyForce( velocityMag * downNormal  );
+    if (raycastVehicle_) {
+        // apply downward force when some wheels are grounded
+        if (numWheelContacts_ > 0 && numWheelContacts_ != numWheels_) {
+            // small arbitrary multiplier
+            const float velocityMultiplyer = 0.5f;
+            Vector3 downNormal = node_->GetUp() * -1.0f;
+            float velocityMag = raycastVehicle_->GetLinearVelocity().LengthSquared() * velocityMultiplyer;
+            velocityMag = Clamp(velocityMag, MIN_DOWN_FORCE, MAX_DOWN_FORCE);
+            raycastVehicle_->ApplyForce(velocityMag * downNormal);
+        }
     }
 }
 
 void Vehicle::AutoCorrectPitchRoll()
 {
+    if (!raycastVehicle_)
+        return;
+
     // auto correct pitch and roll while air borne
     if (numWheelContacts_ == 0)
     {
@@ -658,19 +676,20 @@ void Vehicle::AutoCorrectPitchRoll()
 
 void Vehicle::LimitLinearAndAngularVelocity()
 {
-    // velocity limit
-    Vector3 linVel = raycastVehicle_->GetLinearVelocity();
-    if ( linVel.Length() > MAX_LINEAR_VEL_LIMIT )
-    {
-        raycastVehicle_->SetLinearVelocity( linVel.Normalized() * MAX_LINEAR_VEL_LIMIT );
-    }
+    if (raycastVehicle_) {
+        // velocity limit
+        Vector3 linVel = raycastVehicle_->GetLinearVelocity();
+        if (linVel.Length() > MAX_LINEAR_VEL_LIMIT) {
+            raycastVehicle_->SetLinearVelocity(linVel.Normalized() * MAX_LINEAR_VEL_LIMIT);
+        }
 
-    // angular velocity limiters
-    Vector3 v3AngVel = raycastVehicle_->GetAngularVelocity();
-    v3AngVel.x_ = Clamp( v3AngVel.x_, -MAX_ANGULAR_VEL_LIMIT,  MAX_ANGULAR_VEL_LIMIT );
-    v3AngVel.y_ = Clamp( v3AngVel.y_, -m_fYAngularVelocity,    m_fYAngularVelocity );
-    v3AngVel.z_ = Clamp( v3AngVel.z_, -MAX_ANGULAR_VEL_LIMIT,  MAX_ANGULAR_VEL_LIMIT );
-    raycastVehicle_->SetAngularVelocity( v3AngVel );
+        // angular velocity limiters
+        Vector3 v3AngVel = raycastVehicle_->GetAngularVelocity();
+        v3AngVel.x_ = Clamp(v3AngVel.x_, -MAX_ANGULAR_VEL_LIMIT, MAX_ANGULAR_VEL_LIMIT);
+        v3AngVel.y_ = Clamp(v3AngVel.y_, -m_fYAngularVelocity, m_fYAngularVelocity);
+        v3AngVel.z_ = Clamp(v3AngVel.z_, -MAX_ANGULAR_VEL_LIMIT, MAX_ANGULAR_VEL_LIMIT);
+        raycastVehicle_->SetAngularVelocity(v3AngVel);
+    }
 }
 
 void Vehicle::UpdateGear()
@@ -719,154 +738,141 @@ void Vehicle::UpdateGear()
 
 void Vehicle::UpdateDrift()
 {
-    // rear wheel slip condition values
-    // -note1: these are rough constants, you may want to re-evaluate them
-    // -note2: changes to center of mass and size of inertia change drift behavior
-    const float slipConditon0 = 0.00f; // ice
-    const float slipConditon1 = 0.01f; // wet pavement
-    const float slipConditon2 = 0.02f; // loose dirt
-    const float slipConditon3 = 0.04f; // dirt
-    const float slipConditon4 = 0.06f; // pavement
+    if (raycastVehicle_) {
+        // rear wheel slip condition values
+        // -note1: these are rough constants, you may want to re-evaluate them
+        // -note2: changes to center of mass and size of inertia change drift behavior
+        const float slipConditon0 = 0.00f; // ice
+        const float slipConditon1 = 0.01f; // wet pavement
+        const float slipConditon2 = 0.02f; // loose dirt
+        const float slipConditon3 = 0.04f; // dirt
+        const float slipConditon4 = 0.06f; // pavement
 
-    // set slip
-    const float slipConditionValue = slipConditon3;
-    const float slipMax = MAX_REAR_SLIP;
-    
-    // for demo purpose, limit the drift speed to provide high speed steering experience w/o any drifting
-    const float maxDriftSpeed = 70.0f;
-    const float absSteeringVal = Abs( raycastVehicle_->GetSteeringValue(0) );
-    const float curSpdMph = GetSpeedMPH();
+        // set slip
+        const float slipConditionValue = slipConditon3;
+        const float slipMax = MAX_REAR_SLIP;
 
-    // set rear wheel slip values
-    for ( int i = 2; i < numWheels_; ++i )
-    {
-        // re-calc the slip value only once
-        if (i == 2)
-        {
-            if ( currentAcceleration_ > 0.0f )
-            {
-                const float slipMin = (curSpdMph < maxDriftSpeed)?slipConditionValue:slipMax;
-                const float slipAdj = Lerp(slipMax, slipMin, absSteeringVal/m_fsteeringClamp);
-                float deltaSlip = slipAdj - m_fRearSlip;
+        // for demo purpose, limit the drift speed to provide high speed steering experience w/o any drifting
+        const float maxDriftSpeed = 70.0f;
+        const float absSteeringVal = Abs(raycastVehicle_->GetSteeringValue(0));
+        const float curSpdMph = GetSpeedMPH();
 
-                m_fRearSlip += deltaSlip * 0.05f;
-                m_fRearSlip = Clamp(m_fRearSlip, slipConditionValue, slipMax);
+        // set rear wheel slip values
+        for (int i = 2; i < numWheels_; ++i) {
+            // re-calc the slip value only once
+            if (i == 2) {
+                if (currentAcceleration_ > 0.0f) {
+                    const float slipMin = (curSpdMph < maxDriftSpeed) ? slipConditionValue : slipMax;
+                    const float slipAdj = Lerp(slipMax, slipMin, absSteeringVal / m_fsteeringClamp);
+                    float deltaSlip = slipAdj - m_fRearSlip;
+
+                    m_fRearSlip += deltaSlip * 0.05f;
+                    m_fRearSlip = Clamp(m_fRearSlip, slipConditionValue, slipMax);
+                } else {
+                    m_fRearSlip = slipMax;
+                }
             }
-            else
-            {
-                m_fRearSlip = slipMax;
-            }
+
+            // set value
+            raycastVehicle_->GetWheelInfo(i).m_sideFrictionStiffness = m_fRearSlip;
         }
-
-        // set value
-        raycastVehicle_->GetWheelInfo(i).m_sideFrictionStiffness = m_fRearSlip;
     }
 }
 
 void Vehicle::PostUpdateSound(float timeStep)
 {
-    int playSkidSound = 0;
-    bool playShockImpactSound = false;
+    if (raycastVehicle_) {
+        int playSkidSound = 0;
+        bool playShockImpactSound = false;
 
-    for ( int i = 0; i < numWheels_; ++i )
-    {
-        const btWheelInfo &whInfo = raycastVehicle_->GetWheelInfo(i);
+        for (int i = 0; i < numWheels_; ++i) {
+            const btWheelInfo &whInfo = raycastVehicle_->GetWheelInfo(i);
 
-        // skid sound
-        if ( whInfo.m_raycastInfo.m_isInContact )
-        {
-            if (whInfo.m_skidInfoCumulative < 0.9f)
-            {
-                playSkidSound++;
-            }
+            // skid sound
+            if (whInfo.m_raycastInfo.m_isInContact) {
+                if (whInfo.m_skidInfoCumulative < 0.9f) {
+                    playSkidSound++;
+                }
 
-            // shock impact
-            if ( !prevWheelInContact_[i] )
-            {
-                Vector3 velAtWheel = raycastVehicle_->GetVelocityAtPoint( raycastVehicle_->GetWheelPositionLS(i) );
-                float downLinVel = velAtWheel.DotProduct( Vector3::DOWN );
+                // shock impact
+                if (!prevWheelInContact_[i]) {
+                    Vector3 velAtWheel = raycastVehicle_->GetVelocityAtPoint(raycastVehicle_->GetWheelPositionLS(i));
+                    float downLinVel = velAtWheel.DotProduct(Vector3::DOWN);
 
-                if ( downLinVel > MIN_SHOCK_IMPACT_VEL )
-                {
-                    playShockImpactSound = true;
+                    if (downLinVel > MIN_SHOCK_IMPACT_VEL) {
+                        playShockImpactSound = true;
+                    }
                 }
             }
+
+            // update prev wheel in contact
+            prevWheelInContact_[i] = whInfo.m_raycastInfo.m_isInContact;
         }
 
-        // update prev wheel in contact
-        prevWheelInContact_[i] = whInfo.m_raycastInfo.m_isInContact;
-    }
+        // -ideally, you want the engine sound to sound like it's at 10k rpm w/o any pitch adjustment, and
+        // we nomralize x to be from 0.1f to 1.0f by dividing by 10k in SetFrequency(AUDIO_FIXED_FREQ_44K * x)
+        // -if shifting rmps sounds off then change the normalization value. for the engine prototype sound,
+        // the pitch sound is low, so it's normalized by diving by 8k instead of 10k
+        const float rpmNormalizedForEnginePrototype = 8000.0f;
+        /*engineSoundSrc_->SetFrequency(AUDIO_FIXED_FREQ_44K * curRPM_/rpmNormalizedForEnginePrototype);
 
-    // -ideally, you want the engine sound to sound like it's at 10k rpm w/o any pitch adjustment, and 
-    // we nomralize x to be from 0.1f to 1.0f by dividing by 10k in SetFrequency(AUDIO_FIXED_FREQ_44K * x)
-    // -if shifting rmps sounds off then change the normalization value. for the engine prototype sound, 
-    // the pitch sound is low, so it's normalized by diving by 8k instead of 10k
-    const float rpmNormalizedForEnginePrototype = 8000.0f;
-    /*engineSoundSrc_->SetFrequency(AUDIO_FIXED_FREQ_44K * curRPM_/rpmNormalizedForEnginePrototype);
-
-    // shock impact when transitioning from partially off ground (or air borne) to landing
-    if ( prevWheelContacts_ <= 2 && playShockImpactSound )
-    {
-        if ( !shockSoundSrc_->IsPlaying() )
+        // shock impact when transitioning from partially off ground (or air borne) to landing
+        if ( prevWheelContacts_ <= 2 && playShockImpactSound )
         {
-            shockSoundSrc_->Play(shockSnd_);
-        }
-    }
-
-    // skid sound
-    if ( playSkidSound > 1 )
-    {
-        if ( !skidSoundSrc_->IsPlaying() )
-        {
-            skidSoundSrc_->Play(skidSnd_);
-        }
-    }
-    else
-    {
-        skidSoundSrc_->Stop();
-    }*/
-}
-
-void Vehicle::PostUpdateWheelEffects()
-{
-    float curSpdMph = GetSpeedMPH();
-    Vector3 linVel = raycastVehicle_->GetLinearVelocity();
-
-    for ( int i = 0; i < raycastVehicle_->GetNumWheels(); ++i )
-    {
-        const btWheelInfo &whInfo = raycastVehicle_->GetWheelInfo( i );
-
-        // wheel skid track and particles
-        wheelTrackList_[i]->UpdateWorldPos();
-        ParticleEmitter *particleEmitter = particleEmitterNodeList_[i]->GetComponent<ParticleEmitter>();
-
-        if ( whInfo.m_raycastInfo.m_isInContact && whInfo.m_skidInfoCumulative < 0.9f )
-        {
-            Vector3 pos2 = ToVector3(whInfo.m_raycastInfo.m_contactPointWS);
-            particleEmitterNodeList_[i]->SetPosition(pos2);
-
-            if ( curSpdMph < MAX_SKID_TRACK_SPEED )
+            if ( !shockSoundSrc_->IsPlaying() )
             {
-                wheelTrackList_[i]->AddStrip( pos2, ToVector3(whInfo.m_raycastInfo.m_contactNormalWS) );
+                shockSoundSrc_->Play(shockSnd_);
             }
-            else
-            {
-                wheelTrackList_[i]->ClearStrip();
-            }
+        }
 
-            // emit dust if moving
-            if ( particleEmitter && !particleEmitter->IsEmitting() && curSpdMph > 2.0f)
+        // skid sound
+        if ( playSkidSound > 1 )
+        {
+            if ( !skidSoundSrc_->IsPlaying() )
             {
-                particleEmitter->SetEmitting( true );
+                skidSoundSrc_->Play(skidSnd_);
             }
         }
         else
         {
-            wheelTrackList_[i]->ClearStrip();
+            skidSoundSrc_->Stop();
+        }*/
+    }
+}
 
-            if ( !wheelTrackList_[i]->InSkidState() && particleEmitter && particleEmitter->IsEmitting() )
-            {
-                particleEmitter->SetEmitting( false );
+void Vehicle::PostUpdateWheelEffects()
+{
+    if (raycastVehicle_) {
+        float curSpdMph = GetSpeedMPH();
+        Vector3 linVel = raycastVehicle_->GetLinearVelocity();
+
+        for (int i = 0; i < raycastVehicle_->GetNumWheels(); ++i) {
+            const btWheelInfo &whInfo = raycastVehicle_->GetWheelInfo(i);
+
+            // wheel skid track and particles
+            wheelTrackList_[i]->UpdateWorldPos();
+            ParticleEmitter *particleEmitter = particleEmitterNodeList_[i]->GetComponent<ParticleEmitter>();
+
+            if (whInfo.m_raycastInfo.m_isInContact && whInfo.m_skidInfoCumulative < 0.9f) {
+                Vector3 pos2 = ToVector3(whInfo.m_raycastInfo.m_contactPointWS);
+                particleEmitterNodeList_[i]->SetPosition(pos2);
+
+                if (curSpdMph < MAX_SKID_TRACK_SPEED) {
+                    wheelTrackList_[i]->AddStrip(pos2, ToVector3(whInfo.m_raycastInfo.m_contactNormalWS));
+                } else {
+                    wheelTrackList_[i]->ClearStrip();
+                }
+
+                // emit dust if moving
+                if (particleEmitter && !particleEmitter->IsEmitting() && curSpdMph > 2.0f) {
+                    particleEmitter->SetEmitting(true);
+                }
+            } else {
+                wheelTrackList_[i]->ClearStrip();
+
+                if (!wheelTrackList_[i]->InSkidState() && particleEmitter && particleEmitter->IsEmitting()) {
+                    particleEmitter->SetEmitting(false);
+                }
             }
         }
     }
@@ -874,6 +880,9 @@ void Vehicle::PostUpdateWheelEffects()
 
 void Vehicle::DebugDraw(const Color &color)
 {
+    if (!raycastVehicle_)
+        return;
+
     DebugRenderer *dbgRenderer = GetScene()->GetComponent<DebugRenderer>();
 
     if ( dbgRenderer )
