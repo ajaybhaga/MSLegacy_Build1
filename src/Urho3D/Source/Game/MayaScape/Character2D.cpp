@@ -200,7 +200,7 @@ void Character2D::Update(float timeStep) {
 
      //URHO3D_LOGINFOF("Terrain anims [%d] time [%f]", animCtrl_->GetAnimations().Size(), animCtrl_->GetTime(WALKING_ANI));
 
-        URHO3D_LOGINFOF("Terrain anims [%d] time [%f]", animCtrl_->GetAnimations().Size(), animCtrl_->GetTime(WALKING_ANI));
+       // URHO3D_LOGINFOF("Terrain anims [%d] time [%f]", animCtrl_->GetAnimations().Size(), animCtrl_->GetTime(WALKING_ANI));
 
         if (animCtrl_->GetTime(WALKING_ANI) > 1.3f) {
             animCtrl_->SetTime(WALKING_ANI, 0.0f);

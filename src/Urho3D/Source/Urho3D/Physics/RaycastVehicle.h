@@ -30,15 +30,15 @@ namespace Urho3D
 {
 struct RaycastVehicleData;
 
-class URHO3D_API BaseVehicle : public LogicComponent
+class URHO3D_API RaycastVehicle : public LogicComponent
 {
-    URHO3D_OBJECT(BaseVehicle, LogicComponent)
+    URHO3D_OBJECT(RaycastVehicle, LogicComponent)
 
 public:
     /// Construct.
-    explicit BaseVehicle(Urho3D::Context* context);
+    explicit RaycastVehicle(Urho3D::Context* context);
     /// Destruct.
-    ~BaseVehicle() override;
+    ~RaycastVehicle() override;
 
     /// Register object factory and attributes.
     static void RegisterObject(Context* context);

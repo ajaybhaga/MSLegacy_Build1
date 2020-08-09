@@ -24,6 +24,8 @@
 #include <Urho3D/Input/Controls.h>
 #include <Urho3D/Scene/LogicComponent.h>
 #include "vehicle/63_OffroadVehicle/RaycastVehicle.h"
+//#include <Urho3D/Physics/RaycastVehicle.h>
+
 //#include "Character2D.h"
 
 
@@ -38,7 +40,7 @@ class SoundSource3D;
 using namespace Urho3D;
 
 class WheelTrackModel;
-//class BaseVehicle;
+class RaycastVehicle;
 
 //=============================================================================
 //=============================================================================
@@ -85,9 +87,9 @@ public:
 
     virtual void PostUpdate(float timeStep);
 
-    void ResetForces() {/*
+    void ResetForces() {
         raycastVehicle_->ResetForces();
-        raycastVehicle_->SetAngularVelocity( Vector3::ZERO );*/
+        raycastVehicle_->SetAngularVelocity( Vector3::ZERO );
     }
 
     float GetSpeedKmH() const { return 0; } //raycastVehicle_->GetCurrentSpeedKmHour(); }
@@ -97,6 +99,10 @@ public:
     int GetCurrentGear() const { return curGearIdx_; }
 
     float GetCurrentRPM() const { return curRPM_; }
+
+    float GetAcceleration() const { return currentAcceleration_; }
+
+    float GetAngularVelocity() const { return m_fYAngularVelocity; }
 
     void DebugDraw(const Color &color);
 
@@ -163,9 +169,9 @@ protected:
 
     // acceleration
     float currentAcceleration_;
-
     // ang velocity limiter
     float   m_fYAngularVelocity;
+
 
     // wheel contacts
     int numWheels_;

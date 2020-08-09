@@ -71,7 +71,7 @@
 #include <Urho3D/Physics/CollisionShape.h>
 #include <Urho3D/Physics/Constraint.h>
 #include <Urho3D/Physics/PhysicsWorld.h>
-#include <Urho3D/Physics/BaseVehicle.h>
+//#include <Urho3D/Physics/RaycastVehicle.h>
 #include <Urho3D/Physics/RigidBody.h>
 #include <Urho3D/Resource/ResourceCache.h>
 #include <Urho3D/Scene/Scene.h>
@@ -318,6 +318,7 @@ void MayaScape::Start() {
     CreateScene();
 
     CreateVehicle();
+   // targetCameraPos_ = Vector3(0.0f, 40.0f, CAMERA_DISTANCE);
 
     fpsTimer_.Reset();
     framesCount_ = 0;
@@ -351,7 +352,7 @@ void MayaScape::CreateVehicle() {
 
     // Create the vehicle logic component
     vehicle_ = vehicleNode->CreateComponent<Vehicle>();
-    vehicle_->Init();
+//    vehicle_->Init();
 
     // smooth step
     vehicleRot_ = vehicleNode->GetRotation();
@@ -474,7 +475,8 @@ void MayaScape::CreateScene() {
  //       object->SetMaterial(cache->GetResource<Material>("Materials/LOWPOLY_COLORS.xml")
         object->SetMaterial(cache->GetResource<Material>("Materials/LOWPOLY-COLORS.xml"));
         object->SetCastShadows(true);
-        auto* body = objectNode->CreateComponent<RigidBody>();
+
+        auto* body = adjNode->CreateComponent<RigidBody>();
         body->SetCollisionLayer(2);
         auto* shape = objectNode->CreateComponent<CollisionShape>();
         shape->SetTriangleMesh(object->GetModel(), 0);
@@ -1561,6 +1563,14 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
         sprintf(buff, ", %.0f RPM", rpm);
         data += String(buff);
 
+        float acc = vehicle_->GetAcceleration();
+        sprintf(buff, ", %.0f Acc", acc);
+        data += String(buff);
+
+        float angvel = vehicle_->GetAngularVelocity();
+        sprintf(buff, ", %.0f Angular Velocity", angvel);
+        data += String(buff);
+
         vehicle_->DebugDraw(Color(1.0, 0.0, 1.0));
 
        // sprintf(buff, ", %.0f RPM", rpm);
@@ -1775,6 +1785,10 @@ void MayaScape::HandlePostUpdate(StringHash eventType, VariantMap &eventData) {
         }
 
     }
+
+//    targetCameraPos_ = Vector3(0.0f, 60.0f, CAMERA_DISTANCE);
+//    cameraNode_->SetPosition(targetCameraPos_);
+    cameraNode_->SetRotation(Quaternion(30.0, 0.0, 0.0));
 
 /*
     //

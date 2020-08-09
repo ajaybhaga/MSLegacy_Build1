@@ -36,7 +36,7 @@ class SoundSource3D;
 using namespace Urho3D;
 
 class WheelTrackModel;
-class BaseVehicle;
+class RaycastVehicle;
 
 //=============================================================================
 //=============================================================================
@@ -111,7 +111,7 @@ protected:
     void PostUpdateWheelEffects();
 
 protected:
-    WeakPtr<BaseVehicle> raycastVehicle_;
+    WeakPtr<RaycastVehicle> raycastVehicle_;
    
     /// Current left/right steering amount (-1 to 1.)
     float steering_;

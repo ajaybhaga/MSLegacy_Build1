@@ -168,7 +168,7 @@ void Vehicle::Init()
 {
     ResourceCache* cache = GetSubsystem<ResourceCache>();
    
-    raycastVehicle_ = node_->CreateComponent<BaseVehicle>();
+    raycastVehicle_ = node_->CreateComponent<RaycastVehicle>();
     CollisionShape* hullColShape = node_->CreateComponent<CollisionShape>();
     StaticModel* hullObject = node_->CreateComponent<StaticModel>();
 

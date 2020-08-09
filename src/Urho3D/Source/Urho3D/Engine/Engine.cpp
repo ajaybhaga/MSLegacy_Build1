@@ -52,7 +52,7 @@
 #endif
 #ifdef URHO3D_PHYSICS
 #include "../Physics/PhysicsWorld.h"
-#include "../Physics/BaseVehicle.h"
+#include "../Physics/RaycastVehicle.h"
 #endif
 #include "../Resource/ResourceCache.h"
 #include "../Resource/Localization.h"

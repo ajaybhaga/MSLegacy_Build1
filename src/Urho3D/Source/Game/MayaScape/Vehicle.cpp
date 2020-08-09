@@ -85,7 +85,7 @@ Vehicle::Vehicle(Context* context)
     // fixed update() for inputs and post update() to sync wheels for rendering
     SetUpdateEventMask( USE_FIXEDUPDATE | USE_FIXEDPOSTUPDATE| USE_POSTUPDATE );
 
-    m_fVehicleMass = 100.0f;
+    m_fVehicleMass = 800.0f;
     m_fEngineForce = 0.0f;
     m_fBreakingForce = 20.0f;
 
@@ -369,11 +369,13 @@ void Vehicle::FixedUpdate(float timeStep)
         accelerator = 0.0f;
     }
 
-    if ( newSteering != 0.0f || accelerator != 0.0f )
-    {
-        raycastVehicle_->Activate();
+    if (raycastVehicle_) {
+        if (newSteering != 0.0f || accelerator != 0.0f) {
+            raycastVehicle_->Activate();
+        }
     }
 
+    /*
     UpdateGear();
 
     UpdateSteering(newSteering);
@@ -393,7 +395,7 @@ void Vehicle::FixedUpdate(float timeStep)
     AutoCorrectPitchRoll();
 
     UpdateDrift();
-
+*/
 }
 
 //=============================================================================
@@ -404,6 +406,7 @@ void Vehicle::FixedPostUpdate(float timeStep)
     if (!raycastVehicle_)
         return;
 
+    /*
     float curSpdMph = GetSpeedMPH();
 
     // clear contact states
@@ -509,7 +512,7 @@ void Vehicle::FixedPostUpdate(float timeStep)
 
         if ( curRPM_ < MIN_IDLE_RPM ) 
             curRPM_ += minIdleRPM_;
-    }
+    }*/
 }
 
 //=============================================================================
@@ -520,6 +523,8 @@ void Vehicle::PostUpdate(float timeStep)
     if (!raycastVehicle_)
         return;
     float curSpdMph = GetSpeedMPH();
+
+    /*
 
     for ( int i = 0; i < raycastVehicle_->GetNumWheels(); i++ )
     {
@@ -543,6 +548,7 @@ void Vehicle::PostUpdate(float timeStep)
     PostUpdateSound(timeStep);
 
     PostUpdateWheelEffects();
+     */
 }
 
 void Vehicle::UpdateSteering(float newSteering)

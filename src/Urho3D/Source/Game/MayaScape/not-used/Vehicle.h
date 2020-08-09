@@ -46,7 +46,7 @@ const float ENGINE_POWER = 10.0f;
 const float MAX_WHEEL_ANGLE = 22.5f;
 
 // Vehicle component, responsible for physical movement according to controls.
-// Encapsulates BaseVehicle
+// Encapsulates RaycastVehicle
 class Vehicle : public LogicComponent
 {
     URHO3D_OBJECT(Vehicle, LogicComponent)
