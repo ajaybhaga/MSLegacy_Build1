@@ -1352,7 +1352,7 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
     GameController *gameController = GetSubsystem<GameController>();
 
     if (player_) {
-        gameController->UpdateControlInputs(player_->controls_);
+        gameController->UpdateControlInputs(vehicle_->controls_);
 
         // **note** the buttons controls are handled in the character class update fn.
 
@@ -1544,11 +1544,18 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
         {
             const int CTRL_SPACE = 16;
 
-            vehicle_->controls_.Set(CTRL_FORWARD, input->GetKeyDown(KEY_W));
+
+     /*       vehicle_->controls_.Set(CTRL_FORWARD, input->GetKeyDown(KEY_W));
             vehicle_->controls_.Set(CTRL_BACK, input->GetKeyDown(KEY_S));
             vehicle_->controls_.Set(CTRL_LEFT, input->GetKeyDown(KEY_A));
             vehicle_->controls_.Set(CTRL_RIGHT, input->GetKeyDown(KEY_D));
             vehicle_->controls_.Set(CTRL_SPACE, input->GetKeyDown(KEY_SPACE));
+*/
+            vehicle_->controls_.Set(CTRL_FORWARD, vehicle_->controls_.IsDown(BUTTON_DPAD_UP));
+            vehicle_->controls_.Set(CTRL_BACK, vehicle_->controls_.IsDown(BUTTON_DPAD_DOWN));
+            vehicle_->controls_.Set(CTRL_LEFT, vehicle_->controls_.IsDown(BUTTON_DPAD_LEFT));
+            vehicle_->controls_.Set(CTRL_RIGHT, vehicle_->controls_.IsDown(BUTTON_DPAD_RIGHT));
+            vehicle_->controls_.Set(CTRL_SPACE, vehicle_->controls_.IsDown(CONTROLLER_BUTTON_X));
 
             // Add yaw & pitch from the mouse motion or touch input. Used only for the camera, does not affect motion
             if (touchEnabled_)
