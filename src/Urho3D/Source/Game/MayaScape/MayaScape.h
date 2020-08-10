@@ -106,6 +106,7 @@ private:
     WeakPtr<Character2D> player_;
     WeakPtr<Character2D> agents_[MAX_AGENTS];
 
+    WeakPtr<Terrain> terrain_;
 
     /// Flag for drawing debug geometry.
     bool drawDebug_{};

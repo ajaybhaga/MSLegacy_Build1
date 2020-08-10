@@ -348,7 +348,7 @@ void MayaScape::Stop() {
 
 void MayaScape::CreateVehicle() {
     Node* vehicleNode = scene_->CreateChild("Vehicle");
-    vehicleNode->SetPosition(Vector3(273.0f, 40.0f, 77.0f));
+    vehicleNode->SetPosition(Vector3(0.0f, 20.0f, 0.0f));
 
     // Create the vehicle logic component
     vehicle_ = vehicleNode->CreateComponent<Vehicle>();
@@ -406,17 +406,17 @@ void MayaScape::CreateScene() {
     // Create heightmap terrain with collision
     Node* terrainNode = scene_->CreateChild("Terrain");
     terrainNode->SetPosition(Vector3::ZERO);
-    Terrain* terrain = terrainNode->CreateComponent<Terrain>();
-    terrain->SetPatchSize(64);
-    terrain->SetSpacing(Vector3(2.8f, 0.12f, 2.8f));
+    terrain_ = terrainNode->CreateComponent<Terrain>();
+    terrain_->SetPatchSize(64);
+    terrain_->SetSpacing(Vector3(2.8f, 0.12f, 2.8f));
 //    terrain->SetSpacing(Vector3(3.0f, 0.1f, 3.0f)); // Spacing between vertices and vertical resolution of the height map
 
     //    terrain->SetHeightMap(cache->GetResource<Image>("Offroad/Terrain/HeightMapRace-257.png"));
 //    terrain->SetMaterial(cache->GetResource<Material>("Offroad/Terrain/TerrainRace-256.xml"));
-    terrain->SetHeightMap(cache->GetResource<Image>("Textures/HeightMap.png"));
-    terrain->SetMaterial(cache->GetResource<Material>("Materials/Terrain.xml"));
+    terrain_->SetHeightMap(cache->GetResource<Image>("Textures/HeightMap.png"));
+    terrain_->SetMaterial(cache->GetResource<Material>("Materials/Terrain.xml"));
 
-    terrain->SetOccluder(true);
+    terrain_->SetOccluder(true);
 
     RigidBody* body = terrainNode->CreateComponent<RigidBody>();
     body->SetCollisionLayer(2); // Use layer bitmask 2 for static geometry
@@ -438,10 +438,10 @@ void MayaScape::CreateScene() {
     {
         Node* objectNode = scene_->CreateChild("Mushroom");
         Vector3 position(Random(2000.0f) - 1000.0f, 0.0f, Random(2000.0f) - 1000.0f);
-        position.y_ = terrain->GetHeight(position) - 0.1f;
+        position.y_ = terrain_->GetHeight(position) - 0.1f;
         objectNode->SetPosition(position);
         // Create a rotation quaternion from up vector to terrain normal
-        objectNode->SetRotation(Quaternion(Vector3::UP, terrain->GetNormal(position)));
+        objectNode->SetRotation(Quaternion(Vector3::UP, terrain_->GetNormal(position)));
         Node* adjNode = objectNode->CreateChild("AdjNode");
         adjNode->SetRotation(Quaternion(0.0, 0.0, -90.0f));
 
@@ -657,7 +657,9 @@ void MayaScape::CreateScene() {
     miniMapP1Sprite_->SetSize(textureWidth, textureHeight);
     miniMapP1Sprite_->SetHotSpot(textureWidth, textureHeight);
     miniMapP1Sprite_->SetAlignment(HA_LEFT, VA_TOP);
-    miniMapP1Sprite_->SetPosition(Vector2(1000.0f, 300.0f));
+    miniMapP1Sprite_->SetPosition(Vector2(776.0f-16.0f, 300.0f));
+    miniMapP1Sprite_->SetPosition(Vector2(776.0f+256.0f-16.0f, 300.0f));
+
     miniMapP1Sprite_->SetOpacity(0.4f);
     // Set a low priority so that other UI elements can be drawn on top
     miniMapP1Sprite_->SetPriority(-100);
@@ -1569,6 +1571,27 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
     v = rpmBarBkgP1Sprite_->GetSize();
     int rpm = ((vehicle_->GetCurrentRPM()/7000.0f)* v.x_);
     rpmBarP1Sprite_->SetSize(rpm, v.y_);
+
+    float miniMapWidth = 256.0f;
+    float miniMapHeight = 256.0f;
+
+//    float maxX = terrain_->GetPatchSize()*terrain_->GetNumPatches().x_;
+//    float maxY = terrain_->GetPatchSize()*terrain_->GetNumPatches().y_;
+
+    float maxX = terrain_->GetHeightMap()->GetWidth()*terrain_->GetPatchSize();
+    float maxY = terrain_->GetHeightMap()->GetHeight()*terrain_->GetPatchSize();
+
+    //
+    // Position
+    //Vector3 position((float)x * spacing_.x_, GetRawHeight(xPos, zPos), (float)z * spacing_.z_);
+
+    //
+    float xRange = (vehicle_->GetNode()->GetPosition().x_/maxX) * miniMapWidth;
+    float zRange = (vehicle_->GetNode()->GetPosition().z_/maxY) * miniMapHeight;
+
+//    miniMapP1Sprite_->SetPosition(Vector2(776.0f-16.0f, 300.0f));
+    miniMapP1Sprite_->SetPosition(Vector2(776.0f+xRange-16.0f, 300.0f+zRange));
+
 
     char str[40];
 
