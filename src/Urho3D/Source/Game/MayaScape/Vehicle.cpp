@@ -177,6 +177,7 @@ void Vehicle::Init()
     CollisionShape* hullColShape = node_->CreateComponent<CollisionShape>();
     StaticModel* hullObject = node_->CreateComponent<StaticModel>();
 
+    raycastVehicle_->GetNode()->SetScale(Vector3(0.3f, 0.3f, 0.3f));
     raycastVehicle_->SetMass(m_fVehicleMass);
     raycastVehicle_->SetLinearDamping(0.2f);
     raycastVehicle_->SetAngularDamping(0.1f);
@@ -194,12 +195,13 @@ void Vehicle::Init()
 
     hullObject->GetNode()->SetRotation(Quaternion(0.0, 0.0, 0.0f));
 //    hullObject->GetNode()->SetScale(Vector3(0.01f, 0.01f, 0.01f));
-    hullObject->GetNode()->SetScale(Vector3(1.0f, 1.0f, 1.0f));
+    hullObject->GetNode()->SetScale(Vector3(0.3f, 0.3f, 0.3f));
 
     hullColShape->SetConvexHull(vehColModel);
+    hullColShape->GetNode()->SetScale(Vector3(0.3f, 0.3f, 0.3f));
 
-    raycastVehicle_->CompoundScaleLocalAabbMin(Vector3(0.7f, 0.5f, 1.0f));
-    raycastVehicle_->CompoundScaleLocalAabbMax(Vector3(0.7f, 0.5f, 1.0f));
+//    raycastVehicle_->CompoundScaleLocalAabbMin(Vector3(0.7f, 0.5f, 1.0f));
+ //   raycastVehicle_->CompoundScaleLocalAabbMax(Vector3(0.7f, 0.5f, 1.0f));
 
     bool isFrontWheel=true;
     Vector3 wheelDirectionCS0(0,-1,0);
