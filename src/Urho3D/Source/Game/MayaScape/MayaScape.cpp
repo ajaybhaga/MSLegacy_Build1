@@ -516,12 +516,18 @@ void MayaScape::CreateScene() {
         return;
 
     // Create sprite and add to the UI layout
-    powerbarP1Sprite_ = ui->GetRoot()->CreateChild<Sprite>();
-    powerbarBkgP1Sprite_ = ui->GetRoot()->CreateChild<Sprite>();
+    powerBarP1Sprite_ = ui->GetRoot()->CreateChild<Sprite>();
+    powerBarBkgP1Sprite_ = ui->GetRoot()->CreateChild<Sprite>();
+
+    rpmBarP1Sprite_ = ui->GetRoot()->CreateChild<Sprite>();
+    rpmBarBkgP1Sprite_ = ui->GetRoot()->CreateChild<Sprite>();
 
     // Set sprite texture
-    powerbarP1Sprite_->SetTexture(powerbarTexture);
-    powerbarBkgP1Sprite_->SetTexture(powerbarBkgTexture);
+    powerBarP1Sprite_->SetTexture(powerbarTexture);
+    powerBarBkgP1Sprite_->SetTexture(powerbarBkgTexture);
+
+    rpmBarP1Sprite_->SetTexture(powerbarTexture);
+    rpmBarBkgP1Sprite_->SetTexture(powerbarBkgTexture);
 
     int textureWidth;
     int textureHeight;
@@ -529,26 +535,50 @@ void MayaScape::CreateScene() {
     textureWidth = powerbarTexture->GetWidth();
     textureHeight = powerbarTexture->GetHeight();
 
-    powerbarP1Sprite_->SetScale(256.0f / textureWidth);
-    powerbarP1Sprite_->SetSize(textureWidth, textureHeight);
-    powerbarP1Sprite_->SetHotSpot(textureWidth, textureHeight);
-    powerbarP1Sprite_->SetAlignment(HA_LEFT, VA_TOP);
-    powerbarP1Sprite_->SetPosition(Vector2(300.0f, 50.0f));
-    powerbarP1Sprite_->SetOpacity(1.0f);
+    powerBarP1Sprite_->SetScale(256.0f / textureWidth);
+    powerBarP1Sprite_->SetSize(textureWidth, textureHeight);
+    powerBarP1Sprite_->SetHotSpot(textureWidth, textureHeight);
+    powerBarP1Sprite_->SetAlignment(HA_LEFT, VA_TOP);
+    powerBarP1Sprite_->SetPosition(Vector2(300.0f, 50.0f));
+    powerBarP1Sprite_->SetOpacity(1.0f);
     // Set a low priority so that other UI elements can be drawn on top
-    powerbarP1Sprite_->SetPriority(-100);
+    powerBarP1Sprite_->SetPriority(-100);
 
-    powerbarBkgP1Sprite_->SetScale(256.0f / textureWidth);
-    powerbarBkgP1Sprite_->SetSize(textureWidth, textureHeight);
-    powerbarBkgP1Sprite_->SetHotSpot(textureWidth, textureHeight);
-    powerbarBkgP1Sprite_->SetAlignment(HA_LEFT, VA_TOP);
-    powerbarBkgP1Sprite_->SetPosition(Vector2(300.0f, 50.0f));
-    powerbarBkgP1Sprite_->SetOpacity(0.2f);
+    powerBarBkgP1Sprite_->SetScale(256.0f / textureWidth);
+    powerBarBkgP1Sprite_->SetSize(textureWidth, textureHeight);
+    powerBarBkgP1Sprite_->SetHotSpot(textureWidth, textureHeight);
+    powerBarBkgP1Sprite_->SetAlignment(HA_LEFT, VA_TOP);
+    powerBarBkgP1Sprite_->SetPosition(Vector2(300.0f, 50.0f));
+    powerBarBkgP1Sprite_->SetOpacity(0.2f);
     // Set a low priority so that other UI elements can be drawn on top
-    powerbarBkgP1Sprite_->SetPriority(-100);
+    powerBarBkgP1Sprite_->SetPriority(-100);
 
-    powerbarP1Sprite_->SetVisible(true);
-    powerbarBkgP1Sprite_->SetVisible(true);
+    powerBarP1Sprite_->SetVisible(true);
+    powerBarBkgP1Sprite_->SetVisible(true);
+
+
+
+    rpmBarP1Sprite_->SetScale(256.0f / textureWidth);
+    rpmBarP1Sprite_->SetSize(textureWidth, textureHeight);
+    rpmBarP1Sprite_->SetHotSpot(textureWidth, textureHeight);
+    rpmBarP1Sprite_->SetAlignment(HA_LEFT, VA_TOP);
+    rpmBarP1Sprite_->SetPosition(Vector2(300.0f, 250.0f));
+    rpmBarP1Sprite_->SetOpacity(1.0f);
+    // Set a low priority so that other UI elements can be drawn on top
+    rpmBarP1Sprite_->SetPriority(-100);
+
+    rpmBarBkgP1Sprite_->SetScale(256.0f / textureWidth);
+    rpmBarBkgP1Sprite_->SetSize(textureWidth, textureHeight);
+    rpmBarBkgP1Sprite_->SetHotSpot(textureWidth, textureHeight);
+    rpmBarBkgP1Sprite_->SetAlignment(HA_LEFT, VA_TOP);
+    rpmBarBkgP1Sprite_->SetPosition(Vector2(300.0f, 250.0f));
+    rpmBarBkgP1Sprite_->SetOpacity(0.2f);
+    // Set a low priority so that other UI elements can be drawn on top
+    rpmBarBkgP1Sprite_->SetPriority(-100);
+
+    rpmBarP1Sprite_->SetVisible(true);
+    rpmBarBkgP1Sprite_->SetVisible(true);
+
 
     // Create the UI for displaying the remaining lifes
     auto *lifeUI = ui->GetRoot()->CreateChild<BorderImage>("Life2");
@@ -1432,11 +1462,16 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
         }
     }
 
+    player_->life_ = 50;
 
     // Update player powerbar
-    IntVector2 v = powerbarBkgP1Sprite_->GetSize();
+    IntVector2 v = powerBarBkgP1Sprite_->GetSize();
     int power = int(((player_->life_) / 100.0f) * (float) v.x_);
-    powerbarP1Sprite_->SetSize(power, v.y_);
+    powerBarP1Sprite_->SetSize(power, v.y_);
+
+    v = rpmBarBkgP1Sprite_->GetSize();
+    int rpm = ((vehicle_->GetCurrentRPM()/7000.0f)* v.x_);
+    rpmBarP1Sprite_->SetSize(power, v.y_);
 
     char str[40];
 
@@ -1495,7 +1530,7 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
     {
         i++;
         playerInfo.clear();
-        sprintf(str, "vehicle pos (%f, %f, %f)", vehicle_->GetNode()->GetPosition().x_, vehicle_->GetNode()->GetPosition().y_, vehicle_->GetNode()->GetPosition().z_);
+        sprintf(str, "vehicle pos (%f, %f, %f, %f, gauge = %f)", vehicle_->GetNode()->GetPosition().x_, vehicle_->GetNode()->GetPosition().y_, vehicle_->GetNode()->GetPosition().z_, (vehicle_->GetCurrentRPM()), (vehicle_->GetCurrentRPM()/7000.0f)*100.0f);
         playerInfo.append("-> ").append(str);
         debugText_[i]->SetText(playerInfo.c_str());
         i++;
@@ -1583,10 +1618,8 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
         //        textKmH_->SetText( data );
 
 
-/*        sprintf(str, "%.2f, %.2f, %.2f, %.2f", player_->,
-                player_->vehicle_->rvehicle_->GetEngineForce(4),
-                player_->vehicle_->rvehicle_->WheelIsGrounded(3), player_->vehicle_->rvehicle_->WheelIsGrounded(4));
-        playerInfo.append("Vehicle [engine. ground] -> ").append(str);*/
+        sprintf(str, "%.2f -> Gauge %.2f", vehicle_->GetCurrentRPM(), vehicle_->GetCurrentRPM()/7000.0f);
+        playerInfo.append("Vehicle [engine rpm] -> ").append(str);
         debugText_[i]->SetText(data);
 
         /*

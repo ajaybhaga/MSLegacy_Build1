@@ -116,9 +116,14 @@ private:
     /// Sample2D utility object.
     SharedPtr<Sample2D> sample2D_;
     /// Powerbar P1 sprite.
-    SharedPtr<Sprite> powerbarP1Sprite_;
+    SharedPtr<Sprite> powerBarP1Sprite_;
     /// Powerbar Bkg P1 sprite.
-    SharedPtr<Sprite> powerbarBkgP1Sprite_;
+    SharedPtr<Sprite> powerBarBkgP1Sprite_;
+
+    /// RPM P1 sprite.
+    SharedPtr<Sprite> rpmBarP1Sprite_;
+    /// RPM Bkg P1 sprite.
+    SharedPtr<Sprite> rpmBarBkgP1Sprite_;
 
     /// Particle pool
     ParticlePool particlePool_[20];
