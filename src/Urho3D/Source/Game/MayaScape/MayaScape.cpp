@@ -660,7 +660,7 @@ void MayaScape::CreateScene() {
     miniMapP1Sprite_->SetPosition(Vector2(776.0f-16.0f, 300.0f));
     miniMapP1Sprite_->SetPosition(Vector2(776.0f+256.0f-16.0f, 300.0f));
 
-    miniMapP1Sprite_->SetOpacity(0.4f);
+    miniMapP1Sprite_->SetOpacity(0.9f);
     // Set a low priority so that other UI elements can be drawn on top
     miniMapP1Sprite_->SetPriority(-100);
 
@@ -672,7 +672,7 @@ void MayaScape::CreateScene() {
     miniMapBkgSprite_->SetHotSpot(textureWidth, textureHeight);
     miniMapBkgSprite_->SetAlignment(HA_LEFT, VA_TOP);
     miniMapBkgSprite_->SetPosition(Vector2(1000.0f, 300.0f));
-    miniMapBkgSprite_->SetOpacity(0.8f);
+    miniMapBkgSprite_->SetOpacity(0.5f);
     // Set a low priority so that other UI elements can be drawn on top
     miniMapBkgSprite_->SetPriority(-100);
 
@@ -1571,6 +1571,12 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
     v = rpmBarBkgP1Sprite_->GetSize();
     int rpm = ((vehicle_->GetCurrentRPM()/7000.0f)* v.x_);
     rpmBarP1Sprite_->SetSize(rpm, v.y_);
+
+
+    // Cap speed at 220 KmH
+    v = velBarBkgP1Sprite_->GetSize();
+    int velocity = ((vehicle_->GetSpeedKmH()/220.0f)* v.x_);
+    velBarP1Sprite_->SetSize(velocity, v.y_);
 
     float miniMapWidth = 256.0f;
     float miniMapHeight = 256.0f;

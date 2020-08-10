@@ -92,8 +92,8 @@ public:
         raycastVehicle_->SetAngularVelocity( Vector3::ZERO );
     }
 
-    float GetSpeedKmH() const { return 0; } //raycastVehicle_->GetCurrentSpeedKmHour(); }
-    float GetSpeedMPH() const { return 0; } //raycastVehicle_->GetCurrentSpeedKmHour()*KMH_TO_MPH; }
+    float GetSpeedKmH() const { return raycastVehicle_->GetCurrentSpeedKmHour(); }
+    float GetSpeedMPH() const { return raycastVehicle_->GetCurrentSpeedKmHour()*KMH_TO_MPH; }
     void SetDbgRender(bool enable) { dbgRender_ = enable; }
 
     int GetCurrentGear() const { return curGearIdx_; }
