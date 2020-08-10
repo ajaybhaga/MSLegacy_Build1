@@ -352,7 +352,7 @@ void MayaScape::CreateVehicle() {
 
     // Create the vehicle logic component
     vehicle_ = vehicleNode->CreateComponent<Vehicle>();
-//    vehicle_->Init();
+    vehicle_->Init();
 
     // smooth step
     vehicleRot_ = vehicleNode->GetRotation();
@@ -1484,8 +1484,6 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
     playerInfo.append("Evolution Manager: agent[0]->genotype->evaluation -> ").append(str);
     debugText_[i]->SetText(playerInfo.c_str());
 
-    i++;
-    playerInfo.clear();
 
 
     //URHO3D_LOGINFOF("player_ position x=%f, y=%f, z=%f", player_->GetNode()->GetPosition().x_, player_->GetNode()->GetPosition().y_, player_->GetNode()->GetPosition().z_);
@@ -1498,6 +1496,16 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 
     if (vehicle_)
     {
+
+        i++;
+        playerInfo.clear();
+        sprintf(str, "vehicle pos (%f, %f, %f)", vehicle_->GetNode()->GetPosition().x_, vehicle_->GetNode()->GetPosition().y_, vehicle_->GetNode()->GetPosition().z_);
+        playerInfo.append("-> ").append(str);
+        debugText_[i]->SetText(playerInfo.c_str());
+        i++;
+        playerInfo.clear();
+
+
         UI* ui = GetSubsystem<UI>();
 
         // Get movement controls and assign them to the vehicle component. If UI has a focused element, clear controls
@@ -1788,7 +1796,7 @@ void MayaScape::HandlePostUpdate(StringHash eventType, VariantMap &eventData) {
 
 //    targetCameraPos_ = Vector3(0.0f, 60.0f, CAMERA_DISTANCE);
 //    cameraNode_->SetPosition(targetCameraPos_);
-    cameraNode_->SetRotation(Quaternion(30.0, 0.0, 0.0));
+//    cameraNode_->SetRotation(Quaternion(30.0, 0.0, 0.0));
 
 /*
     //

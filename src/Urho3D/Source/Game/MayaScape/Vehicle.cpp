@@ -168,7 +168,10 @@ void Vehicle::ApplyAttributes()
 void Vehicle::Init()
 {
     ResourceCache* cache = GetSubsystem<ResourceCache>();
-   
+
+    Node* adjNode = node_->CreateChild("AdjNode");
+    adjNode->SetRotation(Quaternion(0.0, 0.0, -90.0f));
+
     auto raycastVehicle_ = node_->CreateComponent<RaycastVehicle>();
     CollisionShape* hullColShape = node_->CreateComponent<CollisionShape>();
     StaticModel* hullObject = node_->CreateComponent<StaticModel>();
@@ -179,21 +182,18 @@ void Vehicle::Init()
     raycastVehicle_->SetCollisionLayer(1);
     raycastVehicle_->AddBodyToWorld();
 
-//    Model *vehModel = cache->GetResource<Model>("Offroad/Models/offroadVehicle.mdl");
     Model *vehModel = cache->GetResource<Model>("Models/Vehicles/Offroad/Models/offroadVehicle.mdl");
 
- //
     hullObject->SetModel(vehModel);
-//    hullObject->SetMaterial(cache->GetResource<Material>("Offroad/Models/Materials/offroadVehicle.xml"));
+    hullObject->SetMaterial(cache->GetResource<Material>("Offroad/Models/Materials/offroadVehicle.xml"));
     hullObject->SetCastShadows(true);
 
     // set convex hull and resize local AABB.Y size
-//    Model *vehColModel = cache->GetResource<Model>("Offroad/Models/vehCollision.mdl");
-//    Model *vehColModel = cache->GetResource<Model>("Offroad/Models/vehCollision.mdl");
-
     Model *vehColModel = cache->GetResource<Model>("Models/Vehicles/Offroad/Models/vehCollision.mdl");
 
+    hullObject->GetNode()->SetScale(Vector3(0.01f, 0.01f, 0.01f));
     hullColShape->SetConvexHull(vehColModel);
+
     raycastVehicle_->CompoundScaleLocalAabbMin(Vector3(0.7f, 0.5f, 1.0f));
     raycastVehicle_->CompoundScaleLocalAabbMax(Vector3(0.7f, 0.5f, 1.0f));
 
@@ -208,11 +208,12 @@ void Vehicle::Init()
     // change center of mass
     raycastVehicle_->SetVehicleCenterOfMass(centerOfMassOffset_);
 
+
     // add wheels
-    Vector3 connectionPointCS0(CUBE_HALF_EXTENTS-(0.6f*m_fwheelWidth), centerOfMassOffset_.y_+0.05f, 2*CUBE_HALF_EXTENTS-m_fwheelRadius-0.4f-centerOfMassOffset_.z_);
+    Vector3 connectionPointCS0(CUBE_HALF_EXTENTS-(0.6f*m_fwheelWidth), centerOfMassOffset_.y_, 2*CUBE_HALF_EXTENTS-m_fwheelRadius-0.4f-centerOfMassOffset_.z_);
     raycastVehicle_->AddWheel(connectionPointCS0,wheelDirectionCS0,wheelAxleCS,m_fsuspensionRestLength,m_fwheelRadius,isFrontWheel);
 
-    connectionPointCS0 = Vector3(-CUBE_HALF_EXTENTS+(0.6f*m_fwheelWidth), centerOfMassOffset_.y_+0.05f, 2*CUBE_HALF_EXTENTS-m_fwheelRadius-0.4f-centerOfMassOffset_.z_);
+    connectionPointCS0 = Vector3(-CUBE_HALF_EXTENTS+(0.6f*m_fwheelWidth), centerOfMassOffset_.y_, 2*CUBE_HALF_EXTENTS-m_fwheelRadius-0.4f-centerOfMassOffset_.z_);
     raycastVehicle_->AddWheel(connectionPointCS0,wheelDirectionCS0,wheelAxleCS,m_fsuspensionRestLength,m_fwheelRadius,isFrontWheel);
 
     isFrontWheel = false;
@@ -269,6 +270,9 @@ void Vehicle::Init()
         const Color LtBrown(0.972f,0.780f,0.412f );
         Model *trackModel = cache->GetResource<Model>("Offroad/Models/wheelTrack.mdl");
 
+        Node* adjNode = GetScene()->CreateChild("AdjNode");
+        adjNode->SetRotation(Quaternion(0.0, 0.0, -90.0f));
+
         for ( int i = 0; i < raycastVehicle_->GetNumWheels(); i++ )
         {
             //synchronize the wheels with the chassis worldtransform
@@ -285,7 +289,7 @@ void Vehicle::Init()
             btWheelInfo &whInfo = raycastVehicle_->GetWheelInfo( i );
             Vector3 v3PosLS = ToVector3( whInfo.m_chassisConnectionPointCS );
 
-            wheelNode->SetRotation( v3PosLS.x_ >= 0.0 ? Quaternion(0.0f, 0.0f, -90.0f) : Quaternion(0.0f, 0.0f, 90.0f) );
+            wheelNode->SetRotation( v3PosLS.x_ >= 0.0 ? Quaternion(-90.0f, 0.0f, 0.0f) : Quaternion(90.0f, 0.0f, 0.0f) );
             wheelNode->SetScale(Vector3(tireScaleXZ, wheelThickness, tireScaleXZ));
 
             // tire model
@@ -295,7 +299,7 @@ void Vehicle::Init()
             pWheel->SetCastShadows(true);
 
             // track
-            Node *trackNode = GetScene()->CreateChild();;
+            Node *trackNode = GetScene()->CreateChild();
             wheelTrackList_[i] = trackNode->CreateComponent<WheelTrackModel>();
             wheelTrackList_[i]->SetModel(trackModel->Clone());
             wheelTrackList_[i]->SetMaterial(cache->GetResource<Material>("Offroad/Models/Materials/TireTrack.xml"));
@@ -375,7 +379,7 @@ void Vehicle::FixedUpdate(float timeStep)
         }
     }
 
-    /*
+
     UpdateGear();
 
     UpdateSteering(newSteering);
@@ -395,7 +399,7 @@ void Vehicle::FixedUpdate(float timeStep)
     AutoCorrectPitchRoll();
 
     UpdateDrift();
-*/
+
 }
 
 //=============================================================================
@@ -406,7 +410,7 @@ void Vehicle::FixedPostUpdate(float timeStep)
     if (!raycastVehicle_)
         return;
 
-    /*
+
     float curSpdMph = GetSpeedMPH();
 
     // clear contact states
@@ -512,7 +516,7 @@ void Vehicle::FixedPostUpdate(float timeStep)
 
         if ( curRPM_ < MIN_IDLE_RPM ) 
             curRPM_ += minIdleRPM_;
-    }*/
+    }
 }
 
 //=============================================================================
@@ -524,7 +528,7 @@ void Vehicle::PostUpdate(float timeStep)
         return;
     float curSpdMph = GetSpeedMPH();
 
-    /*
+
 
     for ( int i = 0; i < raycastVehicle_->GetNumWheels(); i++ )
     {
@@ -548,7 +552,7 @@ void Vehicle::PostUpdate(float timeStep)
     PostUpdateSound(timeStep);
 
     PostUpdateWheelEffects();
-     */
+
 }
 
 void Vehicle::UpdateSteering(float newSteering)
