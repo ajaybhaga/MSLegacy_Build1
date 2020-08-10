@@ -125,6 +125,16 @@ private:
     /// RPM Bkg P1 sprite.
     SharedPtr<Sprite> rpmBarBkgP1Sprite_;
 
+    /// Velocity P1 sprite.
+    SharedPtr<Sprite> velBarP1Sprite_;
+    /// Velocity Bkg P1 sprite.
+    SharedPtr<Sprite> velBarBkgP1Sprite_;
+
+    /// Mini-map P1 sprite.
+    SharedPtr<Sprite> miniMapP1Sprite_;
+    /// Mini-map Bkg P1 sprite.
+    SharedPtr<Sprite> miniMapBkgSprite_;
+
     /// Particle pool
     ParticlePool particlePool_[20];
 

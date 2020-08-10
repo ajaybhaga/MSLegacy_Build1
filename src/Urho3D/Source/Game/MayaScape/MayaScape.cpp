@@ -515,6 +515,27 @@ void MayaScape::CreateScene() {
     if (!rpmBarBkgTexture)
         return;
 
+    // Get velocity bar texture
+    Texture2D *velBarTexture = cache->GetResource<Texture2D>("Textures/powerbar.png");
+    if (!rpmBarTexture)
+        return;
+
+    // Get velocity bar background texture
+    Texture2D *velBarBkgTexture = cache->GetResource<Texture2D>("Textures/powerbar-bk.png");
+    if (!rpmBarBkgTexture)
+        return;
+
+    // Get mini map p1 texture
+    Texture2D *miniMapP1Texture = cache->GetResource<Texture2D>("Textures/minimap-p1.png");
+    if (!miniMapP1Texture)
+        return;
+
+    // Get mini map background texture
+    Texture2D *miniMapBkgTexture = cache->GetResource<Texture2D>("Textures/minimap-bk.png");
+    if (!miniMapBkgTexture)
+        return;
+
+
     // Get genotype texture
     Texture2D *genotypeTexture = cache->GetResource<Texture2D>("Textures/genotype.png");
     if (!genotypeTexture)
@@ -532,12 +553,24 @@ void MayaScape::CreateScene() {
     rpmBarP1Sprite_ = ui->GetRoot()->CreateChild<Sprite>();
     rpmBarBkgP1Sprite_ = ui->GetRoot()->CreateChild<Sprite>();
 
+    velBarP1Sprite_ = ui->GetRoot()->CreateChild<Sprite>();
+    velBarBkgP1Sprite_ = ui->GetRoot()->CreateChild<Sprite>();
+
+    miniMapP1Sprite_ = ui->GetRoot()->CreateChild<Sprite>();
+    miniMapBkgSprite_= ui->GetRoot()->CreateChild<Sprite>();
+
     // Set sprite texture
     powerBarP1Sprite_->SetTexture(powerBarTexture);
     powerBarBkgP1Sprite_->SetTexture(powerBarBkgTexture);
 
     rpmBarP1Sprite_->SetTexture(rpmBarTexture);
     rpmBarBkgP1Sprite_->SetTexture(rpmBarBkgTexture);
+
+    velBarP1Sprite_->SetTexture(rpmBarTexture);
+    velBarBkgP1Sprite_->SetTexture(rpmBarBkgTexture);
+
+    miniMapP1Sprite_->SetTexture(miniMapP1Texture);
+    miniMapBkgSprite_->SetTexture(miniMapBkgTexture);
 
     int textureWidth;
     int textureHeight;
@@ -574,7 +607,7 @@ void MayaScape::CreateScene() {
     rpmBarP1Sprite_->SetSize(textureWidth, textureHeight);
     rpmBarP1Sprite_->SetHotSpot(textureWidth, textureHeight);
     rpmBarP1Sprite_->SetAlignment(HA_LEFT, VA_TOP);
-    rpmBarP1Sprite_->SetPosition(Vector2(300.0f, 250.0f));
+    rpmBarP1Sprite_->SetPosition(Vector2(300.0f, 200.0f));
     rpmBarP1Sprite_->SetOpacity(1.0f);
     // Set a low priority so that other UI elements can be drawn on top
     rpmBarP1Sprite_->SetPriority(-100);
@@ -583,7 +616,7 @@ void MayaScape::CreateScene() {
     rpmBarBkgP1Sprite_->SetSize(textureWidth, textureHeight);
     rpmBarBkgP1Sprite_->SetHotSpot(textureWidth, textureHeight);
     rpmBarBkgP1Sprite_->SetAlignment(HA_LEFT, VA_TOP);
-    rpmBarBkgP1Sprite_->SetPosition(Vector2(300.0f, 250.0f));
+    rpmBarBkgP1Sprite_->SetPosition(Vector2(300.0f, 200.0f));
     rpmBarBkgP1Sprite_->SetOpacity(0.2f);
     // Set a low priority so that other UI elements can be drawn on top
     rpmBarBkgP1Sprite_->SetPriority(-100);
@@ -591,6 +624,58 @@ void MayaScape::CreateScene() {
     rpmBarP1Sprite_->SetVisible(true);
     rpmBarBkgP1Sprite_->SetVisible(true);
 
+
+    textureWidth = rpmBarTexture->GetWidth();
+    textureHeight = rpmBarTexture->GetHeight();
+
+    velBarP1Sprite_->SetScale(256.0f / textureWidth);
+    velBarP1Sprite_->SetSize(textureWidth, textureHeight);
+    velBarP1Sprite_->SetHotSpot(textureWidth, textureHeight);
+    velBarP1Sprite_->SetAlignment(HA_LEFT, VA_TOP);
+    velBarP1Sprite_->SetPosition(Vector2(300.0f, 120.0f));
+    velBarP1Sprite_->SetOpacity(1.0f);
+    // Set a low priority so that other UI elements can be drawn on top
+    velBarP1Sprite_->SetPriority(-100);
+
+    velBarBkgP1Sprite_->SetScale(256.0f / textureWidth);
+    velBarBkgP1Sprite_->SetSize(textureWidth, textureHeight);
+    velBarBkgP1Sprite_->SetHotSpot(textureWidth, textureHeight);
+    velBarBkgP1Sprite_->SetAlignment(HA_LEFT, VA_TOP);
+    velBarBkgP1Sprite_->SetPosition(Vector2(300.0f, 120.0f));
+    velBarBkgP1Sprite_->SetOpacity(0.2f);
+    // Set a low priority so that other UI elements can be drawn on top
+    velBarBkgP1Sprite_->SetPriority(-100);
+
+    velBarP1Sprite_->SetVisible(true);
+    velBarBkgP1Sprite_->SetVisible(true);
+
+
+    textureWidth = miniMapP1Texture->GetWidth();
+    textureHeight = miniMapP1Texture->GetHeight();
+
+    miniMapP1Sprite_->SetScale(1.0);//256.0f / textureWidth);
+    miniMapP1Sprite_->SetSize(textureWidth, textureHeight);
+    miniMapP1Sprite_->SetHotSpot(textureWidth, textureHeight);
+    miniMapP1Sprite_->SetAlignment(HA_LEFT, VA_TOP);
+    miniMapP1Sprite_->SetPosition(Vector2(1000.0f, 300.0f));
+    miniMapP1Sprite_->SetOpacity(0.4f);
+    // Set a low priority so that other UI elements can be drawn on top
+    miniMapP1Sprite_->SetPriority(-100);
+
+    textureWidth = miniMapBkgTexture->GetWidth();
+    textureHeight = miniMapBkgTexture->GetHeight();
+
+    miniMapBkgSprite_->SetScale(256.0f / textureWidth);
+    miniMapBkgSprite_->SetSize(textureWidth, textureHeight);
+    miniMapBkgSprite_->SetHotSpot(textureWidth, textureHeight);
+    miniMapBkgSprite_->SetAlignment(HA_LEFT, VA_TOP);
+    miniMapBkgSprite_->SetPosition(Vector2(1000.0f, 300.0f));
+    miniMapBkgSprite_->SetOpacity(0.8f);
+    // Set a low priority so that other UI elements can be drawn on top
+    miniMapBkgSprite_->SetPriority(-100);
+
+    miniMapP1Sprite_->SetVisible(true);
+    miniMapBkgSprite_->SetVisible(true);
 
     // Create the UI for displaying the remaining lifes
     auto *lifeUI = ui->GetRoot()->CreateChild<BorderImage>("Life2");
