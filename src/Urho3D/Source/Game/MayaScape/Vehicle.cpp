@@ -86,7 +86,7 @@ Vehicle::Vehicle(Context* context)
     // fixed update() for inputs and post update() to sync wheels for rendering
     SetUpdateEventMask( USE_FIXEDUPDATE | USE_FIXEDPOSTUPDATE| USE_POSTUPDATE );
 
-    m_fVehicleMass = 800.0f;
+    m_fVehicleMass = 200.0f;
     m_fEngineForce = 0.0f;
     m_fBreakingForce = 20.0f;
 
@@ -191,9 +191,9 @@ void Vehicle::Init()
     hullObject->SetCastShadows(true);
 
     // set convex hull and resize local AABB.Y size
-    Model *vehColModel = cache->GetResource<Model>("Models/Vehicles/Offroad/Models/vehCollision.mdl");
+    Model *vehColModel = cache->GetResource<Model>("Models/Vehicles/Jeep.mdl");
 
-    hullObject->GetNode()->SetRotation(Quaternion(0.0, 0.0, 0.0f));
+    hullObject->GetNode()->SetRotation(Quaternion(0.0, 180.0, 0.0f));
 //    hullObject->GetNode()->SetScale(Vector3(0.01f, 0.01f, 0.01f));
     hullObject->GetNode()->SetScale(Vector3(0.3f, 0.3f, 0.3f));
 

@@ -75,7 +75,7 @@ void RaycastVehicle::RegisterObject(Context* context)
 void RaycastVehicle::AddBodyToWorld()
 {
     RigidBody::AddBodyToWorld();
-
+    GetBody()->setWorldTransform(GetBody()->getWorldTransform());
     if ( GetBody() && vehicleRaycaster_ == NULL )
     {
         const int rightIndex = 0;
