@@ -496,23 +496,33 @@ void MayaScape::CreateScene() {
     auto *font = cache->GetResource<Font>("Fonts/Anonymous Pro.ttf");
 
     // Get powerbar texture
-    Texture2D *powerbarTexture = cache->GetResource<Texture2D>("Textures/powerbar.png");
-    if (!powerbarTexture)
+    Texture2D *powerBarTexture = cache->GetResource<Texture2D>("Textures/powerbar.png");
+    if (!powerBarTexture)
         return;
 
     // Get powerbar background texture
-    Texture2D *powerbarBkgTexture = cache->GetResource<Texture2D>("Textures/powerbar-bk.png");
-    if (!powerbarBkgTexture)
+    Texture2D *powerBarBkgTexture = cache->GetResource<Texture2D>("Textures/powerbar-bk.png");
+    if (!powerBarBkgTexture)
+        return;
+
+    // Get RPM bar texture
+    Texture2D *rpmBarTexture = cache->GetResource<Texture2D>("Textures/powerbar.png");
+    if (!rpmBarTexture)
+        return;
+
+    // Get RPM bar background texture
+    Texture2D *rpmBarBkgTexture = cache->GetResource<Texture2D>("Textures/powerbar-bk.png");
+    if (!rpmBarBkgTexture)
         return;
 
     // Get genotype texture
     Texture2D *genotypeTexture = cache->GetResource<Texture2D>("Textures/genotype.png");
-    if (!powerbarTexture)
+    if (!genotypeTexture)
         return;
 
     // Get genotype background texture
     Texture2D *genotypeBkgTexture = cache->GetResource<Texture2D>("Textures/genotype-bk.png");
-    if (!powerbarBkgTexture)
+    if (!genotypeBkgTexture)
         return;
 
     // Create sprite and add to the UI layout
@@ -523,17 +533,17 @@ void MayaScape::CreateScene() {
     rpmBarBkgP1Sprite_ = ui->GetRoot()->CreateChild<Sprite>();
 
     // Set sprite texture
-    powerBarP1Sprite_->SetTexture(powerbarTexture);
-    powerBarBkgP1Sprite_->SetTexture(powerbarBkgTexture);
+    powerBarP1Sprite_->SetTexture(powerBarTexture);
+    powerBarBkgP1Sprite_->SetTexture(powerBarBkgTexture);
 
-    rpmBarP1Sprite_->SetTexture(powerbarTexture);
-    rpmBarBkgP1Sprite_->SetTexture(powerbarBkgTexture);
+    rpmBarP1Sprite_->SetTexture(rpmBarTexture);
+    rpmBarBkgP1Sprite_->SetTexture(rpmBarBkgTexture);
 
     int textureWidth;
     int textureHeight;
 
-    textureWidth = powerbarTexture->GetWidth();
-    textureHeight = powerbarTexture->GetHeight();
+    textureWidth = powerBarTexture->GetWidth();
+    textureHeight = powerBarTexture->GetHeight();
 
     powerBarP1Sprite_->SetScale(256.0f / textureWidth);
     powerBarP1Sprite_->SetSize(textureWidth, textureHeight);
@@ -557,6 +567,8 @@ void MayaScape::CreateScene() {
     powerBarBkgP1Sprite_->SetVisible(true);
 
 
+    textureWidth = rpmBarTexture->GetWidth();
+    textureHeight = rpmBarTexture->GetHeight();
 
     rpmBarP1Sprite_->SetScale(256.0f / textureWidth);
     rpmBarP1Sprite_->SetSize(textureWidth, textureHeight);
@@ -1471,7 +1483,7 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 
     v = rpmBarBkgP1Sprite_->GetSize();
     int rpm = ((vehicle_->GetCurrentRPM()/7000.0f)* v.x_);
-    rpmBarP1Sprite_->SetSize(power, v.y_);
+    rpmBarP1Sprite_->SetSize(rpm, v.y_);
 
     char str[40];
 
@@ -1551,11 +1563,11 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
             vehicle_->controls_.Set(CTRL_RIGHT, input->GetKeyDown(KEY_D));
             vehicle_->controls_.Set(CTRL_SPACE, input->GetKeyDown(KEY_SPACE));
 */
-            vehicle_->controls_.Set(CTRL_FORWARD, vehicle_->controls_.IsDown(BUTTON_DPAD_UP));
-            vehicle_->controls_.Set(CTRL_BACK, vehicle_->controls_.IsDown(BUTTON_DPAD_DOWN));
-            vehicle_->controls_.Set(CTRL_LEFT, vehicle_->controls_.IsDown(BUTTON_DPAD_LEFT));
-            vehicle_->controls_.Set(CTRL_RIGHT, vehicle_->controls_.IsDown(BUTTON_DPAD_RIGHT));
-            vehicle_->controls_.Set(CTRL_SPACE, vehicle_->controls_.IsDown(CONTROLLER_BUTTON_X));
+            vehicle_->controls_.Set(CTRL_FORWARD, input->GetKeyDown(KEY_W) | vehicle_->controls_.IsDown(BUTTON_DPAD_UP));
+            vehicle_->controls_.Set(CTRL_BACK, input->GetKeyDown(KEY_S) | vehicle_->controls_.IsDown(BUTTON_DPAD_DOWN));
+            vehicle_->controls_.Set(CTRL_LEFT, input->GetKeyDown(KEY_A) | vehicle_->controls_.IsDown(BUTTON_DPAD_LEFT));
+            vehicle_->controls_.Set(CTRL_RIGHT, input->GetKeyDown(KEY_D) | vehicle_->controls_.IsDown(BUTTON_DPAD_RIGHT));
+            vehicle_->controls_.Set(CTRL_SPACE, input->GetKeyDown(KEY_SPACE) | vehicle_->controls_.IsDown(CONTROLLER_BUTTON_X));
 
             // Add yaw & pitch from the mouse motion or touch input. Used only for the camera, does not affect motion
             if (touchEnabled_)
