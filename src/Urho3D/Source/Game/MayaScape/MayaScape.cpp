@@ -1483,7 +1483,7 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
     sprintf(str, "%f", EvolutionManager::getInstance()->getAgents()[0]->genotype->evaluation);
     playerInfo.append("Evolution Manager: agent[0]->genotype->evaluation -> ").append(str);
     debugText_[i]->SetText(playerInfo.c_str());
-    
+
 
     //URHO3D_LOGINFOF("player_ position x=%f, y=%f, z=%f", player_->GetNode()->GetPosition().x_, player_->GetNode()->GetPosition().y_, player_->GetNode()->GetPosition().z_);
 

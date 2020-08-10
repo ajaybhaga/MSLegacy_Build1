@@ -183,16 +183,19 @@ void Vehicle::Init()
     raycastVehicle_->SetCollisionLayer(1);
     raycastVehicle_->AddBodyToWorld();
 
-    Model *vehModel = cache->GetResource<Model>("Models/Vehicles/Offroad/Models/offroadVehicle.mdl");
+    Model *vehModel = cache->GetResource<Model>("Models/Vehicles/Jeep.mdl");
 
     hullObject->SetModel(vehModel);
-    hullObject->SetMaterial(cache->GetResource<Material>("Offroad/Models/Materials/offroadVehicle.xml"));
+    hullObject->SetMaterial(cache->GetResource<Material>("Materials/Willys.xml"));
     hullObject->SetCastShadows(true);
 
     // set convex hull and resize local AABB.Y size
     Model *vehColModel = cache->GetResource<Model>("Models/Vehicles/Offroad/Models/vehCollision.mdl");
 
-    hullObject->GetNode()->SetScale(Vector3(0.01f, 0.01f, 0.01f));
+    hullObject->GetNode()->SetRotation(Quaternion(0.0, 0.0, 0.0f));
+//    hullObject->GetNode()->SetScale(Vector3(0.01f, 0.01f, 0.01f));
+    hullObject->GetNode()->SetScale(Vector3(1.0f, 1.0f, 1.0f));
+
     hullColShape->SetConvexHull(vehColModel);
 
     raycastVehicle_->CompoundScaleLocalAabbMin(Vector3(0.7f, 0.5f, 1.0f));
