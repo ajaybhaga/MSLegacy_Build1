@@ -178,26 +178,28 @@ void Vehicle::Init()
     StaticModel* hullObject = node_->CreateComponent<StaticModel>();
 
     raycastVehicle_->GetNode()->SetScale(Vector3(0.3f, 0.3f, 0.3f));
+//    raycastVehicle_->GetNode()->SetRotation(Quaternion(0.0f, 0.0f, -90.0f));
     raycastVehicle_->SetMass(m_fVehicleMass);
     raycastVehicle_->SetLinearDamping(0.2f);
     raycastVehicle_->SetAngularDamping(0.1f);
     raycastVehicle_->SetCollisionLayer(1);
     raycastVehicle_->AddBodyToWorld();
 
-    Model *vehModel = cache->GetResource<Model>("Models/Vehicles/Jeep.mdl");
+    Model *vehModel = cache->GetResource<Model>("Models/Vehicles/Offroad/Models/offroadVehicle.mdl");
 
     hullObject->SetModel(vehModel);
-    hullObject->SetMaterial(cache->GetResource<Material>("Materials/Willys.xml"));
+    hullObject->SetMaterial(cache->GetResource<Material>("Data/Models/Vehicles/Offroad/Materials/phong1.xml"));
     hullObject->SetCastShadows(true);
 
     // set convex hull and resize local AABB.Y size
-    Model *vehColModel = cache->GetResource<Model>("Models/Vehicles/Jeep.mdl");
+    Model *vehColModel = cache->GetResource<Model>("Models/Vehicles/Offroad/Models/offroadVehicle.mdl");
 
-    hullObject->GetNode()->SetRotation(Quaternion(0.0, 180.0, 0.0f));
+    hullObject->GetNode()->SetRotation(Quaternion(0.0, 0.0f, 0.0f));
 //    hullObject->GetNode()->SetScale(Vector3(0.01f, 0.01f, 0.01f));
     hullObject->GetNode()->SetScale(Vector3(0.3f, 0.3f, 0.3f));
 
     hullColShape->SetConvexHull(vehColModel);
+    //hullColShape->GetNode()->SetRotation(Quaternion(0.0, 0.0f, -90.0f));
     hullColShape->GetNode()->SetScale(Vector3(0.3f, 0.3f, 0.3f));
 
 //    raycastVehicle_->CompoundScaleLocalAabbMin(Vector3(0.7f, 0.5f, 1.0f));
