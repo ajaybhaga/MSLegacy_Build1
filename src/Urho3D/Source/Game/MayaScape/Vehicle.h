@@ -23,7 +23,7 @@
 
 #include <Urho3D/Input/Controls.h>
 #include <Urho3D/Scene/LogicComponent.h>
-#include "vehicle/63_OffroadVehicle/RaycastVehicle.h"
+#include "RaycastVehicle.h"
 //#include <Urho3D/Physics/RaycastVehicle.h>
 
 //#include "Character2D.h"

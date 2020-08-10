@@ -261,7 +261,7 @@ void Vehicle::Init()
 
         for ( int i = 0; i < raycastVehicle_->GetNumWheels(); i++ )
         {
-            //synchronize the wheels with the chassis worldtransform
+            //synchronize the wheels with the chassis world transform
             raycastVehicle_->UpdateWheelTransform(i,true);
 
             Vector3 v3Origin = raycastVehicle_->GetWheelPositionWS(i);

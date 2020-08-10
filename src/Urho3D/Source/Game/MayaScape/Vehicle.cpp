@@ -38,6 +38,7 @@
 #include <Urho3D/Graphics/ParticleEffect.h>
 #include <Urho3D/Audio/SoundSource3D.h>
 #include <Urho3D/Audio/Sound.h>
+#include <Urho3D/IO/Log.h>
 
 #include "vehicle/63_OffroadVehicle/RaycastVehicle.h"
 #include "Vehicle.h"
@@ -172,7 +173,7 @@ void Vehicle::Init()
     Node* adjNode = node_->CreateChild("AdjNode");
     adjNode->SetRotation(Quaternion(0.0, 0.0, -90.0f));
 
-    auto raycastVehicle_ = node_->CreateComponent<RaycastVehicle>();
+    raycastVehicle_ = node_->CreateComponent<RaycastVehicle>();
     CollisionShape* hullColShape = node_->CreateComponent<CollisionShape>();
     StaticModel* hullObject = node_->CreateComponent<StaticModel>();
 
@@ -407,9 +408,12 @@ void Vehicle::FixedUpdate(float timeStep)
 //=============================================================================
 void Vehicle::FixedPostUpdate(float timeStep)
 {
+//    URHO3D_LOGINFOF("Vehicle::FixedPostUpdate [%f]", timeStep);
+
     if (!raycastVehicle_)
         return;
 
+//    URHO3D_LOGINFOF("Vehicle::FixedPostUpdate [%f] -> got raycastVehicle.", timeStep);
 
     float curSpdMph = GetSpeedMPH();
 
@@ -524,10 +528,14 @@ void Vehicle::FixedPostUpdate(float timeStep)
 //=============================================================================
 void Vehicle::PostUpdate(float timeStep)
 {
+
+//    URHO3D_LOGINFOF("Vehicle::PostUpdate [%f]", timeStep);
+
     if (!raycastVehicle_)
         return;
     float curSpdMph = GetSpeedMPH();
 
+//    URHO3D_LOGINFOF("Vehicle::PostUpdate [%f] -> got raycastVehicle.", timeStep);
 
 
     for ( int i = 0; i < raycastVehicle_->GetNumWheels(); i++ )
