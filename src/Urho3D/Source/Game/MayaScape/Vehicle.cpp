@@ -177,8 +177,11 @@ void Vehicle::Init()
     CollisionShape* hullColShape = node_->CreateComponent<CollisionShape>();
     StaticModel* hullObject = node_->CreateComponent<StaticModel>();
 
-    raycastVehicle_->GetNode()->SetScale(Vector3(0.3f, 0.3f, 0.3f));
+//    raycastVehicle_->GetNode()->SetScale(3.0f);
+
+//    raycastVehicle_->GetNode()->SetScale(Vector3(0.3f, 0.3f, 0.3f));
 //    raycastVehicle_->GetNode()->SetRotation(Quaternion(0.0f, 0.0f, -90.0f));
+
     raycastVehicle_->SetMass(m_fVehicleMass);
     raycastVehicle_->SetLinearDamping(0.2f);
     raycastVehicle_->SetAngularDamping(0.1f);
@@ -204,11 +207,11 @@ void Vehicle::Init()
     hullObject->GetNode()->SetScale(Vector3(0.3f, 0.3f, 0.3f));
 
     hullColShape->SetConvexHull(vehColModel);
-    //hullColShape->GetNode()->SetRotation(Quaternion(0.0, 0.0f, -90.0f));
+    hullColShape->GetNode()->SetRotation(Quaternion(0.0, 0.0f, -90.0f));
     hullColShape->GetNode()->SetScale(Vector3(0.3f, 0.3f, 0.3f));
 
-//    raycastVehicle_->CompoundScaleLocalAabbMin(Vector3(0.7f, 0.5f, 1.0f));
- //   raycastVehicle_->CompoundScaleLocalAabbMax(Vector3(0.7f, 0.5f, 1.0f));
+    raycastVehicle_->CompoundScaleLocalAabbMin(Vector3(0.7f, 0.5f, 1.0f));
+    raycastVehicle_->CompoundScaleLocalAabbMax(Vector3(0.7f, 0.5f, 1.0f));
 
     bool isFrontWheel=true;
     Vector3 wheelDirectionCS0(0,-1,0);
@@ -270,12 +273,8 @@ void Vehicle::Init()
         float wheelThickness = 0.4f;
 
 
-  //        pWheel->SetModel(cache->GetResource<Model>("Models/AssetPack/sun.mdl"));
-//        pWheel->SetModel(cache->GetResource<Model>("Models/Cylinder.mdl"));
-//        pWheel->SetMaterial(cache->GetResource<Material>("Materials/LOWPOLY-COLORS.xml"));
 
 //        Model *vehModel = cache->GetResource<Model>("Models/Vehicles/Offroad/Models/body-car.mdl");
-//        hullObject->ApplyMaterialList("Models/Vehicles/Offroad/Models/body-car.txt");
 
 
         Model *tireModel = cache->GetResource<Model>("Models/Vehicles/Offroad/Models/wheel-fl.mdl");
@@ -317,8 +316,10 @@ void Vehicle::Init()
 
             // tire model
             StaticModel *pWheel = adjNode->CreateComponent<StaticModel>();
-//            pWheel->GetNode()->SetScale(0.4f);
+            //pWheel->GetNode()->SetScale(0.4f);
             pWheel->SetModel(tireModel);
+            pWheel->ApplyMaterialList("Models/Vehicles/Offroad/Models/wheel-fl.txt");
+
             pWheel->SetMaterial(cache->GetResource<Material>("Offroad/Models/Materials/Tire.xml"));
             pWheel->SetCastShadows(true);
 
@@ -943,6 +944,16 @@ void Vehicle::DebugDraw(const Color &color)
         dbgRenderer->AddBoundingBox(bbox, mat34, color);
         dbgRenderer->AddLine(posWS, posWS + node_->GetUp(), color);
         dbgRenderer->AddLine(posWS, posWS + node_->GetRight(), color);
+
+
+
+        raycastVehicle_->DrawDebugGeometry(dbgRenderer, false);
+
+
+
+
+
+
     }
 }
 

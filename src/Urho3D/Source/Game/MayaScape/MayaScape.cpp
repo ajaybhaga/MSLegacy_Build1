@@ -1962,7 +1962,7 @@ void MayaScape::HandlePostUpdate(StringHash eventType, VariantMap &eventData) {
 
         if (drawDebug_) {
   //          scene_->GetComponent<PhysicsWorld>()->DrawDebugGeometry(true);
-//            vehicle_->DebugDraw(Color::MAGENTA);
+               vehicle_->DebugDraw(Color::MAGENTA);
         }
 
     }
