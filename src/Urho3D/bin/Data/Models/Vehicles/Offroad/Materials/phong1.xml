@@ -1,6 +1,7 @@
 <?xml version="1.0" ?>
 <material>
-	<technique name="Techniques/NoTexture.xml" />
-	<parameter name="MatDiffColor" value="0.4 0.4 0.4 1" />
+	<technique name="Techniques/Diff.xml" />
+	<texture name="Textures/vehicle1.png" unit="diffuse" />
+	<parameter name="MatDiffColor" value="0.661295 0.740678 0.384109 1" />
 	<parameter name="MatSpecColor" value="0.25 0.25 0.25 103" />
 </material>

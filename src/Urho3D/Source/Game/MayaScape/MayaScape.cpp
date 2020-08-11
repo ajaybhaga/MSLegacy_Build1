@@ -653,12 +653,15 @@ void MayaScape::CreateScene() {
     textureWidth = miniMapP1Texture->GetWidth();
     textureHeight = miniMapP1Texture->GetHeight();
 
+    float miniMapP1X = 776.0f+45.0f;
+    float miniMapP1Y = 300.0f-15.0f;
+
     miniMapP1Sprite_->SetScale(1.0);//256.0f / textureWidth);
     miniMapP1Sprite_->SetSize(textureWidth, textureHeight);
     miniMapP1Sprite_->SetHotSpot(textureWidth, textureHeight);
     miniMapP1Sprite_->SetAlignment(HA_LEFT, VA_TOP);
-    miniMapP1Sprite_->SetPosition(Vector2(776.0f-16.0f, 300.0f));
-    miniMapP1Sprite_->SetPosition(Vector2(776.0f+256.0f-16.0f, 300.0f));
+    miniMapP1Sprite_->SetPosition(Vector2(miniMapP1X-16.0f, miniMapP1Y));
+    miniMapP1Sprite_->SetPosition(Vector2(miniMapP1X+256.0f-16.0f, miniMapP1Y));
 
     miniMapP1Sprite_->SetOpacity(0.9f);
     // Set a low priority so that other UI elements can be drawn on top
@@ -667,11 +670,14 @@ void MayaScape::CreateScene() {
     textureWidth = miniMapBkgTexture->GetWidth();
     textureHeight = miniMapBkgTexture->GetHeight();
 
+    float miniMapX = 1000.0f+45.0f;
+    float miniMapY = 300.0f-15.0f;
+
     miniMapBkgSprite_->SetScale(256.0f / textureWidth);
     miniMapBkgSprite_->SetSize(textureWidth, textureHeight);
     miniMapBkgSprite_->SetHotSpot(textureWidth, textureHeight);
     miniMapBkgSprite_->SetAlignment(HA_LEFT, VA_TOP);
-    miniMapBkgSprite_->SetPosition(Vector2(1000.0f, 300.0f));
+    miniMapBkgSprite_->SetPosition(Vector2(miniMapX,  miniMapY));
     miniMapBkgSprite_->SetOpacity(0.5f);
     // Set a low priority so that other UI elements can be drawn on top
     miniMapBkgSprite_->SetPriority(-100);
@@ -1568,8 +1574,9 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
     int power = int(((player_->life_) / 100.0f) * (float) v.x_);
     powerBarP1Sprite_->SetSize(power, v.y_);
 
+    float maxRPM = 8000.0f;
     v = rpmBarBkgP1Sprite_->GetSize();
-    int rpm = ((vehicle_->GetCurrentRPM()/7000.0f)* v.x_);
+    int rpm = ((vehicle_->GetCurrentRPM()/maxRPM)* v.x_);
     rpmBarP1Sprite_->SetSize(rpm, v.y_);
 
 
@@ -1595,8 +1602,13 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
     float xRange = (vehicle_->GetNode()->GetPosition().x_/maxX) * miniMapWidth;
     float zRange = (vehicle_->GetNode()->GetPosition().z_/maxY) * miniMapHeight;
 
+    float miniMapP1X = 776.0f+45.0f;
+    float miniMapP1Y = 300.0f-15.0f;
+
+
+
 //    miniMapP1Sprite_->SetPosition(Vector2(776.0f-16.0f, 300.0f));
-    miniMapP1Sprite_->SetPosition(Vector2(776.0f+xRange-16.0f, 300.0f+zRange));
+    miniMapP1Sprite_->SetPosition(Vector2(miniMapP1X+xRange-16.0f, miniMapP1Y+zRange));
 
 
     char str[40];
@@ -1743,7 +1755,7 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
         sprintf(buff, ", %.0f Angular Velocity", angvel);
         data += String(buff);
 
-        vehicle_->DebugDraw(Color(1.0, 0.0, 1.0));
+       // vehicle_->DebugDraw(Color(1.0, 0.0, 1.0));
 
        // sprintf(buff, ", %.0f RPM", rpm);
        // data += String(buff);
@@ -1949,9 +1961,8 @@ void MayaScape::HandlePostUpdate(StringHash eventType, VariantMap &eventData) {
         cameraNode_->SetRotation(dir);
 
         if (drawDebug_) {
-            scene_->GetComponent<PhysicsWorld>()->DrawDebugGeometry(true);
-
-            vehicle_->DebugDraw(Color::MAGENTA);
+  //          scene_->GetComponent<PhysicsWorld>()->DrawDebugGeometry(true);
+//            vehicle_->DebugDraw(Color::MAGENTA);
         }
 
     }
