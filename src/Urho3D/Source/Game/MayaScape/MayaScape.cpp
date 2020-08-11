@@ -745,7 +745,11 @@ void MayaScape::CreateScene() {
 
     TileMap3D *tileMap = tileMapNode->CreateComponent<TileMap3D>();
 
-    tileMap->SetTmxFile(cache->GetResource<TmxFile2D>("Urho2D/Tilesets/MayaScape_Level0.tmx"));
+//
+//    auto *tmxFile = cache->GetResource<TmxFile2D>("Urho2D/Tilesets/Ortho.tmx");
+
+    auto *tmxFile = cache->GetResource<TmxFile2D>("Tracks/Ortho.tmx");
+    tileMap->SetTmxFile(tmxFile);
     const TileMapInfo2D &info = tileMap->GetInfo();
     URHO3D_LOGINFOF("tileMap=%f x %f", info.GetMapWidth(), info.GetMapHeight());
 
