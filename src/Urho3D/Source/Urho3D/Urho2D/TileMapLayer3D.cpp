@@ -182,12 +182,12 @@ void TileMapLayer3D::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
 void TileMapLayer3D::Initialize(TileMap3D* tileMap, const TmxLayer2D* tmxLayer)
 {
 
-    URHO3D_LOGINFOF("TileMapLayer3D::Initialize -> loading tile layer models...", 0);
+//    URHO3D_LOGINFOF("TileMapLayer3D::Initialize -> loading tile layer models...", 0);
 
     if (tileMap == tileMap_ && tmxLayer == tmxLayer_)
         return;
 
-    URHO3D_LOGINFOF("TileMapLayer3D::Initialize -> tile layers %.2f", tileMap->GetNumLayers());
+//    URHO3D_LOGINFOF("TileMapLayer3D::Initialize -> tile layers %.2f", tileMap->GetNumLayers());
 
     if (tmxLayer_)
     {
@@ -352,26 +352,37 @@ Node* TileMapLayer3D::GetImageNode() const
     return nodes_[0];
 }
 
-void TileMapLayer3D::SetTileLayer(const TmxTileLayer2D* tileLayer)
-{
+void TileMapLayer3D::SetTileLayer(const TmxTileLayer2D* tileLayer) {
+    bool track = false;
     bool land = false;
     bool plant = false;
     bool building = false;
 
-    URHO3D_LOGINFOF("TileMapLayer3D::SetTileLayer -> loading tile layer models...", 0);
+//    URHO3D_LOGINFOF("TileMapLayer3D::SetTileLayer -> loading tile layer models...", 0);
 
-    auto* cache = GetSubsystem<ResourceCache>();
+    auto *cache = GetSubsystem<ResourceCache>();
 
     tileLayer_ = tileLayer;
+    URHO3D_LOGINFOF("TileMapLayer3D::SetTileLayer -> name = %s", tileLayer->GetName().CString());
 
-    if (tileLayer_->GetName() == "Land")
+    if (tileLayer_->GetName() == "Track") {
+        track = true;
+        URHO3D_LOGINFOF("TileMapLayer3D::SetTileLayer -> Track", 0);
+    }
+
+    if (tileLayer_->GetName() == "Land") {
         land = true;
-    
-    if (tileLayer_->GetName() == "Plant")
+        URHO3D_LOGINFOF("TileMapLayer3D::SetTileLayer -> Land", 0);
+    }
+    if (tileLayer_->GetName() == "Plant") {
         plant = true;
-
-    if (tileLayer_->GetName() == "Building")
+        URHO3D_LOGINFOF("TileMapLayer3D::SetTileLayer -> Plant", 0);
+    }
+    if (tileLayer_->GetName() == "Building") {
         building = true;
+        URHO3D_LOGINFOF("TileMapLayer3D::SetTileLayer -> Building", 0);
+    }
+
 
     int width = tileLayer->GetWidth();
     int height = tileLayer->GetHeight();
@@ -391,7 +402,9 @@ void TileMapLayer3D::SetTileLayer(const TmxTileLayer2D* tileLayer)
             unsigned int tileId = tile->GetGid();
 
 
-            std::string path = "Models/";
+//
+//            std::string path = "Models/";
+            std::string path = "Models/Tracks/Models/";
             std::string filler = "";
             std::string terrainType = "Land";
             if (tileId > 9)
@@ -409,9 +422,41 @@ void TileMapLayer3D::SetTileLayer(const TmxTileLayer2D* tileLayer)
 
             // Set tile location
 //            tileNode->SetPosition(Vector3(info.TileIndexToPosition(x, y))+tile->GetModelOffset()+Vector3(0,0,-1));
+            if (track) { xoffset = 2.0f; depth = 1.0f; }
+
             if (land) { xoffset = 0.3f; depth = 1.0f; }
             if (plant) { xoffset = 0.0f; depth = -0.5f; height = 0.0f; }
             if (building) { xoffset = 0.0f; depth = 1.5f; height = -0.6f; }
+
+            if (track) {
+                switch(tileId) {
+                    case 1:
+                        tileStr = path + "1.mdl";
+                        matStr = path + "1.txt";
+                        scale = 0.12f;
+                        height = 4.7f;
+                        break;
+                    case 2:
+                        tileStr = path + "2.mdl";
+                        matStr = path + "2.txt";
+                        scale = 0.07f;
+                        height = 10.7f;
+                        depth = -0.9f;
+                        break;
+                    case 3:
+                        break;
+                    case 4:
+                        break;
+                    case 5:
+                        break;
+                    case 6:
+                        break;
+                    case 7:
+                        break;
+                    case 8:
+                        break;
+                };
+            }
 
             if (land) {
                 switch(tileId) {
@@ -523,12 +568,16 @@ void TileMapLayer3D::SetTileLayer(const TmxTileLayer2D* tileLayer)
     
             tileNode->SetPosition(Vector3(info.TileIndexToPosition(x, y))*1.0f+Vector3(xoffset,height,depth));
             tileNode->SetScale(Vector3(scale, scale, scale));
-            tileNode->SetRotation(Quaternion(180.0f,90.0f,90.0f));
+//            tileNode->SetRotation(Quaternion(180.0f,90.0f,90.0f));
+            tileNode->SetRotation(Quaternion(0.0f,0.0f,0.0f));
 
             staticObject->SetModel(cache->GetResource<Model>(buffer));
-            String matFile = GetSubsystem<FileSystem>()->GetProgramDir() + "Data/" + matStr.c_str();
+        //    String matFile = GetSubsystem<FileSystem>()->GetProgramDir() + "Data/" + matStr.c_str();
  //           staticObject->SetMaterial(cache->GetResource<Material>("Materials/LOWPOLY-COLORS.xml"));
-            staticObject->ApplyMaterialList(matFile);
+            staticObject->ApplyMaterialList(matStr.c_str());
+            URHO3D_LOGINFOF("TileMapLayer3D::SetTileLayer -> material = %s", matStr.c_str());
+
+//            hullObject->ApplyMaterialList("Models/Vehicles/Offroad/Models/body-car.txt");
 
            // staticObject->SetMaterial(cache->GetResource<Material>("Materials/BROWN-DARK.xml"));
           //  staticObject->SetMaterial(cache->GetResource<Material>("Materials/GREEN.xml"));

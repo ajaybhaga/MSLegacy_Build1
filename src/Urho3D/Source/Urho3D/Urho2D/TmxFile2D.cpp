@@ -35,6 +35,8 @@
 
 #include "../DebugNew.h"
 
+// Updating for new version of Tiled - abhaga Aug 11 2020
+// Commented version check during EndLoad()
 
 namespace Urho3D
 {
@@ -510,13 +512,17 @@ bool TmxFile2D::EndLoad()
     if (!loadXMLFile_)
         return false;
 
+
+    URHO3D_LOGDEBUG("*** TmxFile2D::EndLoad()");
+
     XMLElement rootElem = loadXMLFile_->GetRoot("map");
     String version = rootElem.GetAttribute("version");
-    if (version != "1.0")
+
+   /* if (version != "1.4")
     {
         URHO3D_LOGERROR("Invalid version");
         return false;
-    }
+    }*/
 
     String orientation = rootElem.GetAttribute("orientation");
     if (orientation == "orthogonal")
@@ -546,6 +552,12 @@ bool TmxFile2D::EndLoad()
     {
         bool ret = true;
         String name = childElement.GetName();
+
+
+        URHO3D_LOGINFOF("*** TmxFile2D::EndLoad() -> name = %s", name.CString());
+
+
+
         if (name == "tileset")
             ret = LoadTileSet(childElement);
         else if (name == "layer")

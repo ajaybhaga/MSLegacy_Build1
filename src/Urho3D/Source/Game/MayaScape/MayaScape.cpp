@@ -748,7 +748,7 @@ void MayaScape::CreateScene() {
 //
 //    auto *tmxFile = cache->GetResource<TmxFile2D>("Urho2D/Tilesets/Ortho.tmx");
 
-    auto *tmxFile = cache->GetResource<TmxFile2D>("Tracks/Ortho.tmx");
+    auto *tmxFile = cache->GetResource<TmxFile2D>("Tracks/Track1.tmx");
     tileMap->SetTmxFile(tmxFile);
     const TileMapInfo2D &info = tileMap->GetInfo();
     URHO3D_LOGINFOF("tileMap=%f x %f", info.GetMapWidth(), info.GetMapHeight());
@@ -1466,9 +1466,9 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
         ReloadScene(false);
 
     GameController *gameController = GetSubsystem<GameController>();
+    gameController->UpdateControlInputs(vehicle_->controls_);
 
     if (player_) {
-        gameController->UpdateControlInputs(vehicle_->controls_);
 
         // **note** the buttons controls are handled in the character class update fn.
 
