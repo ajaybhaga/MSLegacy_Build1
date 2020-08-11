@@ -50,7 +50,7 @@
 
 //=============================================================================
 //=============================================================================
-#define CUBE_HALF_EXTENTS       1.15f
+#define CUBE_HALF_EXTENTS       1.65f
 
 #define MIN_SLOW_DOWN_VEL       15.0f
 #define MIN_STICTION_VEL        5.0f
@@ -185,14 +185,19 @@ void Vehicle::Init()
     raycastVehicle_->SetCollisionLayer(1);
     raycastVehicle_->AddBodyToWorld();
 
-    Model *vehModel = cache->GetResource<Model>("Models/Vehicles/Offroad/Models/offroadVehicle.mdl");
+//    Model *vehModel = cache->GetResource<Model>("Models/Vehicles/Offroad/Models/offroadVehicle.mdl");
+
+    Model *vehModel = cache->GetResource<Model>("Models/Vehicles/Offroad/Models/body-car.mdl");
 
     hullObject->SetModel(vehModel);
-    hullObject->SetMaterial(cache->GetResource<Material>("Data/Models/Vehicles/Offroad/Materials/phong1.xml"));
+//    hullObject->SetMaterial(cache->GetResource<Material>("Data/Models/Vehicles/Offroad/Materials/phong1.xml"));
+    hullObject->ApplyMaterialList("Models/Vehicles/Offroad/Models/body-car.txt");
+
     hullObject->SetCastShadows(true);
 
     // set convex hull and resize local AABB.Y size
-    Model *vehColModel = cache->GetResource<Model>("Models/Vehicles/Offroad/Models/offroadVehicle.mdl");
+//    Model *vehColModel = cache->GetResource<Model>("Models/Vehicles/Offroad/Models/offroadVehicle.mdl");
+    Model *vehColModel = cache->GetResource<Model>("Models/Vehicles/Offroad/Models/coll-car.mdl");
 
     hullObject->GetNode()->SetRotation(Quaternion(0.0, 0.0f, 0.0f));
 //    hullObject->GetNode()->SetScale(Vector3(0.01f, 0.01f, 0.01f));
@@ -261,15 +266,21 @@ void Vehicle::Init()
     {
         raycastVehicle_->ResetSuspension();
 
-        float wheelDim = m_fwheelRadius*2.0f;
-        float wheelThickness = 1.0f;
+        float wheelDim = m_fwheelRadius*3.0f;
+        float wheelThickness = 0.4f;
 
 
   //        pWheel->SetModel(cache->GetResource<Model>("Models/AssetPack/sun.mdl"));
 //        pWheel->SetModel(cache->GetResource<Model>("Models/Cylinder.mdl"));
 //        pWheel->SetMaterial(cache->GetResource<Material>("Materials/LOWPOLY-COLORS.xml"));
 
-        Model *tireModel = cache->GetResource<Model>("Offroad/Models/tire.mdl");
+//        Model *vehModel = cache->GetResource<Model>("Models/Vehicles/Offroad/Models/body-car.mdl");
+//        hullObject->ApplyMaterialList("Models/Vehicles/Offroad/Models/body-car.txt");
+
+
+        Model *tireModel = cache->GetResource<Model>("Models/Vehicles/Offroad/Models/wheel-fl.mdl");
+
+        //        Model *tireModel = cache->GetResource<Model>("Offroad/Models/tire.mdl");
         BoundingBox tirebbox = tireModel->GetBoundingBox();
 
 
@@ -278,8 +289,6 @@ void Vehicle::Init()
         const Color LtBrown(0.972f,0.780f,0.412f );
         Model *trackModel = cache->GetResource<Model>("Offroad/Models/wheelTrack.mdl");
 
-        Node* adjNode = GetScene()->CreateChild("AdjNode");
-        adjNode->SetRotation(Quaternion(0.0, 0.0, -90.0f));
 
         for ( int i = 0; i < raycastVehicle_->GetNumWheels(); i++ )
         {
@@ -298,10 +307,17 @@ void Vehicle::Init()
             Vector3 v3PosLS = ToVector3( whInfo.m_chassisConnectionPointCS );
 
             wheelNode->SetRotation( v3PosLS.x_ >= 0.0 ? Quaternion(-90.0f, 0.0f, 0.0f) : Quaternion(90.0f, 0.0f, 0.0f) );
-            wheelNode->SetScale(Vector3(tireScaleXZ, wheelThickness, tireScaleXZ));
+//            wheelNode->SetScale(Vector3(tireScaleXZ, wheelThickness, tireScaleXZ));
+
+            //wheelThickness = 1.0f
+            wheelNode->SetScale(Vector3(tireScaleXZ,wheelThickness,tireScaleXZ));
+
+            Node* adjNode = wheelNode->CreateChild("AdjNode");
+            adjNode->SetRotation(Quaternion(0.0, 0.0, -90.0f));
 
             // tire model
-            StaticModel *pWheel = wheelNode->CreateComponent<StaticModel>();
+            StaticModel *pWheel = adjNode->CreateComponent<StaticModel>();
+//            pWheel->GetNode()->SetScale(0.4f);
             pWheel->SetModel(tireModel);
             pWheel->SetMaterial(cache->GetResource<Material>("Offroad/Models/Materials/Tire.xml"));
             pWheel->SetCastShadows(true);

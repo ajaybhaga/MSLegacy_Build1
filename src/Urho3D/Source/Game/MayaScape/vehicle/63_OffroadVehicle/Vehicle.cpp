@@ -178,7 +178,7 @@ void Vehicle::Init()
     raycastVehicle_->SetCollisionLayer(1);
    
 //    Model *vehModel = cache->GetResource<Model>("Offroad/Models/offroadVehicle.mdl");
-    Model *vehModel = cache->GetResource<Model>("Models/Vehicles/Offroad/Models/offroadVehicle.mdl");
+    Model *vehModel = cache->GetResource<Model>("Models/Vehicles/Offroad/Models/body-car.mdl");
 
  //
     hullObject->SetModel(vehModel);
@@ -189,7 +189,8 @@ void Vehicle::Init()
 //    Model *vehColModel = cache->GetResource<Model>("Offroad/Models/vehCollision.mdl");
 //    Model *vehColModel = cache->GetResource<Model>("Offroad/Models/vehCollision.mdl");
 
-    Model *vehColModel = cache->GetResource<Model>("Models/Vehicles/Offroad/Models/vehCollision.mdl");
+//    Model *vehColModel = cache->GetResource<Model>("Models/Vehicles/Offroad/Models/vehCollision.mdl");
+    Model *vehColModel = cache->GetResource<Model>("Models/Vehicles/Offroad/Models/coll-car.mdl");
 
     hullColShape->SetConvexHull(vehColModel);
     raycastVehicle_->CompoundScaleLocalAabbMin(Vector3(0.7f, 0.5f, 1.0f));
