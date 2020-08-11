@@ -354,6 +354,7 @@ void MayaScape::CreateVehicle() {
     vehicle_ = vehicleNode->CreateComponent<Vehicle>();
     vehicle_->Init();
 
+    vehicleNode->SetRotation(Quaternion(0.0, -90.0, 0.0));
     // smooth step
     vehicleRot_ = vehicleNode->GetRotation();
     Quaternion dir(vehicleRot_.YawAngle(), Vector3::UP);

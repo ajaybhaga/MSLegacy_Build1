@@ -86,7 +86,7 @@ Vehicle::Vehicle(Context* context)
     // fixed update() for inputs and post update() to sync wheels for rendering
     SetUpdateEventMask( USE_FIXEDUPDATE | USE_FIXEDPOSTUPDATE| USE_POSTUPDATE );
 
-    m_fVehicleMass = 200.0f;
+    m_fVehicleMass = 100.0f;
     m_fEngineForce = 0.0f;
     m_fBreakingForce = 20.0f;
 
@@ -221,16 +221,16 @@ void Vehicle::Init()
 
     //******************
     // center of mass
-    centerOfMassOffset_ = Vector3(0, -1.0f, 0.4f);
+    centerOfMassOffset_ = Vector3(0, 0.3f, 0.8f);
 
     // change center of mass
     raycastVehicle_->SetVehicleCenterOfMass(centerOfMassOffset_);
 
 
-    float bodyLength = 2.0f;
+    float bodyLength = 1.9f;
     float bodyFixedWidth = 0.6f;
     float bodyWidth = 1.5f;
-    float wheelYOffset = -3.0f;
+    float wheelYOffset = -0.4f;
     // add wheels
     Vector3 connectionPointCS0(bodyWidth*CUBE_HALF_EXTENTS-(bodyFixedWidth*m_fwheelWidth), centerOfMassOffset_.y_+wheelYOffset, bodyLength*CUBE_HALF_EXTENTS-m_fwheelRadius-0.4f-centerOfMassOffset_.z_);
     raycastVehicle_->AddWheel(connectionPointCS0,wheelDirectionCS0,wheelAxleCS,m_fsuspensionRestLength,m_fwheelRadius,isFrontWheel);

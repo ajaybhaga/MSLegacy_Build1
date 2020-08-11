@@ -98,7 +98,7 @@ void RaycastVehicle::SetVehicleCenterOfMass(const Vector3 &centerOfMass)
         // compound shape
         btTransform transf;
         transf.setIdentity();
-        sphShape_ = new btSphereShape(4.0f);
+        sphShape_ = new btSphereShape(2.0f);
         indexAddedShape_ = GetCompoundShape()->getNumChildShapes() ;
 
         // rigid body's center of mass = avg(sum of all compound positions) // size and mass are irrelevant
