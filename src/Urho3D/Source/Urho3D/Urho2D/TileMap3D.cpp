@@ -30,6 +30,8 @@
 #include "../Urho2D/TileMap3D.h"
 #include "../Urho2D/TileMapLayer3D.h"
 #include "../Urho2D/TmxFile2D.h"
+#include "../IO/Log.h"
+
 
 #include "../DebugNew.h"
 
@@ -115,6 +117,9 @@ void TileMap3D::DrawDebugGeometry()
 
 void TileMap3D::SetTmxFile(TmxFile2D* tmxFile)
 {
+    URHO3D_LOGINFOF("TileMap3D::SetTmxFile", 0);
+
+
     if (tmxFile == tmxFile_)
         return;
 
@@ -136,6 +141,8 @@ void TileMap3D::SetTmxFile(TmxFile2D* tmxFile)
 
     unsigned numLayers = tmxFile_->GetNumLayers();
     layers_.Resize(numLayers);
+
+    URHO3D_LOGINFOF("TileMap3D::SetTmxFile -> %d", numLayers);
 
     for (unsigned i = 0; i < numLayers; ++i)
     {

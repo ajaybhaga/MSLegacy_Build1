@@ -722,7 +722,7 @@ PODVector<Vector2> Sample2D::CreatePathFromPoints(TileMapObject2D* object, Vecto
     return path;
 }
 
-void Sample2D::CreateUIContent(const String& demoTitle, int remainingLifes, int remainingCoins)
+void Sample2D::CreateUIContent(const String& demoTitle)
 {
     auto* cache = GetSubsystem<ResourceCache>();
     auto* ui = GetSubsystem<UI>();
@@ -733,6 +733,7 @@ void Sample2D::CreateUIContent(const String& demoTitle, int remainingLifes, int 
 
     // We create in-game UIs (coins and lifes) first so that they are hidden by the fullscreen UI (we could also temporary hide them using SetVisible)
 
+    /*
     // Create the UI for displaying the remaining coins
     auto* coinsUI = ui->GetRoot()->CreateChild<BorderImage>("Coins");
     coinsUI->SetTexture(cache->GetResource<Texture2D>("Urho2D/GoldIcon.png"));
@@ -747,7 +748,8 @@ void Sample2D::CreateUIContent(const String& demoTitle, int remainingLifes, int 
     coinsText->SetTextEffect(TE_SHADOW);
     coinsText->SetText(String(remainingCoins));
     coinsText->SetVisible(false);
-    
+    */
+    /*
     // Create the UI for displaying the remaining lifes
     auto* lifeUI = ui->GetRoot()->CreateChild<BorderImage>("Life");
     lifeUI->SetTexture(cache->GetResource<Texture2D>("Urho2D/imp/imp_all.png"));
@@ -762,6 +764,8 @@ void Sample2D::CreateUIContent(const String& demoTitle, int remainingLifes, int 
     lifeText->SetTextEffect(TE_SHADOW);
     lifeText->SetText(String(remainingLifes));
     lifeText->SetVisible(false);
+*/
+
 
     // Create the fullscreen UI for start/end
     auto* fullUI = ui->GetRoot()->CreateChild<Window>("FullUI");

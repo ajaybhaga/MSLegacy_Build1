@@ -103,7 +103,7 @@ public:
     /// Create path from tmx object's points.
     PODVector<Vector2> CreatePathFromPoints(TileMapObject2D* object, Vector2 offset);
     /// Create the UI content.
-    void CreateUIContent(const String& demoTitle, int remainingLifes, int remainingCoins);
+    void CreateUIContent(const String& demoTitle);
     /// Handle 'EXIT' button released event.
     void HandleExitButton(StringHash eventType, VariantMap& eventData);
     /// Save the scene.

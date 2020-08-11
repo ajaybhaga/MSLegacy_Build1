@@ -326,7 +326,7 @@ void MayaScape::Start() {
     UI *ui = GetSubsystem<UI>();
 
     // Create the UI content
-    sample2D_->CreateUIContent("MayaScape Game Engine v0.1", player_->remainingLifes_, player_->remainingCoins_);
+    sample2D_->CreateUIContent("MayaScape Game Engine v0.1");
 //    auto* ui = GetSubsystem<UI>();
     Button *playButton = static_cast<Button *>(ui->GetRoot()->GetChild("PlayButton", true));
     SubscribeToEvent(playButton, E_RELEASED, URHO3D_HANDLER(MayaScape, HandlePlayButton));
@@ -732,19 +732,23 @@ void MayaScape::CreateScene() {
     // Set background color for the scene
     Zone *zone = renderer->GetDefaultZone();
     zone->SetFogColor(Color(0.2f, 0.2f, 0.2f));
+*/
 
-    // Create tile map from tmx file
+    // Load default track
+
+    // Create tile map for track from tmx file
     SharedPtr<Node> tileMapNode(scene_->CreateChild("TileMap"));
 
 //    auto* tileMap3d = tileMapNode->CreateComponent<TileMap3D>();
 //    tileMap3d->SetTmxFile(cache->GetResource<TmxFile2D>("Urho2D/Tilesets/Ortho.tmx"
 
     TileMap3D *tileMap = tileMapNode->CreateComponent<TileMap3D>();
-    URHO3D_LOGINFOF("tileMap=%x", tileMap);
 
-    tileMap->SetTmxFile(cache->GetResource<TmxFile2D>("Urho2D/Tilesets/MayaSpace_Level0.tmx"));
+    tileMap->SetTmxFile(cache->GetResource<TmxFile2D>("Urho2D/Tilesets/MayaScape_Level0.tmx"));
     const TileMapInfo2D &info = tileMap->GetInfo();
-*/
+    URHO3D_LOGINFOF("tileMap=%f x %f", info.GetMapWidth(), info.GetMapHeight());
+
+//    tileMap->Set
 /*
     // Create balloon object
     for (int i = 0; i < 4; i++) {
@@ -777,7 +781,7 @@ void MayaScape::CreateScene() {
         obj_->type_ = 3;
     }
 */
-
+/*
     // Create player character
 //    Node* modelNode = sample2D_->CreateCharacter(info, 0.0f, Vector3(2.5f, 16.0f, 0.0f), 1.0f, 1);
     Node *modelNode = sample2D_->CreateCharacter(0.0f, Vector3(2.5f, 2.0f, -40.0f), 2);
@@ -885,7 +889,7 @@ void MayaScape::CreateScene() {
             billboardObject->Commit();
         }
         */
-
+/*
         // Genotype
 
         //Node* gtNode = scene_->CreateChild("Genotype");
@@ -1403,33 +1407,35 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
     float zoom_ = cameraNode_->GetComponent<Camera>()->GetZoom();
     float deltaSum;
 
-    // Determine zoom by getting average distance from all players
-    for (int i = 0; i < EvolutionManager::getInstance()->getAgents().size(); i++) {
+    if (player_) {
+        // Determine zoom by getting average distance from all players
+        for (int i = 0; i < EvolutionManager::getInstance()->getAgents().size(); i++) {
 
-        // Update player location for AI
-        agents_[i]->playerPos_ = player_->GetNode()->GetPosition();
+            // Update player location for AI
+            agents_[i]->playerPos_ = player_->GetNode()->GetPosition();
 
-        Vector3 p1 = player_->GetNode()->GetPosition();
-        p1.z_ = 0;
-        Vector3 p2 = agents_[i]->GetNode()->GetPosition();
-        p2.z_ = 0;
-        float delta = p1.DistanceToPoint(p2);
-        deltaSum += delta;
+            Vector3 p1 = player_->GetNode()->GetPosition();
+            p1.z_ = 0;
+            Vector3 p2 = agents_[i]->GetNode()->GetPosition();
+            p2.z_ = 0;
+            float delta = p1.DistanceToPoint(p2);
+            deltaSum += delta;
+        }
+
+        float avgDelta = ((float) deltaSum) / ((float) EvolutionManager::getInstance()->getAgents().size());
+        float factor;
+
+        if (avgDelta > 5.0f) {
+            factor = 1.0f - avgDelta * 0.02f;
+        } else {
+            factor = 1.0f + avgDelta * 0.02f;
+        }
+
+        factor = 1.0f;
+
+        zoom_ = Clamp(zoom_ * factor, CAMERA_MIN_DIST, CAMERA_MAX_DIST);
+        cameraNode_->GetComponent<Camera>()->SetZoom(zoom_);
     }
-
-    float avgDelta = ((float) deltaSum) / ((float) EvolutionManager::getInstance()->getAgents().size());
-    float factor;
-
-    if (avgDelta > 5.0f) {
-        factor = 1.0f - avgDelta * 0.02f;
-    } else {
-        factor = 1.0f + avgDelta * 0.02f;
-    }
-
-    factor = 1.0f;
-
-    zoom_ = Clamp(zoom_ * factor, CAMERA_MIN_DIST, CAMERA_MAX_DIST);
-    cameraNode_->GetComponent<Camera>()->SetZoom(zoom_);
 
     //    URHO3D_LOGINFOF("delta=%f", delta);
     //    URHO3D_LOGINFOF("factor=%f", factor);
@@ -1485,8 +1491,8 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
         Bone *startBone = rootBone;
 
 
-    }
 
+    /*
     // Clamp player life
     if (player_->life_ > 100) {
         player_->life_ = 100;
@@ -1517,7 +1523,8 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 
         if (_sndCnt > 5) {
             sample2D_->PlaySoundEffect("enemy01-laugh.wav");
-        }*/
+        }
+
 
             // Update billboards (genotype, powerbar)
 
@@ -1568,10 +1575,18 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
     }
 
     player_->life_ = 50;
+     */
 
+     }
+
+
+    int life = 0;
+    if (player_) {
+        life = player_->life_;
+    }
     // Update player powerbar
     IntVector2 v = powerBarBkgP1Sprite_->GetSize();
-    int power = int(((player_->life_) / 100.0f) * (float) v.x_);
+    int power = int(((life) / 100.0f) * (float) v.x_);
     powerBarP1Sprite_->SetSize(power, v.y_);
 
     float maxRPM = 8000.0f;
@@ -1610,53 +1625,55 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 //    miniMapP1Sprite_->SetPosition(Vector2(776.0f-16.0f, 300.0f));
     miniMapP1Sprite_->SetPosition(Vector2(miniMapP1X+xRange-16.0f, miniMapP1Y+zRange));
 
-
-    char str[40];
-
-    Vector3 pos = player_->GetNode()->GetPosition();
-    sprintf(str, "%f,%f,%f", pos.x_, pos.y_, pos.z_);
     int i = 0;
-    std::string playerInfo;
-    playerInfo.clear();
-    playerInfo.append("Player position (x,y,z) -> ").append(str);
-    debugText_[i]->SetText(playerInfo.c_str());
 
-    i++;
-    Vector3 vel = player_->currState_.moveDir;
-    sprintf(str, "%f,%f,%f", vel.x_, vel.y_, vel.z_);
+    if (player_) {
+        std::string playerInfo;
+        char str[40];
 
-    playerInfo.clear();
-    playerInfo.append("Player velocity (x,y,z) -> ").append(str);
-    debugText_[i]->SetText(playerInfo.c_str());
+        Vector3 pos = player_->GetNode()->GetPosition();
+        sprintf(str, "%f,%f,%f", pos.x_, pos.y_, pos.z_);
+        playerInfo.clear();
+        playerInfo.append("Player position (x,y,z) -> ").append(str);
+        debugText_[i]->SetText(playerInfo.c_str());
 
-    i++;
+        i++;
+        Vector3 vel = player_->currState_.moveDir;
+        sprintf(str, "%f,%f,%f", vel.x_, vel.y_, vel.z_);
+
+        playerInfo.clear();
+        playerInfo.append("Player velocity (x,y,z) -> ").append(str);
+        debugText_[i]->SetText(playerInfo.c_str());
+
+        i++;
 //    Vector3 vel = player_
-    sprintf(str, "%d,%d,%d", player_->currState_.onGround, player_->currState_.jump, player_->currState_.kick);
+        sprintf(str, "%d,%d,%d", player_->currState_.onGround, player_->currState_.jump, player_->currState_.kick);
 
-    playerInfo.clear();
-    playerInfo.append("Player state (onGround,jump,kick) -> ").append(str);
-    debugText_[i]->SetText(playerInfo.c_str());
-
-
-    i++;
-    playerInfo.clear();
-    sprintf(str, "%d", EvolutionManager::getInstance()->getGenerationCount());
-    playerInfo.append("Evolution Manager: Generation -> ").append(str);
-    debugText_[i]->SetText(playerInfo.c_str());
+        playerInfo.clear();
+        playerInfo.append("Player state (onGround,jump,kick) -> ").append(str);
+        debugText_[i]->SetText(playerInfo.c_str());
 
 
-    i++;
-    playerInfo.clear();
-    sprintf(str, "%d", EvolutionManager::getInstance()->populationSize);
-    playerInfo.append("Evolution Manager: populationSize -> ").append(str);
-    debugText_[i]->SetText(playerInfo.c_str());
+        i++;
+        playerInfo.clear();
+        sprintf(str, "%d", EvolutionManager::getInstance()->getGenerationCount());
+        playerInfo.append("Evolution Manager: Generation -> ").append(str);
+        debugText_[i]->SetText(playerInfo.c_str());
 
-    i++;
-    playerInfo.clear();
-    sprintf(str, "%f", EvolutionManager::getInstance()->getAgents()[0]->genotype->evaluation);
-    playerInfo.append("Evolution Manager: agent[0]->genotype->evaluation -> ").append(str);
-    debugText_[i]->SetText(playerInfo.c_str());
 
+        i++;
+        playerInfo.clear();
+        sprintf(str, "%d", EvolutionManager::getInstance()->populationSize);
+        playerInfo.append("Evolution Manager: populationSize -> ").append(str);
+        debugText_[i]->SetText(playerInfo.c_str());
+
+        i++;
+        playerInfo.clear();
+        sprintf(str, "%f", EvolutionManager::getInstance()->getAgents()[0]->genotype->evaluation);
+        playerInfo.append("Evolution Manager: agent[0]->genotype->evaluation -> ").append(str);
+        debugText_[i]->SetText(playerInfo.c_str());
+
+    }
 
     //URHO3D_LOGINFOF("player_ position x=%f, y=%f, z=%f", player_->GetNode()->GetPosition().x_, player_->GetNode()->GetPosition().y_, player_->GetNode()->GetPosition().z_);
 
@@ -1666,6 +1683,7 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 
     if (vehicle_)
     {
+        /*
         i++;
         playerInfo.clear();
         sprintf(str, "vehicle pos (%f, %f, %f, %f, gauge = %f)", vehicle_->GetNode()->GetPosition().x_, vehicle_->GetNode()->GetPosition().y_, vehicle_->GetNode()->GetPosition().z_, (vehicle_->GetCurrentRPM()), (vehicle_->GetCurrentRPM()/7000.0f)*100.0f);
@@ -1673,7 +1691,7 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
         debugText_[i]->SetText(playerInfo.c_str());
         i++;
         playerInfo.clear();
-
+*/
 
         UI* ui = GetSubsystem<UI>();
 
@@ -1762,11 +1780,11 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 
         //        textKmH_->SetText( data );
 
-
+/*
         sprintf(str, "%.2f -> Gauge %.2f", vehicle_->GetCurrentRPM(), vehicle_->GetCurrentRPM()/7000.0f);
         playerInfo.append("Vehicle [engine rpm] -> ").append(str);
         debugText_[i]->SetText(data);
-
+*/
         /*
         i++;
         playerInfo.clear();
@@ -1912,10 +1930,10 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 }
 
 void MayaScape::HandlePostUpdate(StringHash eventType, VariantMap &eventData) {
-    if (!player_)
-        return;
+//    if (!player_)
+//        return;
 
-    Node *character2DNode = player_->GetNode();
+  //  Node *character2DNode = player_->GetNode();
    /* cameraNode_->SetPosition(Vector3(character2DNode->GetPosition().x_, character2DNode->GetPosition().y_,
                                      -10.0f)); // Camera tracks character
 */
@@ -2004,23 +2022,24 @@ void MayaScape::HandlePostRenderUpdate(StringHash eventType, VariantMap &eventDa
     // Mesh and bones do not match -> bones are too big
     // Scale down bone
 //    player_->
-    auto *model_ = player_->GetNode()->GetComponent<AnimatedModel>(true);
-    //node_->GetComponent<AnimatedModel>(true);
+    if (player_) {
+        auto *model_ = player_->GetNode()->GetComponent<AnimatedModel>(true);
+        //node_->GetComponent<AnimatedModel>(true);
 
 
-    //  if (!model_ || !animation_)
-    //      return;
+        //  if (!model_ || !animation_)
+        //      return;
 
-    Skeleton &skeleton = model_->GetSkeleton();
-    Bone *rootBone = skeleton.GetRootBone();
-    Bone *startBone = rootBone;
+        Skeleton &skeleton = model_->GetSkeleton();
+        Bone *rootBone = skeleton.GetRootBone();
+        Bone *startBone = rootBone;
 
-    if (!rootBone)
-        return;
+        if (!rootBone)
+            return;
 
 //    startBone->initialScale_(Vector3(0.01f, 0.01f, 0.01f));
 
-    if (drawDebug_) {
+        if (drawDebug_) {
 /*        auto *physicsWorld = scene_->GetComponent<PhysicsWorld2D>();
         physicsWorld->DrawDebugGeometry();
 
@@ -2028,10 +2047,11 @@ void MayaScape::HandlePostRenderUpdate(StringHash eventType, VariantMap &eventDa
         auto *map = tileMapNode->GetComponent<TileMap3D>();
         map->DrawDebugGeometry(scene_->GetComponent<DebugRenderer>(), false);
 */
-        // bones. Note that debug geometry has to be separately requested each frame. Disable depth test so that we can see the
-        // bones properly
-        GetSubsystem<Renderer>()->DrawDebugGeometry(false);
+            // bones. Note that debug geometry has to be separately requested each frame. Disable depth test so that we can see the
+            // bones properly
+            GetSubsystem<Renderer>()->DrawDebugGeometry(false);
 
+        }
     }
 
     if (doSpecial_){

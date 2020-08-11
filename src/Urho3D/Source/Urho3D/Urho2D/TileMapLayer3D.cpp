@@ -39,6 +39,7 @@
 
 #include "..//IO/File.h"
 #include "../IO/FileSystem.h"
+#include "../IO/Log.h"
 
 
 #include "../DebugNew.h"
@@ -180,8 +181,13 @@ void TileMapLayer3D::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
 
 void TileMapLayer3D::Initialize(TileMap3D* tileMap, const TmxLayer2D* tmxLayer)
 {
+
+    URHO3D_LOGINFOF("TileMapLayer3D::Initialize -> loading tile layer models...", 0);
+
     if (tileMap == tileMap_ && tmxLayer == tmxLayer_)
         return;
+
+    URHO3D_LOGINFOF("TileMapLayer3D::Initialize -> tile layers %.2f", tileMap->GetNumLayers());
 
     if (tmxLayer_)
     {
@@ -351,6 +357,8 @@ void TileMapLayer3D::SetTileLayer(const TmxTileLayer2D* tileLayer)
     bool land = false;
     bool plant = false;
     bool building = false;
+
+    URHO3D_LOGINFOF("TileMapLayer3D::SetTileLayer -> loading tile layer models...", 0);
 
     auto* cache = GetSubsystem<ResourceCache>();
 
