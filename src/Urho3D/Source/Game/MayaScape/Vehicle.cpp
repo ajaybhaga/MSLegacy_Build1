@@ -50,7 +50,7 @@
 
 //=============================================================================
 //=============================================================================
-#define CUBE_HALF_EXTENTS       1.65f
+#define CUBE_HALF_EXTENTS       1.9f
 
 #define MIN_SLOW_DOWN_VEL       15.0f
 #define MIN_STICTION_VEL        5.0f
@@ -90,7 +90,9 @@ Vehicle::Vehicle(Context* context)
     m_fEngineForce = 0.0f;
     m_fBreakingForce = 20.0f;
 
-    m_fmaxEngineForce = 950.f;
+    m_fmaxEngineForce = 1200.f;
+
+//    m_fmaxEngineForce = 950.f;
     m_fmaxBreakingForce = 800.f;
 
     m_fVehicleSteering = 0.0f;
@@ -202,7 +204,7 @@ void Vehicle::Init()
 //    Model *vehColModel = cache->GetResource<Model>("Models/Vehicles/Offroad/Models/offroadVehicle.mdl");
     Model *vehColModel = cache->GetResource<Model>("Models/Vehicles/Offroad/Models/coll-car.mdl");
 
-    hullObject->GetNode()->SetRotation(Quaternion(0.0, 0.0f, 0.0f));
+//    hullObject->GetNode()->SetRotation(Quaternion(0.0, 180.0f, 0.0f));
 //    hullObject->GetNode()->SetScale(Vector3(0.01f, 0.01f, 0.01f));
     hullObject->GetNode()->SetScale(Vector3(0.3f, 0.3f, 0.3f));
 
@@ -219,24 +221,28 @@ void Vehicle::Init()
 
     //******************
     // center of mass
-    centerOfMassOffset_ = Vector3(0, -0.07f, 0.6f);
+    centerOfMassOffset_ = Vector3(0, -1.0f, 0.4f);
 
     // change center of mass
     raycastVehicle_->SetVehicleCenterOfMass(centerOfMassOffset_);
 
 
+    float bodyLength = 2.0f;
+    float bodyFixedWidth = 0.6f;
+    float bodyWidth = 1.5f;
+    float wheelYOffset = -3.0f;
     // add wheels
-    Vector3 connectionPointCS0(CUBE_HALF_EXTENTS-(0.6f*m_fwheelWidth), centerOfMassOffset_.y_, 2*CUBE_HALF_EXTENTS-m_fwheelRadius-0.4f-centerOfMassOffset_.z_);
+    Vector3 connectionPointCS0(bodyWidth*CUBE_HALF_EXTENTS-(bodyFixedWidth*m_fwheelWidth), centerOfMassOffset_.y_+wheelYOffset, bodyLength*CUBE_HALF_EXTENTS-m_fwheelRadius-0.4f-centerOfMassOffset_.z_);
     raycastVehicle_->AddWheel(connectionPointCS0,wheelDirectionCS0,wheelAxleCS,m_fsuspensionRestLength,m_fwheelRadius,isFrontWheel);
 
-    connectionPointCS0 = Vector3(-CUBE_HALF_EXTENTS+(0.6f*m_fwheelWidth), centerOfMassOffset_.y_, 2*CUBE_HALF_EXTENTS-m_fwheelRadius-0.4f-centerOfMassOffset_.z_);
+    connectionPointCS0 = Vector3(bodyWidth*-CUBE_HALF_EXTENTS+(bodyFixedWidth*m_fwheelWidth), centerOfMassOffset_.y_+wheelYOffset, bodyLength*CUBE_HALF_EXTENTS-m_fwheelRadius-0.4f-centerOfMassOffset_.z_);
     raycastVehicle_->AddWheel(connectionPointCS0,wheelDirectionCS0,wheelAxleCS,m_fsuspensionRestLength,m_fwheelRadius,isFrontWheel);
 
     isFrontWheel = false;
-    connectionPointCS0 = Vector3(-CUBE_HALF_EXTENTS+(0.6f*m_fwheelWidth), centerOfMassOffset_.y_, -2*CUBE_HALF_EXTENTS+m_fwheelRadius+0.4f-centerOfMassOffset_.z_);
+    connectionPointCS0 = Vector3(bodyWidth*-CUBE_HALF_EXTENTS+(bodyFixedWidth*m_fwheelWidth), centerOfMassOffset_.y_+wheelYOffset, -bodyLength*CUBE_HALF_EXTENTS+m_fwheelRadius+0.4f-centerOfMassOffset_.z_);
     raycastVehicle_->AddWheel(connectionPointCS0,wheelDirectionCS0,wheelAxleCS,m_fsuspensionRestLength,m_fwheelRadius,isFrontWheel);
 
-    connectionPointCS0 = Vector3(CUBE_HALF_EXTENTS-(0.6f*m_fwheelWidth), centerOfMassOffset_.y_, -2*CUBE_HALF_EXTENTS+m_fwheelRadius+0.4f-centerOfMassOffset_.z_);
+    connectionPointCS0 = Vector3(bodyWidth*CUBE_HALF_EXTENTS-(bodyFixedWidth*m_fwheelWidth), centerOfMassOffset_.y_+wheelYOffset, -bodyLength*CUBE_HALF_EXTENTS+m_fwheelRadius+0.4f-centerOfMassOffset_.z_);
     raycastVehicle_->AddWheel(connectionPointCS0,wheelDirectionCS0,wheelAxleCS,m_fsuspensionRestLength,m_fwheelRadius,isFrontWheel);
 
     numWheels_ = raycastVehicle_->GetNumWheels();
@@ -576,7 +582,7 @@ void Vehicle::PostUpdate(float timeStep)
         pWheel->SetPosition( v3Origin );
        
         Vector3 v3PosLS = ToVector3( whInfo.m_chassisConnectionPointCS );
-        Quaternion qRotator = ( v3PosLS.x_ >= 0.0 ? Quaternion(0.0f, 0.0f, -90.0f) : Quaternion(0.0f, 0.0f, 90.0f) );
+        Quaternion qRotator = ( v3PosLS.x_ < 0.0 ? Quaternion(0.0f, 0.0f, -90.0f) : Quaternion(0.0f, 0.0f, 90.0f) );
         pWheel->SetRotation( qRot * qRotator );
     }
 

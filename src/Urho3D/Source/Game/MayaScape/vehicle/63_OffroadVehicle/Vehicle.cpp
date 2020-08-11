@@ -202,7 +202,7 @@ void Vehicle::Init()
 
     //******************
     // center of mass
-    centerOfMassOffset_ = Vector3(0, -0.07f, -2.0f);
+    centerOfMassOffset_ = Vector3(0, 10.07f, -2.0f);
 
     // change center of mass
     raycastVehicle_->SetVehicleCenterOfMass(centerOfMassOffset_);
