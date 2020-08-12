@@ -352,6 +352,253 @@ Node* TileMapLayer3D::GetImageNode() const
     return nodes_[0];
 }
 
+enum direction {
+    WEST, EAST, NORTH, SOUTH
+};
+
+float xScale = 28.0f;
+float yScale = 28.0f;
+
+Vector3 TileMapLayer3D::CalculateTileShift(const TmxTileLayer2D* tileLayer, const Tile2D* tile, int x, int y) {
+    unsigned int adjWTileId = -1;
+    unsigned int adjETileId = -1;
+    unsigned int adjNTileId = -1;
+    unsigned int adjSTileId = -1;
+    float xShift, yShift, zShift;
+    xShift = yShift = zShift = 0.0f;
+
+    unsigned int tileId = tile->GetGid();
+    Tile2D* adjTile = nullptr;
+
+    adjTile = tileLayer->GetTile(x-1, y);
+    if (adjTile)
+        adjWTileId = adjTile->GetGid();
+    adjTile = nullptr;
+
+    adjTile = tileLayer->GetTile(x+1, y);
+    if (adjTile)
+        adjETileId = adjTile->GetGid();
+    adjTile = nullptr;
+
+    adjTile = tileLayer->GetTile(x, y-1);
+    if (adjTile)
+        adjNTileId = adjTile->GetGid();
+    adjTile = nullptr;
+
+    adjTile = tileLayer->GetTile(x, y+1);
+    if (adjTile)
+        adjSTileId = adjTile->GetGid();
+    adjTile = nullptr;
+
+
+    // Adjcent W is same
+    if (adjWTileId == tileId) {
+
+    } else {
+
+        // DETECTED - twice
+        // Top left
+        if (adjWTileId == 3) {
+            // Squeeze in
+            xShift = 0.01f;
+            yShift = -yScale;
+            zShift = 0.0f;
+
+            URHO3D_LOGINFOF("W TileMapLayer3D::SetTileLayer -> Squeeze in [%d, %f, %f]", adjWTileId, xShift, yShift);
+        }
+
+        // Top right
+        if (adjWTileId == 4) {
+            // Squeeze in
+            xShift = 0.01f;
+            yShift = 0.01f;
+            zShift = 0.0f;
+
+            //    xShift = 300.0f;
+            URHO3D_LOGINFOF("W TileMapLayer3D::SetTileLayer -> Squeeze in [%d, %f, %f]", adjWTileId, xShift, yShift);
+        }
+
+        // DETECTED - twice
+        // Bottom left
+        if (adjWTileId == 5) {
+            // Squeeze in
+            xShift = 0.01f;
+            yShift = yScale;
+            zShift = 0.0f;
+
+            URHO3D_LOGINFOF("W TileMapLayer3D::SetTileLayer -> Squeeze in [%d, %f, %f]", adjWTileId, xShift, yShift);
+
+        }
+
+        // Bottom right
+        if (adjWTileId == 6) {
+            // Squeeze in
+            xShift = 0.01f;
+            yShift = 0.01f;
+            zShift = 0.0f;
+
+            URHO3D_LOGINFOF("W TileMapLayer3D::SetTileLayer -> Squeeze in [%d, %f, %f]", adjWTileId, xShift, yShift);
+        }
+
+    }
+
+
+    // Adjcent E is same
+    if (adjETileId == tileId) {
+
+    } else {
+
+        // Top left
+        if (adjETileId == 3) {
+            // Squeeze in
+            xShift = 0.01f;
+            yShift = 0.01f;
+            zShift = 0.0f;
+
+            URHO3D_LOGINFOF("E TileMapLayer3D::SetTileLayer -> Squeeze in [%d, %f, %f]", adjETileId, xShift, yShift);
+        }
+
+        // DETECTED - twice
+        // Top right
+        if (adjETileId == 4) {
+            // Squeeze in
+            xShift = 0.01f;
+            yShift = -yScale;
+            zShift = 0.0f;
+
+            URHO3D_LOGINFOF("E TileMapLayer3D::SetTileLayer -> Squeeze in [%d, %f, %f]", adjETileId, xShift, yShift);
+        }
+
+        // Bottom left
+        if (adjETileId == 5) {
+            // Squeeze in
+            xShift = 0.01f;
+            yShift = 0.01f;
+            zShift = 0.0f;
+
+            URHO3D_LOGINFOF("E TileMapLayer3D::SetTileLayer -> Squeeze in [%d, %f, %f]", adjETileId, xShift, yShift);
+
+        }
+
+        // DETECTED - twice
+        // Bottom right
+        if (adjETileId == 6) {
+            // Squeeze in
+            xShift = 0.01f;
+            yShift = yScale;
+            zShift = 0.0f;
+
+            URHO3D_LOGINFOF("E TileMapLayer3D::SetTileLayer -> Squeeze in [%d, %f, %f]", adjETileId, xShift, yShift);
+        }
+
+    }
+
+
+    // Adjcent N is same
+    if (adjNTileId == tileId) {
+
+    } else {
+
+        // DETECTED - twice
+        // Top left
+        if (adjNTileId == 3) {
+            // Squeeze in
+            xShift = -xScale;
+            yShift = 0.01f;
+            zShift = 0.0f;
+
+            URHO3D_LOGINFOF("N TileMapLayer3D::SetTileLayer -> Squeeze in [%d, %f, %f]", adjNTileId, xShift, yShift);
+        }
+
+        // DETECTED - twice
+        // Top right
+        if (adjNTileId == 4) {
+            // Squeeze in
+            xShift = xScale;
+            yShift = 0.01f;
+            zShift = 0.0f;
+
+            URHO3D_LOGINFOF("N TileMapLayer3D::SetTileLayer -> Squeeze in [%d, %f, %f]", adjNTileId, xShift, yShift);
+        }
+
+        // Bottom left
+        if (adjNTileId == 5) {
+            // Squeeze in
+            xShift = 0.01f;
+            yShift = 0.01f;
+            zShift = 0.0f;
+
+            URHO3D_LOGINFOF("N TileMapLayer3D::SetTileLayer -> Squeeze in [%d, %f, %f]", adjNTileId, xShift, yShift);
+
+        }
+
+        // Bottom right
+        if (adjNTileId == 6) {
+            // Squeeze in
+            xShift = 0.01f;
+            yShift = 0.01f;
+            zShift = 0.0f;
+
+            URHO3D_LOGINFOF("N TileMapLayer3D::SetTileLayer -> Squeeze in [%d, %f, %f]", adjNTileId, xShift, yShift);
+        }
+
+    }
+
+
+    // Adjcent S is same
+    if (adjSTileId == tileId) {
+
+    } else {
+
+        // Top left
+        if (adjSTileId == 3) {
+            // Squeeze in
+            xShift = 0.01f;
+            yShift = 0.01f;
+            zShift = 0.0f;
+
+            URHO3D_LOGINFOF("S TileMapLayer3D::SetTileLayer -> Squeeze in [%d, %f, %f]", adjSTileId, xShift, yShift);
+        }
+
+        // DETECTED - twice
+        // Top right
+        if (adjSTileId == 4) {
+            // Squeeze in
+            xShift = 0.01f;
+            yShift = 0.01f;
+            zShift = 0.0f;
+
+            //    xShift = 300.0f;
+            URHO3D_LOGINFOF("S TileMapLayer3D::SetTileLayer -> Squeeze in [%d, %f, %f]", adjSTileId, xShift, yShift);
+        }
+
+        // Bottom left
+        if (adjSTileId == 5) {
+            // Squeeze in
+            xShift = -xScale;
+            yShift = 0.01f;
+            zShift = 0.0f;
+
+            URHO3D_LOGINFOF("S TileMapLayer3D::SetTileLayer -> Squeeze in [%d, %f, %f]", adjSTileId, xShift, yShift);
+
+        }
+
+        // DETECTED - twice
+        // Bottom right
+        if (adjSTileId == 6) {
+            // Squeeze in
+            xShift = xScale;
+            yShift = 0.01f;
+            zShift = 0.0f;
+
+            URHO3D_LOGINFOF("S TileMapLayer3D::SetTileLayer -> Squeeze in [%d, %f, %f]", adjSTileId, xShift, yShift);
+        }
+
+    }
+
+    return Vector3(xShift, yShift, zShift);
+}
+
 void TileMapLayer3D::SetTileLayer(const TmxTileLayer2D* tileLayer) {
     bool track = false;
     bool land = false;
@@ -386,290 +633,301 @@ void TileMapLayer3D::SetTileLayer(const TmxTileLayer2D* tileLayer) {
 
     int width = tileLayer->GetWidth();
     int height = tileLayer->GetHeight();
-    nodes_.Resize((unsigned)(width * height));
+    nodes_.Resize((unsigned) (width * height));
 
     char buffer[100];
     std::string path = "Models/Tracks/Models/";
 
-    const TileMapInfo2D& info = tileMap_->GetInfo();
-    for (int y = 0; y < height; ++y)
-    {
-        for (int x = 0; x < width; ++x)
-        {
+    const TileMapInfo2D &info = tileMap_->GetInfo();
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
 
-            URHO3D_LOGINFOF("TileMapLayer3D::tile loop -> (x,y) : (%d, %d)", x, y);
+//            URHO3D_LOGINFOF("TileMapLayer3D::tile loop -> (x,y) : (%d, %d)", x, y);
 
-            const Tile2D* tile = tileLayer->GetTile(x, y);
+            const Tile2D *tile = tileLayer->GetTile(x, y);
 
             bool doGrid = false;
             unsigned int tileId = -1;
+
             // On no tile, default to grid
             if (!tile) {
                 //doGrid = true;
             } else {
                 tileId = tile->GetGid();
-            }
 
-            SharedPtr<Node> tileNode(GetNode()->CreateTemporaryChild("Tile"));
-            auto* staticObject = tileNode->CreateComponent<StaticModel>();
+                SharedPtr<Node> tileNode(GetNode()->CreateTemporaryChild("Tile"));
+                auto *staticObject = tileNode->CreateComponent<StaticModel>();
 
+                // Calculate tile shift based on adjacent neighbors
+                Vector3 tileShift = CalculateTileShift(tileLayer, tile, x, y);
 
 //
 //            std::string path = "Models/";
-            std::string filler = "";
-            std::string terrainType = "Land";
-            if (tileId > 9)
-                filler = ""; 
-            else 
-                filler = "0";
+                std::string filler = "";
+                std::string terrainType = "Land";
+                if (tileId > 9)
+                    filler = "";
+                else
+                    filler = "0";
 //            std::string tileStr = path + terrainType + "Tile" + filler + "%d.mdl";       
-            std::string tileStr = path + "square.mdl";
-            std::string matStr = "";       
+                std::string tileStr = path + "square.mdl";
+                std::string matStr = "";
 //            std::string tileStr;
-            float xoffset;
-            float elevation;
-            float depth;
-            float xShift, yShift;
-//            xShift = -2800.0f;
-//            yShift = -1100.0f;
-            xShift = -0.0f;
-            yShift = -0.0f;
+                float xoffset;
+                float elevation;
+                float depth;
 
-            float scale = 25.0f;
-            Quaternion rot = Quaternion(0.0f, 0.0f, 0.0f);
-            std::string str = "";
+                float scale = 25.0f;
+                Quaternion rot = Quaternion(0.0f, 0.0f, 0.0f);
+                std::string str = "";
 
-            // Set tile location
+                // Set tile location
 //            tileNode->SetPosition(Vector3(info.TileIndexToPosition(x, y))+tile->GetModelOffset()+Vector3(0,0,-1));
-            if (track) { xoffset = 0.0f; depth = 0.0f; elevation = 0.0f;
-                std::string str = path + "square.mdl";
-                sprintf(buffer, str.c_str(), tileId);
-                matStr = path + "square.txt";
-            } else return;
-
-            if (land) { xoffset = 0.3f; depth = 1.0f; }
-            if (plant) { xoffset = 0.0f; depth = -0.5f; elevation = 0.0f; }
-            if (building) { xoffset = 0.0f; depth = 1.5f; elevation = -0.6f; }
-
-            if (doGrid) {
-//                tileStr = path + "grid.mdl";
-                tileStr = path + "square.mdl";
-                matStr = path + "square.txt";
-//                scale = 0.12f;
-     //           elevation = 4.7f;
-            } else {
-
                 if (track) {
-                    switch (tileId) {
-                        case 1:
-                            // Straight horizontal
-                            tileStr = path + "1.mdl";
-                            matStr = path + "1.txt";
-
-                            xShift = -0.0f;
-                            yShift = 0.0f;
-
-                            scale = 0.04f;
-                            elevation = 2.0f;
-                            rot = Quaternion(180.0f, 90.0f, 90.0f);
-                            break;
-                        case 2:
-                            // Straight vertical
-                            tileStr = path + "1.mdl";
-                            matStr = path + "1.txt";
-                            scale = 0.04f;
-                            elevation = 2.0f;
-                            rot = Quaternion(90.0f, 90.0f, 90.0f);
-
-                            break;
-                        case 3:
-                            // Top left
-                            tileStr = path + "6.mdl";
-                            matStr = path + "6.txt";
-
-                            xShift = 32.0f;
-                            yShift = 32.0f;
-
-                            scale = 0.04f;
-                            elevation = 2.0f;
-                            rot = Quaternion(90.0f, 90.0f, 90.0f);
-
-                            break;
-                        case 4:
-                            // Top right
-                            tileStr = path + "6.mdl";
-                            matStr = path + "6.txt";
-
-                            xShift = -32.0f;
-                            yShift = 32.0f;
-
-                            scale = 0.04f;
-                            elevation = 2.0f;
-                            rot = Quaternion(0.0f, 90.0f, 90.0f);
-
-                            break;
-                        case 5:
-                            // Bottom left
-                            tileStr = path + "6.mdl";
-                            matStr = path + "6.txt";
-
-                            xShift = 32.0f;
-                            yShift = -32.0f;
-
-                            scale = 0.04f;
-                            elevation = 2.0f;
-                            rot = Quaternion(180.0f, 90.0f, 90.0f);
-
-                            break;
-                        case 6:
-                            // Bottom right
-                            tileStr = path + "6.mdl";
-                            matStr = path + "6.txt";
-
-                            xShift = -32.0f;
-                            yShift = -32.0f;
-
-                            scale = 0.04f;
-                            elevation = 2.0f;
-                            rot = Quaternion(270.0f, 90.0f, 90.0f);
-
-                            break;
-                        case 7:
-                            break;
-                        case 8:
-                            break;
-                    };
-                }
+                    xoffset = 0.0f;
+                    depth = 0.0f;
+                    elevation = 0.0f;
+                    std::string str = path + "square.mdl";
+                    sprintf(buffer, str.c_str(), tileId);
+                    matStr = path + "square.txt";
+                } else return;
 
                 if (land) {
-                    switch (tileId) {
-                        case 1:
-                            tileStr = path + "AssetPack/castle-wall_stone.mdl";
-                            matStr = path + "AssetPack/castle-wall_stone.txt";
-                            scale = 0.12f;
-                            break;
-                        case 2:
-                            tileStr = path + "AssetPack/terrain-world-plain.mdl";
-                            matStr = path + "AssetPack/terrain-world-plain.txt";
-                            scale = 0.07f;
-                            elevation = 0.7f;
-                            depth = -0.9f;
-                            break;
-                        case 3:
-                            break;
-                        case 4:
-                            break;
-                        case 5:
-                            break;
-                        case 6:
-                            break;
-                        case 7:
-                            break;
-                        case 8:
-                            break;
-                    };
+                    xoffset = 0.3f;
+                    depth = 1.0f;
                 }
-
                 if (plant) {
-                    switch (tileId) {
-                        case 33:
-                            tileStr = path + "AssetPack/tree-forest.mdl";
-                            matStr = path + "AssetPack/tree-forest.txt";
-                            break;
-                        case 34:
-                            tileStr = path + "AssetPack/tree-baobab.mdl";
-                            matStr = path + "AssetPack/tree-baobab.txt";
-                            break;
-                        case 35:
-                            tileStr = path + "AssetPack/tree-birch02.mdl";
-                            matStr = path + "AssetPack/tree-birch02.txt";
-                            break;
-                        case 36:
-                            tileStr = path + "AssetPack/tree-oak_T.mdl";
-                            matStr = path + "AssetPack/tree-oak_T.txt";
-                            break;
-                        case 37:
-                            tileStr = path + "AssetPack/tree-lime.mdl";
-                            matStr = path + "AssetPack/tree-lime.txt";
-                            break;
-                        case 38:
-                            tileStr = path + "AssetPack/grass01.mdl";
-                            matStr = path + "AssetPack/grass01.txt";
-                            break;
-                        case 39:
-                            tileStr = path + "AssetPack/flower01.mdl";
-                            matStr = path + "AssetPack/flower01.txt";
-                            break;
-                        case 40:
-                            tileStr = path + "AssetPack/flower02.mdl";
-                            matStr = path + "AssetPack/flower02.txt";
-                            break;
-                    };
+                    xoffset = 0.0f;
+                    depth = -0.5f;
+                    elevation = 0.0f;
                 }
-
                 if (building) {
-                    switch (tileId) {
-                        case 9:
-                            tileStr = path + "AssetPack/castle-tower.mdl";
-                            matStr = path + "AssetPack/castle-tower.txt";
-                            scale = 0.17f;
-                            break;
-                        case 10:
-                            tileStr = path + "AssetPack/castle-tower-square.mdl";
-                            matStr = path + "AssetPack/castle-tower-square.txt";
-                            scale = 0.17f;
-                            break;
-                        case 11:
-                            tileStr = path + "AssetPack/castle-gate_small.mdl";
-                            matStr = path + "AssetPack/castle-gate_small.txt";
-                            scale = 0.17f;
-                            break;
-                        case 12:
-                            tileStr = path + "AssetPack/castle.mdl";
-                            matStr = path + "AssetPack/castle.txt";
-                            scale = 0.15f;
-                            break;
-                        case 13:
-                            tileStr = path + "AssetPack/castle-gate.mdl";
-                            matStr = path + "AssetPack/castle-gate.txt";
-                            scale = 0.17f;
-                            break;
-                        case 14:
-                            break;
-                        case 15:
-                            break;
-                        case 16:
-                            break;
-                    };
+                    xoffset = 0.0f;
+                    depth = 1.5f;
+                    elevation = -0.6f;
                 }
 
-                const char *cstr = tileStr.c_str();
-                sprintf(buffer, cstr, tileId);
-            }
+                if (doGrid) {
+//                tileStr = path + "grid.mdl";
+                    tileStr = path + "square.mdl";
+                    matStr = path + "square.txt";
+//                scale = 0.12f;
+                    //           elevation = 4.7f;
+                } else {
+
+                    if (track) {
+                        switch (tileId) {
+                            case 1:
+                                // Straight horizontal
+                                tileStr = path + "1.mdl";
+                                matStr = path + "1.txt";
+
+                                scale = 0.04f;
+                                elevation = 2.0f;
+                                rot = Quaternion(180.0f, 90.0f, 90.0f);
+                                break;
+                            case 2:
+                                // Straight vertical
+                                tileStr = path + "1.mdl";
+                                matStr = path + "1.txt";
+                                scale = 0.04f;
+                                elevation = 2.0f;
+                                rot = Quaternion(90.0f, 90.0f, 90.0f);
+
+                                break;
+                            case 3:
+                                // Top left
+                                tileStr = path + "6.mdl";
+                                matStr = path + "6.txt";
+
+//                            xShift = 32.0f;
+//                            yShift = 32.0f;
+
+                                scale = 0.04f;
+                                elevation = 2.0f;
+                                rot = Quaternion(90.0f, 90.0f, 90.0f);
+
+                                break;
+                            case 4:
+                                // Top right
+                                tileStr = path + "6.mdl";
+                                matStr = path + "6.txt";
+
+//                            xShift = -32.0f;
+//                            yShift = 32.0f;
+
+                                scale = 0.04f;
+                                elevation = 2.0f;
+                                rot = Quaternion(0.0f, 90.0f, 90.0f);
+
+                                break;
+                            case 5:
+                                // Bottom left
+                                tileStr = path + "6.mdl";
+                                matStr = path + "6.txt";
+
+                                //                          xShift = 32.0f;
+                                //                          yShift = -32.0f;
+
+                                scale = 0.04f;
+                                elevation = 2.0f;
+                                rot = Quaternion(180.0f, 90.0f, 90.0f);
+
+                                break;
+                            case 6:
+                                // Bottom right
+                                tileStr = path + "6.mdl";
+                                matStr = path + "6.txt";
+
+                                //                        xShift = -32.0f;
+                                //                        yShift = -32.0f;
+
+                                scale = 0.04f;
+                                elevation = 2.0f;
+                                rot = Quaternion(270.0f, 90.0f, 90.0f);
+
+                                break;
+                            case 7:
+                                break;
+                            case 8:
+                                break;
+                        };
+                    }
+
+                    if (land) {
+                        switch (tileId) {
+                            case 1:
+                                tileStr = path + "AssetPack/castle-wall_stone.mdl";
+                                matStr = path + "AssetPack/castle-wall_stone.txt";
+                                scale = 0.12f;
+                                break;
+                            case 2:
+                                tileStr = path + "AssetPack/terrain-world-plain.mdl";
+                                matStr = path + "AssetPack/terrain-world-plain.txt";
+                                scale = 0.07f;
+                                elevation = 0.7f;
+                                depth = -0.9f;
+                                break;
+                            case 3:
+                                break;
+                            case 4:
+                                break;
+                            case 5:
+                                break;
+                            case 6:
+                                break;
+                            case 7:
+                                break;
+                            case 8:
+                                break;
+                        };
+                    }
+
+                    if (plant) {
+                        switch (tileId) {
+                            case 33:
+                                tileStr = path + "AssetPack/tree-forest.mdl";
+                                matStr = path + "AssetPack/tree-forest.txt";
+                                break;
+                            case 34:
+                                tileStr = path + "AssetPack/tree-baobab.mdl";
+                                matStr = path + "AssetPack/tree-baobab.txt";
+                                break;
+                            case 35:
+                                tileStr = path + "AssetPack/tree-birch02.mdl";
+                                matStr = path + "AssetPack/tree-birch02.txt";
+                                break;
+                            case 36:
+                                tileStr = path + "AssetPack/tree-oak_T.mdl";
+                                matStr = path + "AssetPack/tree-oak_T.txt";
+                                break;
+                            case 37:
+                                tileStr = path + "AssetPack/tree-lime.mdl";
+                                matStr = path + "AssetPack/tree-lime.txt";
+                                break;
+                            case 38:
+                                tileStr = path + "AssetPack/grass01.mdl";
+                                matStr = path + "AssetPack/grass01.txt";
+                                break;
+                            case 39:
+                                tileStr = path + "AssetPack/flower01.mdl";
+                                matStr = path + "AssetPack/flower01.txt";
+                                break;
+                            case 40:
+                                tileStr = path + "AssetPack/flower02.mdl";
+                                matStr = path + "AssetPack/flower02.txt";
+                                break;
+                        };
+                    }
+
+                    if (building) {
+                        switch (tileId) {
+                            case 9:
+                                tileStr = path + "AssetPack/castle-tower.mdl";
+                                matStr = path + "AssetPack/castle-tower.txt";
+                                scale = 0.17f;
+                                break;
+                            case 10:
+                                tileStr = path + "AssetPack/castle-tower-square.mdl";
+                                matStr = path + "AssetPack/castle-tower-square.txt";
+                                scale = 0.17f;
+                                break;
+                            case 11:
+                                tileStr = path + "AssetPack/castle-gate_small.mdl";
+                                matStr = path + "AssetPack/castle-gate_small.txt";
+                                scale = 0.17f;
+                                break;
+                            case 12:
+                                tileStr = path + "AssetPack/castle.mdl";
+                                matStr = path + "AssetPack/castle.txt";
+                                scale = 0.15f;
+                                break;
+                            case 13:
+                                tileStr = path + "AssetPack/castle-gate.mdl";
+                                matStr = path + "AssetPack/castle-gate.txt";
+                                scale = 0.17f;
+                                break;
+                            case 14:
+                                break;
+                            case 15:
+                                break;
+                            case 16:
+                                break;
+                        };
+                    }
+
+                    const char *cstr = tileStr.c_str();
+                    sprintf(buffer, cstr, tileId);
+                }
 
 
+                float tileSpacing = 80.0f;
 
-            float tileSpacing = 80.0f;
+                Vector3 tilePos = Vector3(x * tileSpacing, y * tileSpacing,
+                                          0.0f);//Vector3(info.TileIndexToPosition(x, y));//)*4.0f+Vector3(xoffset,height,depth);
+//            URHO3D_LOGINFOF("TileMapLayer3D::tilePos -> (x,y) : (%f, %f)", tilePos.x_, tilePos.z_);
 
-            Vector3 tilePos = Vector3(x*tileSpacing, y*tileSpacing, 0.0f);//Vector3(info.TileIndexToPosition(x, y));//)*4.0f+Vector3(xoffset,height,depth);
-            URHO3D_LOGINFOF("TileMapLayer3D::tilePos -> (x,y) : (%f, %f)", tilePos.x_, tilePos.z_);
+//            URHO3D_LOGINFOF("TileMapLayer3D:: Setting Model -> (model) : (%s)", buffer);
 
-            URHO3D_LOGINFOF("TileMapLayer3D:: Setting Model -> (model) : (%s)", buffer);
+                tileNode->SetRotation(rot);
 
-            tileNode->SetRotation(rot);
-            tileNode->SetPosition(Vector3(xShift+tilePos.x_+xoffset, yShift+tilePos.y_, elevation+0.0f));
-            tileNode->SetScale(Vector3(scale, scale, scale));
+                if (tileShift.x_ > 0.0f || tileShift.y_ > 0.0f) {
+//                tileShift.z_ = 4.0f;
+                }
+                tileNode->SetPosition(Vector3(tileShift.x_ + tilePos.x_ + xoffset, tileShift.y_ + tilePos.y_,
+                                              tileShift.z_ + elevation));
+                tileNode->SetScale(Vector3(scale, scale, scale));
 //
-            staticObject->SetModel(cache->GetResource<Model>(buffer));
-        //    String matFile = GetSubsystem<FileSystem>()->GetProgramDir() + "Data/" + matStr.c_str();
- //           staticObject->SetMaterial(cache->GetResource<Material>("Materials/LOWPOLY-COLORS.xml"));
-            staticObject->ApplyMaterialList(matStr.c_str());
-            URHO3D_LOGINFOF("TileMapLayer3D::SetTileLayer -> material = %s", matStr.c_str());
+                staticObject->SetModel(cache->GetResource<Model>(buffer));
+                //    String matFile = GetSubsystem<FileSystem>()->GetProgramDir() + "Data/" + matStr.c_str();
+                //           staticObject->SetMaterial(cache->GetResource<Material>("Materials/LOWPOLY-COLORS.xml"));
+                staticObject->ApplyMaterialList(matStr.c_str());
+                //          URHO3D_LOGINFOF("TileMapLayer3D::SetTileLayer -> material = %s", matStr.c_str());
 
 //            hullObject->ApplyMaterialList("Models/Vehicles/Offroad/Models/body-car.txt");
 
-           // staticObject->SetMaterial(cache->GetResource<Material>("Materials/BROWN-DARK.xml"));
-          //  staticObject->SetMaterial(cache->GetResource<Material>("Materials/GREEN.xml"));
+                // staticObject->SetMaterial(cache->GetResource<Material>("Materials/BROWN-DARK.xml"));
+                //  staticObject->SetMaterial(cache->GetResource<Material>("Materials/GREEN.xml"));
 
 //
 /*
@@ -681,12 +939,12 @@ void TileMapLayer3D::SetTileLayer(const TmxTileLayer2D* tileLayer) {
 
 
 
-            //terrain-world-plain.mdl
+                //terrain-world-plain.mdl
 
 //            staticObject->SetMaterial(cache->GetResource<Material>("Models/3dtile01.mtl"));
 
- //             tileMap->SetTmxFile(cache->GetResource<TmxFile2D>("Models/3dtile01.obj"));
- 
+                //             tileMap->SetTmxFile(cache->GetResource<TmxFile2D>("Models/3dtile01.obj"));
+
 
 /*
             staticSprite->SetSprite(tile->GetSprite());
@@ -694,11 +952,12 @@ void TileMapLayer3D::SetTileLayer(const TmxTileLayer2D* tileLayer) {
             staticSprite->SetLayer(drawOrder_);
             staticSprite->SetOrderInLayer(y * width + x);*/
 
-      /*      Node* mushroomNode = scene_->CreateChild("Mushroom");
-            mushroomNode->SetPosition(Vector3(Random(90.0f) - 45.0f, 0.0f, Random(90.0f) - 45.0f));
-            mushroomNode->SetRotation(Quaternion(0.0f, Random(360.0f), 0.0f));
-            mushroomNode->SetScale(0.5f + Random(2.0f));*/
-            nodes_[y * width + x] = tileNode;
+                /*      Node* mushroomNode = scene_->CreateChild("Mushroom");
+                      mushroomNode->SetPosition(Vector3(Random(90.0f) - 45.0f, 0.0f, Random(90.0f) - 45.0f));
+                      mushroomNode->SetRotation(Quaternion(0.0f, Random(360.0f), 0.0f));
+                      mushroomNode->SetScale(0.5f + Random(2.0f));*/
+                nodes_[y * width + x] = tileNode;
+            }
         }
     }
 }

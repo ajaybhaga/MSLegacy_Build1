@@ -66,7 +66,10 @@ public:
     /// Return tile map.
     TileMap3D* GetTileMap() const;
 
-    /// Return tmx layer.
+    // Calculate tile shift (for fitting track models)
+    Vector3 CalculateTileShift(const TmxTileLayer2D* tileLayer, const Tile2D* tile, int x, int y);
+
+        /// Return tmx layer.
     const TmxLayer2D* GetTmxLayer() const { return tmxLayer_; }
 
     /// Return draw order.
