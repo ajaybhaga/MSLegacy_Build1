@@ -400,7 +400,7 @@ Vector3 TileMapLayer3D::CalculateTileShift(const TmxTileLayer2D* tileLayer, cons
         // Top left
         if (adjWTileId == 3) {
             // Squeeze in
-            xShift = 0.01f;
+            xShift = xScale/4;
             yShift = -yScale;
             zShift = 0.0f;
 
@@ -422,7 +422,7 @@ Vector3 TileMapLayer3D::CalculateTileShift(const TmxTileLayer2D* tileLayer, cons
         // Bottom left
         if (adjWTileId == 5) {
             // Squeeze in
-            xShift = 0.01f;
+            xShift = xScale/4;
             yShift = yScale;
             zShift = 0.0f;
 
@@ -462,7 +462,7 @@ Vector3 TileMapLayer3D::CalculateTileShift(const TmxTileLayer2D* tileLayer, cons
         // Top right
         if (adjETileId == 4) {
             // Squeeze in
-            xShift = 0.01f;
+            xShift = -xScale/4;
             yShift = -yScale;
             zShift = 0.0f;
 
@@ -484,7 +484,7 @@ Vector3 TileMapLayer3D::CalculateTileShift(const TmxTileLayer2D* tileLayer, cons
         // Bottom right
         if (adjETileId == 6) {
             // Squeeze in
-            xShift = 0.01f;
+            xShift = -xScale/4;
             yShift = yScale;
             zShift = 0.0f;
 
@@ -504,7 +504,7 @@ Vector3 TileMapLayer3D::CalculateTileShift(const TmxTileLayer2D* tileLayer, cons
         if (adjNTileId == 3) {
             // Squeeze in
             xShift = -xScale;
-            yShift = 0.01f;
+            yShift = yScale/4+2.0f;
             zShift = 0.0f;
 
             URHO3D_LOGINFOF("N TileMapLayer3D::SetTileLayer -> Squeeze in [%d, %f, %f]", adjNTileId, xShift, yShift);
@@ -515,7 +515,7 @@ Vector3 TileMapLayer3D::CalculateTileShift(const TmxTileLayer2D* tileLayer, cons
         if (adjNTileId == 4) {
             // Squeeze in
             xShift = xScale;
-            yShift = 0.01f;
+            yShift = yScale/4+2.0f;
             zShift = 0.0f;
 
             URHO3D_LOGINFOF("N TileMapLayer3D::SetTileLayer -> Squeeze in [%d, %f, %f]", adjNTileId, xShift, yShift);
@@ -560,7 +560,6 @@ Vector3 TileMapLayer3D::CalculateTileShift(const TmxTileLayer2D* tileLayer, cons
             URHO3D_LOGINFOF("S TileMapLayer3D::SetTileLayer -> Squeeze in [%d, %f, %f]", adjSTileId, xShift, yShift);
         }
 
-        // DETECTED - twice
         // Top right
         if (adjSTileId == 4) {
             // Squeeze in
@@ -572,11 +571,12 @@ Vector3 TileMapLayer3D::CalculateTileShift(const TmxTileLayer2D* tileLayer, cons
             URHO3D_LOGINFOF("S TileMapLayer3D::SetTileLayer -> Squeeze in [%d, %f, %f]", adjSTileId, xShift, yShift);
         }
 
+        // DETECTED - twice
         // Bottom left
         if (adjSTileId == 5) {
             // Squeeze in
             xShift = -xScale;
-            yShift = 0.01f;
+            yShift = -7.0f;
             zShift = 0.0f;
 
             URHO3D_LOGINFOF("S TileMapLayer3D::SetTileLayer -> Squeeze in [%d, %f, %f]", adjSTileId, xShift, yShift);
@@ -588,7 +588,7 @@ Vector3 TileMapLayer3D::CalculateTileShift(const TmxTileLayer2D* tileLayer, cons
         if (adjSTileId == 6) {
             // Squeeze in
             xShift = xScale;
-            yShift = 0.01f;
+            yShift = -7.0f;
             zShift = 0.0f;
 
             URHO3D_LOGINFOF("S TileMapLayer3D::SetTileLayer -> Squeeze in [%d, %f, %f]", adjSTileId, xShift, yShift);
