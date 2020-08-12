@@ -738,7 +738,7 @@ void TileMapLayer3D::SetTileLayer(const TmxTileLayer2D* tileLayer) {
                                 tileStr = path + "1.mdl";
                                 matStr = path + "1.txt";
 
-                                scale = 0.04f;
+                                scale = 0.041f;
                                 elevation = 2.0f;
                                 rot = Quaternion(180.0f, 90.0f, 90.0f);
                                 break;
@@ -746,7 +746,7 @@ void TileMapLayer3D::SetTileLayer(const TmxTileLayer2D* tileLayer) {
                                 // Straight vertical
                                 tileStr = path + "1.mdl";
                                 matStr = path + "1.txt";
-                                scale = 0.04f;
+                                scale = 0.041f;
                                 elevation = 2.0f;
                                 rot = Quaternion(90.0f, 90.0f, 90.0f);
 
