@@ -391,8 +391,24 @@ Vector3 TileMapLayer3D::CalculateTileShift(const TmxTileLayer2D* tileLayer, cons
     adjTile = nullptr;
 
 
-    // Adjcent W is same
+    // Adjacent W is same
     if (adjWTileId == tileId) {
+        // Squeeze in
+
+        int m = y % 2;
+        xShift = 2.0f;// allows squeeze
+
+
+        URHO3D_LOGINFOF("W TileMapLayer3D::SetTileLayer -> m, x [%d, %d]", m, x);
+
+        if (m == 1) {
+            yShift = yScale;
+        } else {
+            yShift = -yScale;
+        }
+//        zShift = 20.0f;
+
+// M
 
     } else {
 
@@ -443,7 +459,7 @@ Vector3 TileMapLayer3D::CalculateTileShift(const TmxTileLayer2D* tileLayer, cons
     }
 
 
-    // Adjcent E is same
+    // Adjacent E is same
     if (adjETileId == tileId) {
 
     } else {
@@ -494,7 +510,7 @@ Vector3 TileMapLayer3D::CalculateTileShift(const TmxTileLayer2D* tileLayer, cons
     }
 
 
-    // Adjcent N is same
+    // Adjacent N is same
     if (adjNTileId == tileId) {
 
     } else {
@@ -545,7 +561,7 @@ Vector3 TileMapLayer3D::CalculateTileShift(const TmxTileLayer2D* tileLayer, cons
     }
 
 
-    // Adjcent S is same
+    // Adjacent S is same
     if (adjSTileId == tileId) {
 
     } else {
