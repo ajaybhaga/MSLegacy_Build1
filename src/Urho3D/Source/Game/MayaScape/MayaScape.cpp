@@ -741,7 +741,7 @@ void MayaScape::CreateScene() {
     SharedPtr<Node> tileMapNode(scene_->CreateChild("TileMap"));
 //    tileMapNode->SetPosition(Vector3(vehicle_->GetNode()->GetPosition().x_, 0.0f, vehicle_->GetNode()->GetPosition().z_));
     tileMapNode->SetRotation(Quaternion(-90.0f, 0.0f, 0.0f));
-    tileMapNode->SetPosition(Vector3(-800.0f, 0.2f,  400.0f));
+    tileMapNode->SetPosition(Vector3(-1200.0f, 0.2f,  800.0f));
     tileMapNode->SetScale(1.0f);
 
 

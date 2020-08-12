@@ -429,6 +429,12 @@ void TileMapLayer3D::SetTileLayer(const TmxTileLayer2D* tileLayer) {
             float xoffset;
             float elevation;
             float depth;
+            float xShift, yShift;
+//            xShift = -2800.0f;
+//            yShift = -1100.0f;
+            xShift = -0.0f;
+            yShift = -0.0f;
+
             float scale = 25.0f;
             Quaternion rot = Quaternion(0.0f, 0.0f, 0.0f);
             std::string str = "";
@@ -459,6 +465,10 @@ void TileMapLayer3D::SetTileLayer(const TmxTileLayer2D* tileLayer) {
                             // Straight horizontal
                             tileStr = path + "1.mdl";
                             matStr = path + "1.txt";
+
+                            xShift = -0.0f;
+                            yShift = 0.0f;
+
                             scale = 0.04f;
                             elevation = 2.0f;
                             rot = Quaternion(180.0f, 90.0f, 90.0f);
@@ -476,6 +486,10 @@ void TileMapLayer3D::SetTileLayer(const TmxTileLayer2D* tileLayer) {
                             // Top left
                             tileStr = path + "6.mdl";
                             matStr = path + "6.txt";
+
+                            xShift = 32.0f;
+                            yShift = 32.0f;
+
                             scale = 0.04f;
                             elevation = 2.0f;
                             rot = Quaternion(90.0f, 90.0f, 90.0f);
@@ -485,7 +499,11 @@ void TileMapLayer3D::SetTileLayer(const TmxTileLayer2D* tileLayer) {
                             // Top right
                             tileStr = path + "6.mdl";
                             matStr = path + "6.txt";
-                            scale = 0.03f;
+
+                            xShift = -32.0f;
+                            yShift = 32.0f;
+
+                            scale = 0.04f;
                             elevation = 2.0f;
                             rot = Quaternion(0.0f, 90.0f, 90.0f);
 
@@ -494,7 +512,11 @@ void TileMapLayer3D::SetTileLayer(const TmxTileLayer2D* tileLayer) {
                             // Bottom left
                             tileStr = path + "6.mdl";
                             matStr = path + "6.txt";
-                            scale = 0.03f;
+
+                            xShift = 32.0f;
+                            yShift = -32.0f;
+
+                            scale = 0.04f;
                             elevation = 2.0f;
                             rot = Quaternion(180.0f, 90.0f, 90.0f);
 
@@ -503,7 +525,11 @@ void TileMapLayer3D::SetTileLayer(const TmxTileLayer2D* tileLayer) {
                             // Bottom right
                             tileStr = path + "6.mdl";
                             matStr = path + "6.txt";
-                            scale = 0.03f;
+
+                            xShift = -32.0f;
+                            yShift = -32.0f;
+
+                            scale = 0.04f;
                             elevation = 2.0f;
                             rot = Quaternion(270.0f, 90.0f, 90.0f);
 
@@ -622,13 +648,8 @@ void TileMapLayer3D::SetTileLayer(const TmxTileLayer2D* tileLayer) {
             }
 
 
-            float xShift, yShift;
-//            xShift = -2800.0f;
-//            yShift = -1100.0f;
-            xShift = -0.0f;
-            yShift = -0.0f;
 
-            float tileSpacing = 60.0f;
+            float tileSpacing = 80.0f;
 
             Vector3 tilePos = Vector3(x*tileSpacing, y*tileSpacing, 0.0f);//Vector3(info.TileIndexToPosition(x, y));//)*4.0f+Vector3(xoffset,height,depth);
             URHO3D_LOGINFOF("TileMapLayer3D::tilePos -> (x,y) : (%f, %f)", tilePos.x_, tilePos.z_);
