@@ -107,7 +107,7 @@
 #include "Utilities2D/Mover.h"
 #include "MayaScape.h"
 #include <MayaScape/ai/evolution_manager.h>
-#include "vehicle/63_OffroadVehicle/RaycastVehicle.h"
+#include "RaycastVehicle.h"
 #include "MayaScape/Vehicle.h"
 #include "WheelTrackModel.h"
 #include "SmoothStep.h"

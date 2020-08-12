@@ -40,7 +40,7 @@
 #include <Urho3D/Audio/Sound.h>
 #include <Urho3D/IO/Log.h>
 
-#include "vehicle/63_OffroadVehicle/RaycastVehicle.h"
+#include "RaycastVehicle.h"
 #include "Vehicle.h"
 
 #include "WheelTrackModel.h"

@@ -388,23 +388,34 @@ void TileMapLayer3D::SetTileLayer(const TmxTileLayer2D* tileLayer) {
     int height = tileLayer->GetHeight();
     nodes_.Resize((unsigned)(width * height));
 
+    char buffer[100];
+    std::string path = "Models/Tracks/Models/";
+
     const TileMapInfo2D& info = tileMap_->GetInfo();
     for (int y = 0; y < height; ++y)
     {
         for (int x = 0; x < width; ++x)
         {
+
+            URHO3D_LOGINFOF("TileMapLayer3D::tile loop -> (x,y) : (%d, %d)", x, y);
+
             const Tile2D* tile = tileLayer->GetTile(x, y);
-            if (!tile)
-                continue;
+
+            bool doGrid = false;
+            unsigned int tileId = -1;
+            // On no tile, default to grid
+            if (!tile) {
+                //doGrid = true;
+            } else {
+                tileId = tile->GetGid();
+            }
 
             SharedPtr<Node> tileNode(GetNode()->CreateTemporaryChild("Tile"));
             auto* staticObject = tileNode->CreateComponent<StaticModel>();
-            unsigned int tileId = tile->GetGid();
 
 
 //
 //            std::string path = "Models/";
-            std::string path = "Models/Tracks/Models/";
             std::string filler = "";
             std::string terrainType = "Land";
             if (tileId > 9)
@@ -428,145 +439,165 @@ void TileMapLayer3D::SetTileLayer(const TmxTileLayer2D* tileLayer) {
             if (plant) { xoffset = 0.0f; depth = -0.5f; height = 0.0f; }
             if (building) { xoffset = 0.0f; depth = 1.5f; height = -0.6f; }
 
-            if (track) {
-                switch(tileId) {
-                    case 1:
-                        tileStr = path + "1.mdl";
-                        matStr = path + "1.txt";
-                        scale = 0.12f;
-                        height = 4.7f;
-                        break;
-                    case 2:
-                        tileStr = path + "2.mdl";
-                        matStr = path + "2.txt";
-                        scale = 0.07f;
-                        height = 10.7f;
-                        depth = -0.9f;
-                        break;
-                    case 3:
-                        break;
-                    case 4:
-                        break;
-                    case 5:
-                        break;
-                    case 6:
-                        break;
-                    case 7:
-                        break;
-                    case 8:
-                        break;
-                };
+            if (doGrid) {
+                tileStr = path + "grid.mdl";
+                matStr = path + "1.txt";
+                scale = 0.12f;
+                height = 4.7f;
+            } else {
+
+                if (track) {
+                    switch (tileId) {
+                        case 1:
+                            tileStr = path + "1.mdl";
+                            matStr = path + "1.txt";
+                            scale = 0.12f;
+                            height = 4.7f;
+                            break;
+                        case 2:
+                            tileStr = path + "2.mdl";
+                            matStr = path + "2.txt";
+                            scale = 0.07f;
+                            height = 10.7f;
+                            depth = -0.9f;
+                            break;
+                        case 3:
+                            break;
+                        case 4:
+                            break;
+                        case 5:
+                            break;
+                        case 6:
+                            break;
+                        case 7:
+                            break;
+                        case 8:
+                            break;
+                    };
+                }
+
+                if (land) {
+                    switch (tileId) {
+                        case 1:
+                            tileStr = path + "AssetPack/castle-wall_stone.mdl";
+                            matStr = path + "AssetPack/castle-wall_stone.txt";
+                            scale = 0.12f;
+                            break;
+                        case 2:
+                            tileStr = path + "AssetPack/terrain-world-plain.mdl";
+                            matStr = path + "AssetPack/terrain-world-plain.txt";
+                            scale = 0.07f;
+                            height = 0.7f;
+                            depth = -0.9f;
+                            break;
+                        case 3:
+                            break;
+                        case 4:
+                            break;
+                        case 5:
+                            break;
+                        case 6:
+                            break;
+                        case 7:
+                            break;
+                        case 8:
+                            break;
+                    };
+                }
+
+                if (plant) {
+                    switch (tileId) {
+                        case 33:
+                            tileStr = path + "AssetPack/tree-forest.mdl";
+                            matStr = path + "AssetPack/tree-forest.txt";
+                            break;
+                        case 34:
+                            tileStr = path + "AssetPack/tree-baobab.mdl";
+                            matStr = path + "AssetPack/tree-baobab.txt";
+                            break;
+                        case 35:
+                            tileStr = path + "AssetPack/tree-birch02.mdl";
+                            matStr = path + "AssetPack/tree-birch02.txt";
+                            break;
+                        case 36:
+                            tileStr = path + "AssetPack/tree-oak_T.mdl";
+                            matStr = path + "AssetPack/tree-oak_T.txt";
+                            break;
+                        case 37:
+                            tileStr = path + "AssetPack/tree-lime.mdl";
+                            matStr = path + "AssetPack/tree-lime.txt";
+                            break;
+                        case 38:
+                            tileStr = path + "AssetPack/grass01.mdl";
+                            matStr = path + "AssetPack/grass01.txt";
+                            break;
+                        case 39:
+                            tileStr = path + "AssetPack/flower01.mdl";
+                            matStr = path + "AssetPack/flower01.txt";
+                            break;
+                        case 40:
+                            tileStr = path + "AssetPack/flower02.mdl";
+                            matStr = path + "AssetPack/flower02.txt";
+                            break;
+                    };
+                }
+
+                if (building) {
+                    switch (tileId) {
+                        case 9:
+                            tileStr = path + "AssetPack/castle-tower.mdl";
+                            matStr = path + "AssetPack/castle-tower.txt";
+                            scale = 0.17f;
+                            break;
+                        case 10:
+                            tileStr = path + "AssetPack/castle-tower-square.mdl";
+                            matStr = path + "AssetPack/castle-tower-square.txt";
+                            scale = 0.17f;
+                            break;
+                        case 11:
+                            tileStr = path + "AssetPack/castle-gate_small.mdl";
+                            matStr = path + "AssetPack/castle-gate_small.txt";
+                            scale = 0.17f;
+                            break;
+                        case 12:
+                            tileStr = path + "AssetPack/castle.mdl";
+                            matStr = path + "AssetPack/castle.txt";
+                            scale = 0.15f;
+                            break;
+                        case 13:
+                            tileStr = path + "AssetPack/castle-gate.mdl";
+                            matStr = path + "AssetPack/castle-gate.txt";
+                            scale = 0.17f;
+                            break;
+                        case 14:
+                            break;
+                        case 15:
+                            break;
+                        case 16:
+                            break;
+                    };
+                }
+
+                const char *cstr = tileStr.c_str();
+                sprintf(buffer, cstr, tileId);
             }
 
-            if (land) {
-                switch(tileId) {
-                    case 1:
-                        tileStr = path + "AssetPack/castle-wall_stone.mdl";  
-                        matStr = path + "AssetPack/castle-wall_stone.txt";  
-                        scale = 0.12f;
-                    break;
-                    case 2:
-                        tileStr = path + "AssetPack/terrain-world-plain.mdl";
-                        matStr = path + "AssetPack/terrain-world-plain.txt";
-                        scale = 0.07f;
-                        height = 0.7f;
-                        depth = -0.9f;
-                    break;
-                    case 3:
-                    break;
-                    case 4:
-                    break;
-                    case 5:
-                    break;
-                    case 6:
-                    break;
-                    case 7:
-                    break;
-                    case 8:
-                    break;
-                };
-            }
-                    
-            if (plant) {                  
-                switch(tileId) {
-                    case 33:
-                        tileStr = path + "AssetPack/tree-forest.mdl";  
-                        matStr = path + "AssetPack/tree-forest.txt";  
-                    break;
-                    case 34:
-                        tileStr = path + "AssetPack/tree-baobab.mdl";  
-                        matStr = path + "AssetPack/tree-baobab.txt";  
-                    break;
-                    case 35:
-                        tileStr = path + "AssetPack/tree-birch02.mdl";  
-                        matStr = path + "AssetPack/tree-birch02.txt";  
-                    break;
-                    case 36:
-                        tileStr = path + "AssetPack/tree-oak_T.mdl";
-                        matStr = path + "AssetPack/tree-oak_T.txt";
-                    break;
-                    case 37:
-                        tileStr = path + "AssetPack/tree-lime.mdl";
-                        matStr = path + "AssetPack/tree-lime.txt";
-                    break;
-                    case 38:
-                        tileStr = path + "AssetPack/grass01.mdl";
-                        matStr = path + "AssetPack/grass01.txt";
-                    break;
-                    case 39:
-                        tileStr = path + "AssetPack/flower01.mdl";
-                        matStr = path + "AssetPack/flower01.txt";
-                    break;
-                    case 40:
-                        tileStr = path + "AssetPack/flower02.mdl";
-                        matStr = path + "AssetPack/flower02.txt";
-                    break;
-                };
-            }
+            std::string str = path + "grid.mdl";
+            sprintf(buffer, str.c_str(), tileId);
 
-            if (building) {
-                switch(tileId) {
-                    case 9:
-                        tileStr = path + "AssetPack/castle-tower.mdl";  
-                        matStr = path + "AssetPack/castle-tower.txt";  
-                        scale = 0.17f;
-                    break;
-                    case 10:
-                        tileStr = path + "AssetPack/castle-tower-square.mdl";  
-                        matStr = path + "AssetPack/castle-tower-square.txt";  
-                        scale = 0.17f;
-                    break;
-                    case 11:
-                        tileStr = path + "AssetPack/castle-gate_small.mdl";  
-                        matStr = path + "AssetPack/castle-gate_small.txt";  
-                        scale = 0.17f;
-                    break;
-                    case 12:
-                        tileStr = path + "AssetPack/castle.mdl";  
-                        matStr = path + "AssetPack/castle.txt";  
-                        scale = 0.15f;
-                    break;
-                    case 13:
-                        tileStr = path + "AssetPack/castle-gate.mdl";
-                        matStr = path + "AssetPack/castle-gate.txt";
-                        scale = 0.17f;
-                    break;
-                    case 14:
-                    break;
-                    case 15:
-                    break;
-                    case 16:
-                    break;
-                };
-            }
 
-            const char *cstr = tileStr.c_str();
+            float xShift, yShift;
+//            xShift = -2800.0f;
+//            yShift = -1100.0f;
+            xShift = -0.0f;
+            yShift = -0.0f;
 
-            char buffer[100];
-            sprintf(buffer, cstr, tileId);
+            Vector3 tilePos = Vector3(x*30.0f, 0, y*20.0f);//Vector3(info.TileIndexToPosition(x, y));//)*4.0f+Vector3(xoffset,height,depth);
+            URHO3D_LOGINFOF("TileMapLayer3D::tilePos -> (x,y) : (%f, %f)", tilePos.x_, tilePos.z_);
 
-    
-            tileNode->SetPosition(Vector3(info.TileIndexToPosition(x, y))*1.0f+Vector3(xoffset,height,depth));
+            URHO3D_LOGINFOF("TileMapLayer3D:: Setting Model -> (model) : (%s)", buffer);
+
+            tileNode->SetPosition(Vector3(xShift+tilePos.x_+xoffset, height+10.0f, yShift+tilePos.y_));
             tileNode->SetScale(Vector3(scale, scale, scale));
 //            tileNode->SetRotation(Quaternion(180.0f,90.0f,90.0f));
             tileNode->SetRotation(Quaternion(0.0f,0.0f,0.0f));
