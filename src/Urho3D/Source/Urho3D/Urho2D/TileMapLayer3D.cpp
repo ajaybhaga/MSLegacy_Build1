@@ -423,51 +423,90 @@ void TileMapLayer3D::SetTileLayer(const TmxTileLayer2D* tileLayer) {
             else 
                 filler = "0";
 //            std::string tileStr = path + terrainType + "Tile" + filler + "%d.mdl";       
-            std::string tileStr = path + "AssetPack/elephant.mdl";
+            std::string tileStr = path + "square.mdl";
             std::string matStr = "";       
 //            std::string tileStr;
             float xoffset;
-            float height;
+            float elevation;
             float depth;
-            float scale = 0.17f;
+            float scale = 25.0f;
+            Quaternion rot = Quaternion(0.0f, 0.0f, 0.0f);
+            std::string str = "";
 
             // Set tile location
 //            tileNode->SetPosition(Vector3(info.TileIndexToPosition(x, y))+tile->GetModelOffset()+Vector3(0,0,-1));
-            if (track) { xoffset = 2.0f; depth = 1.0f; }
+            if (track) { xoffset = 0.0f; depth = 0.0f; elevation = 0.0f;
+                std::string str = path + "square.mdl";
+                sprintf(buffer, str.c_str(), tileId);
+                matStr = path + "square.txt";
+            } else return;
 
             if (land) { xoffset = 0.3f; depth = 1.0f; }
-            if (plant) { xoffset = 0.0f; depth = -0.5f; height = 0.0f; }
-            if (building) { xoffset = 0.0f; depth = 1.5f; height = -0.6f; }
+            if (plant) { xoffset = 0.0f; depth = -0.5f; elevation = 0.0f; }
+            if (building) { xoffset = 0.0f; depth = 1.5f; elevation = -0.6f; }
 
             if (doGrid) {
-                tileStr = path + "grid.mdl";
-                matStr = path + "1.txt";
-                scale = 0.12f;
-                height = 4.7f;
+//                tileStr = path + "grid.mdl";
+                tileStr = path + "square.mdl";
+                matStr = path + "square.txt";
+//                scale = 0.12f;
+     //           elevation = 4.7f;
             } else {
 
                 if (track) {
                     switch (tileId) {
                         case 1:
+                            // Straight horizontal
                             tileStr = path + "1.mdl";
                             matStr = path + "1.txt";
-                            scale = 0.12f;
-                            height = 4.7f;
+                            scale = 0.04f;
+                            elevation = 2.0f;
+                            rot = Quaternion(180.0f, 90.0f, 90.0f);
                             break;
                         case 2:
-                            tileStr = path + "2.mdl";
-                            matStr = path + "2.txt";
-                            scale = 0.07f;
-                            height = 10.7f;
-                            depth = -0.9f;
+                            // Straight vertical
+                            tileStr = path + "1.mdl";
+                            matStr = path + "1.txt";
+                            scale = 0.04f;
+                            elevation = 2.0f;
+                            rot = Quaternion(90.0f, 90.0f, 90.0f);
+
                             break;
                         case 3:
+                            // Top left
+                            tileStr = path + "6.mdl";
+                            matStr = path + "6.txt";
+                            scale = 0.04f;
+                            elevation = 2.0f;
+                            rot = Quaternion(90.0f, 90.0f, 90.0f);
+
                             break;
                         case 4:
+                            // Top right
+                            tileStr = path + "6.mdl";
+                            matStr = path + "6.txt";
+                            scale = 0.03f;
+                            elevation = 2.0f;
+                            rot = Quaternion(0.0f, 90.0f, 90.0f);
+
                             break;
                         case 5:
+                            // Bottom left
+                            tileStr = path + "6.mdl";
+                            matStr = path + "6.txt";
+                            scale = 0.03f;
+                            elevation = 2.0f;
+                            rot = Quaternion(180.0f, 90.0f, 90.0f);
+
                             break;
                         case 6:
+                            // Bottom right
+                            tileStr = path + "6.mdl";
+                            matStr = path + "6.txt";
+                            scale = 0.03f;
+                            elevation = 2.0f;
+                            rot = Quaternion(270.0f, 90.0f, 90.0f);
+
                             break;
                         case 7:
                             break;
@@ -487,7 +526,7 @@ void TileMapLayer3D::SetTileLayer(const TmxTileLayer2D* tileLayer) {
                             tileStr = path + "AssetPack/terrain-world-plain.mdl";
                             matStr = path + "AssetPack/terrain-world-plain.txt";
                             scale = 0.07f;
-                            height = 0.7f;
+                            elevation = 0.7f;
                             depth = -0.9f;
                             break;
                         case 3:
@@ -582,9 +621,6 @@ void TileMapLayer3D::SetTileLayer(const TmxTileLayer2D* tileLayer) {
                 sprintf(buffer, cstr, tileId);
             }
 
-            std::string str = path + "grid.mdl";
-            sprintf(buffer, str.c_str(), tileId);
-
 
             float xShift, yShift;
 //            xShift = -2800.0f;
@@ -592,16 +628,17 @@ void TileMapLayer3D::SetTileLayer(const TmxTileLayer2D* tileLayer) {
             xShift = -0.0f;
             yShift = -0.0f;
 
-            Vector3 tilePos = Vector3(x*30.0f, 0, y*20.0f);//Vector3(info.TileIndexToPosition(x, y));//)*4.0f+Vector3(xoffset,height,depth);
+            float tileSpacing = 60.0f;
+
+            Vector3 tilePos = Vector3(x*tileSpacing, y*tileSpacing, 0.0f);//Vector3(info.TileIndexToPosition(x, y));//)*4.0f+Vector3(xoffset,height,depth);
             URHO3D_LOGINFOF("TileMapLayer3D::tilePos -> (x,y) : (%f, %f)", tilePos.x_, tilePos.z_);
 
             URHO3D_LOGINFOF("TileMapLayer3D:: Setting Model -> (model) : (%s)", buffer);
 
-            tileNode->SetPosition(Vector3(xShift+tilePos.x_+xoffset, height+10.0f, yShift+tilePos.y_));
+            tileNode->SetRotation(rot);
+            tileNode->SetPosition(Vector3(xShift+tilePos.x_+xoffset, yShift+tilePos.y_, elevation+0.0f));
             tileNode->SetScale(Vector3(scale, scale, scale));
-//            tileNode->SetRotation(Quaternion(180.0f,90.0f,90.0f));
-            tileNode->SetRotation(Quaternion(0.0f,0.0f,0.0f));
-
+//
             staticObject->SetModel(cache->GetResource<Model>(buffer));
         //    String matFile = GetSubsystem<FileSystem>()->GetProgramDir() + "Data/" + matStr.c_str();
  //           staticObject->SetMaterial(cache->GetResource<Material>("Materials/LOWPOLY-COLORS.xml"));

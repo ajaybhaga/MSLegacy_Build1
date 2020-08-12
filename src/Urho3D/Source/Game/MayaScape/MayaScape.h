@@ -108,6 +108,8 @@ private:
 
     WeakPtr<Terrain> terrain_;
 
+    WeakPtr<TileMap3D> tileMap_;
+
     /// Flag for drawing debug geometry.
     bool drawDebug_{};
     bool doSpecial_{};

@@ -739,18 +739,23 @@ void MayaScape::CreateScene() {
 
     // Create tile map for track from tmx file
     SharedPtr<Node> tileMapNode(scene_->CreateChild("TileMap"));
+//    tileMapNode->SetPosition(Vector3(vehicle_->GetNode()->GetPosition().x_, 0.0f, vehicle_->GetNode()->GetPosition().z_));
+    tileMapNode->SetRotation(Quaternion(-90.0f, 0.0f, 0.0f));
+    tileMapNode->SetPosition(Vector3(-800.0f, 0.2f,  400.0f));
+    tileMapNode->SetScale(1.0f);
+
 
 //    auto* tileMap3d = tileMapNode->CreateComponent<TileMap3D>();
 //    tileMap3d->SetTmxFile(cache->GetResource<TmxFile2D>("Urho2D/Tilesets/Ortho.tmx"
 
-    TileMap3D *tileMap = tileMapNode->CreateComponent<TileMap3D>();
+    tileMap_ = tileMapNode->CreateComponent<TileMap3D>();
 
 //
 //    auto *tmxFile = cache->GetResource<TmxFile2D>("Urho2D/Tilesets/Ortho.tmx");
 
     auto *tmxFile = cache->GetResource<TmxFile2D>("Tracks/Track1.tmx");
-    tileMap->SetTmxFile(tmxFile);
-    const TileMapInfo2D &info = tileMap->GetInfo();
+    tileMap_->SetTmxFile(tmxFile);
+    const TileMapInfo2D &info = tileMap_->GetInfo();
     URHO3D_LOGINFOF("tileMap=%f x %f", info.GetMapWidth(), info.GetMapHeight());
 
 //    tileMap->Set
@@ -1986,6 +1991,8 @@ void MayaScape::HandlePostUpdate(StringHash eventType, VariantMap &eventData) {
         if (drawDebug_) {
   //          scene_->GetComponent<PhysicsWorld>()->DrawDebugGeometry(true);
                vehicle_->DebugDraw(Color::MAGENTA);
+
+               terrain_->SetViewMask(0);
         }
 
     }
