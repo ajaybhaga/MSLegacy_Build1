@@ -356,8 +356,8 @@ enum direction {
     WEST, EAST, NORTH, SOUTH
 };
 
-float xScale = 28.0f;
-float yScale = 28.0f;
+float xScale = 36.0f;
+float yScale = 36.0f;
 
 Vector3 TileMapLayer3D::CalculateTileShift(const TmxTileLayer2D* tileLayer, const Tile2D* tile, int x, int y) {
     unsigned int adjWTileId = -1;
