@@ -230,7 +230,7 @@ void Vehicle::Init()
     float bodyLength = 1.9f;
     float bodyFixedWidth = 0.6f;
     float bodyWidth = 1.5f;
-    float wheelYOffset = -0.4f;
+    float wheelYOffset = -0.8f;
     // add wheels
     Vector3 connectionPointCS0(bodyWidth*CUBE_HALF_EXTENTS-(bodyFixedWidth*m_fwheelWidth), centerOfMassOffset_.y_+wheelYOffset, bodyLength*CUBE_HALF_EXTENTS-m_fwheelRadius-0.4f-centerOfMassOffset_.z_);
     raycastVehicle_->AddWheel(connectionPointCS0,wheelDirectionCS0,wheelAxleCS,m_fsuspensionRestLength,m_fwheelRadius,isFrontWheel);

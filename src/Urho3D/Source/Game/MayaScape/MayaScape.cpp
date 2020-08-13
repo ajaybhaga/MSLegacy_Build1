@@ -422,8 +422,12 @@ void MayaScape::CreateScene() {
     RigidBody* body = terrainNode->CreateComponent<RigidBody>();
     body->SetCollisionLayer(2); // Use layer bitmask 2 for static geometry
     CollisionShape* shape = terrainNode->CreateComponent<CollisionShape>();
+
+
+    // Assigns terrain collision map (calculated based on heightmap)
     shape->SetTerrain();
-///
+
+ //
     auto *graphics = GetSubsystem<Graphics>();
 
     /*
@@ -448,15 +452,16 @@ void MayaScape::CreateScene() {
         auto* object = adjNode->CreateComponent<StaticModel>();
         std::string mdlPath = "Models/Tracks/Models/trackA.mdl";
         std::string matPath = "Models/Tracks/Models/trackA.txt";
-        object->SetModel(cache->GetResource<Model>(mdlPath.c_str()));
+        auto* model = cache->GetResource<Model>(mdlPath.c_str());
+        object->SetModel(model);
         object->ApplyMaterialList(matPath.c_str());
         object->SetCastShadows(true);
 
-//        auto* body = adjNode->CreateComponent<RigidBody>();
- //       body->SetCollisionLayer(2);
-  //      auto* shape = objectNode->CreateComponent<CollisionShape>();
-   //     shape->SetTriangleMesh(object->GetModel(), 0);
-
+        body = adjNode->CreateComponent<RigidBody>();
+        body->SetCollisionLayer(2);
+        trackColShape_ = adjNode->CreateComponent<CollisionShape>();
+        trackColShape_->SetTriangleMesh(object->GetModel(), 0);
+//        trackColShape_->SetConvexHull(model);
 
     // Create 1000 mushrooms in the terrain. Always face outward along the terrain normal
     const unsigned NUM_MUSHROOMS = 1000;
@@ -1791,11 +1796,11 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
             vehicle_->controls_.Set(CTRL_RIGHT, input->GetKeyDown(KEY_D));
             vehicle_->controls_.Set(CTRL_SPACE, input->GetKeyDown(KEY_SPACE));
 */
-            vehicle_->controls_.Set(CTRL_FORWARD, input->GetKeyDown(KEY_W) | vehicle_->controls_.IsDown(BUTTON_DPAD_UP));
+            vehicle_->controls_.Set(CTRL_FORWARD, input->GetKeyDown(KEY_W) | vehicle_->controls_.IsDown(BUTTON_B));
             vehicle_->controls_.Set(CTRL_BACK, input->GetKeyDown(KEY_S) | vehicle_->controls_.IsDown(BUTTON_DPAD_DOWN));
             vehicle_->controls_.Set(CTRL_LEFT, input->GetKeyDown(KEY_A) | vehicle_->controls_.IsDown(BUTTON_DPAD_LEFT));
             vehicle_->controls_.Set(CTRL_RIGHT, input->GetKeyDown(KEY_D) | vehicle_->controls_.IsDown(BUTTON_DPAD_RIGHT));
-            vehicle_->controls_.Set(CTRL_SPACE, input->GetKeyDown(KEY_SPACE) | vehicle_->controls_.IsDown(CONTROLLER_BUTTON_X));
+            vehicle_->controls_.Set(CTRL_SPACE, input->GetKeyDown(KEY_SPACE) | vehicle_->controls_.IsDown(BUTTON_X));
 
             // Add yaw & pitch from the mouse motion or touch input. Used only for the camera, does not affect motion
             if (touchEnabled_)
@@ -2067,6 +2072,9 @@ void MayaScape::HandlePostUpdate(StringHash eventType, VariantMap &eventData) {
                vehicle_->DebugDraw(Color::MAGENTA);
 
                terrain_->SetViewMask(0);
+
+            trackColShape_->DrawDebugGeometry(scene_->GetComponent<DebugRenderer>(), false);
+
         }
 
     }

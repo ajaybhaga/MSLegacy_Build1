@@ -142,6 +142,7 @@ private:
     SharedPtr<Sprite> steerWheelSprite_;
 
 
+
     /// Particle pool
     ParticlePool particlePool_[20];
 
@@ -152,6 +153,8 @@ private:
 
     /// The controllable vehicle component.
     WeakPtr<Vehicle> vehicle_;
+
+    WeakPtr<CollisionShape> trackColShape_;
 
     WeakPtr<Text>  textKmH_;
 
