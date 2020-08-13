@@ -65,6 +65,7 @@
 #include <Urho3D/Engine/Engine.h>
 #include <Urho3D/Graphics/StaticModel.h>
 #include <Urho3D/Graphics/Terrain.h>
+#include <Urho3D/Graphics/TerrainPatch.h>
 #include <Urho3D/Graphics/Zone.h>
 #include <Urho3D/IO/FileSystem.h>
 #include <Urho3D/Input/Input.h>
@@ -348,11 +349,19 @@ void MayaScape::Stop() {
 
 void MayaScape::CreateVehicle() {
     Node* vehicleNode = scene_->CreateChild("Vehicle");
+
+    // Place on track
     vehicleNode->SetPosition(Vector3(-814.0f, 40.0f, -595.0f));
 
     // Create the vehicle logic component
     vehicle_ = vehicleNode->CreateComponent<Vehicle>();
     vehicle_->Init();
+
+    // Place on at corner of map
+    TerrainPatch* p = terrain_->GetPatch(0, 0);
+    IntVector2 v = p->GetCoordinates();
+//    vehicleNode->SetPosition(Vector3(v.x_-1400.0f, 40.0f, v.y_-1400.0f));
+//    vehicleNode->SetPosition(Vector3(v.x_-1400.0f, 40.0f, v.y_+1400.0f));
 
     vehicleNode->SetRotation(Quaternion(0.0, -90.0, 0.0));
     // smooth step
@@ -438,16 +447,16 @@ void MayaScape::CreateScene() {
     shape->SetTerrain();*/
 
 
-        Node* objectNode = scene_->CreateChild("RaceTrack");
+        raceTrack_ = scene_->CreateChild("RaceTrack");
         Vector3 position(-200.0f, terrain_->GetHeight(position)+2.0f, -300.0f);
      //   position.y_ = terrain_->GetHeight(position) - 0.1f;
-        objectNode->SetPosition(position);
+        raceTrack_->SetPosition(position);
         // Create a rotation quaternion from up vector to terrain normal
-        objectNode->SetRotation(Quaternion(Vector3::UP, terrain_->GetNormal(position)));
-        Node* adjNode = objectNode->CreateChild("AdjNode");
+        raceTrack_->SetRotation(Quaternion(Vector3::UP, terrain_->GetNormal(position)));
+        Node* adjNode = raceTrack_->CreateChild("AdjNode");
         adjNode->SetRotation(Quaternion(0.0, 0.0, 0.0f));
 
-        objectNode->SetScale(30.0f);
+        raceTrack_->SetScale(30.0f);
 
         auto* object = adjNode->CreateComponent<StaticModel>();
         std::string mdlPath = "Models/Tracks/Models/trackA.mdl";
@@ -693,15 +702,15 @@ void MayaScape::CreateScene() {
     textureWidth = miniMapP1Texture->GetWidth();
     textureHeight = miniMapP1Texture->GetHeight();
 
-    float miniMapP1X = 776.0f+45.0f;
-    float miniMapP1Y = 300.0f-15.0f;
+ //   float miniMapP1X = 776.0f+45.0f;
+ //   float miniMapP1Y = 300.0f-15.0f;
 
-    miniMapP1Sprite_->SetScale(1.0);//256.0f / textureWidth);
+    miniMapP1Sprite_->SetScale(0.4);//256.0f / textureWidth);
     miniMapP1Sprite_->SetSize(textureWidth, textureHeight);
-    miniMapP1Sprite_->SetHotSpot(textureWidth, textureHeight);
+    miniMapP1Sprite_->SetHotSpot(textureWidth/2, textureHeight/2);
     miniMapP1Sprite_->SetAlignment(HA_LEFT, VA_TOP);
-    miniMapP1Sprite_->SetPosition(Vector2(miniMapP1X-16.0f, miniMapP1Y));
-    miniMapP1Sprite_->SetPosition(Vector2(miniMapP1X+256.0f-16.0f, miniMapP1Y));
+//    miniMapP1Sprite_->SetPosition(Vector2(miniMapP1X-16.0f, miniMapP1Y));
+//    miniMapP1Sprite_->SetPosition(Vector2(miniMapP1X+256.0f-16.0f, miniMapP1Y));
 
     miniMapP1Sprite_->SetOpacity(0.9f);
     // Set a low priority so that other UI elements can be drawn on top
@@ -1685,18 +1694,20 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
     // Position
     //Vector3 position((float)x * spacing_.x_, GetRawHeight(xPos, zPos), (float)z * spacing_.z_);
 
-    //
-    float xRange = (vehicle_->GetNode()->GetPosition().x_/maxX) * miniMapWidth;
-    float zRange = (vehicle_->GetNode()->GetPosition().z_/maxY) * miniMapHeight;
+    float mapSize = 3000.0f;
+    Vector3 shiftedRange = vehicle_->GetNode()->GetPosition() + Vector3(mapSize/2, mapSize/2, mapSize/2);
 
-    float miniMapP1X = 776.0f+45.0f;
-    float miniMapP1Y = 300.0f-15.0f;
+    // 1600+1600
+    float xRange = (shiftedRange.x_/mapSize) * miniMapWidth;
+    float zRange = (shiftedRange.z_/mapSize) * miniMapHeight;
 
-
+    float miniMapP1X = miniMapBkgSprite_->GetPosition().x_;
+    float miniMapP1Y = miniMapBkgSprite_->GetPosition().y_;
 
     // Update mini map for P1 position
 //    miniMapP1Sprite_->SetPosition(Vector2(776.0f-16.0f, 300.0f));
-    miniMapP1Sprite_->SetPosition(Vector2(miniMapP1X+xRange-16.0f, miniMapP1Y+zRange));
+    miniMapP1Sprite_->SetPosition(Vector2(miniMapP1X-xRange+0.0f, miniMapP1Y-zRange+0.0f));
+    miniMapP1Sprite_->SetRotation(vehicleRot_.YawAngle());
 
 
     float steering = vehicle_->GetSteering();
@@ -1770,6 +1781,13 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
         sprintf(str, "%f,%f,%f", pos.x_, pos.y_, pos.z_);
         playerInfo.clear();
         playerInfo.append("Vehicle position (x,y,z) -> ").append(str);
+        debugText_[i]->SetText(playerInfo.c_str());
+
+        i++;
+
+        sprintf(str, "%f,%f", xRange, zRange);
+        playerInfo.clear();
+        playerInfo.append("Vehicle minmap pos (x,z) -> ").append(str);
         debugText_[i]->SetText(playerInfo.c_str());
 
         /*

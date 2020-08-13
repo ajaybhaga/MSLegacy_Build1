@@ -227,7 +227,7 @@ void Game::SetWindowTitleAndIcon()
     graphics->SetWindowIcon(icon);
 
     std::string s;
-    s = s.append("MayaScape Engine Build ").append(datetime()).append(" - Monkey Maya Studios");
+    s = s.append("Monkey Maya Studios: MayaScape Build ").append(datetime()).append(" (demo)");
 
     graphics->SetWindowTitle(s.c_str());
     //sprintf("MayaSpace Engine Build " " by Ajay Bhaga", __DATE__));
