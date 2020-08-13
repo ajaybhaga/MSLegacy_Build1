@@ -138,6 +138,10 @@ private:
     /// Mini-map Bkg P1 sprite.
     SharedPtr<Sprite> miniMapBkgSprite_;
 
+    /// Steering wheel
+    SharedPtr<Sprite> steerWheelSprite_;
+
+
     /// Particle pool
     ParticlePool particlePool_[20];
 

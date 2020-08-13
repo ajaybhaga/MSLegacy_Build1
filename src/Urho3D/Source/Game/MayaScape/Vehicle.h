@@ -104,6 +104,8 @@ public:
 
     float GetAngularVelocity() const { return m_fYAngularVelocity; }
 
+    float GetSteering() const { return steering_; };
+
     void DebugDraw(const Color &color);
 
     /// Movement controls.

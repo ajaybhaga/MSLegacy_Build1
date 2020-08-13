@@ -348,7 +348,7 @@ void MayaScape::Stop() {
 
 void MayaScape::CreateVehicle() {
     Node* vehicleNode = scene_->CreateChild("Vehicle");
-    vehicleNode->SetPosition(Vector3(0.0f, 40.0f, 0.0f));
+    vehicleNode->SetPosition(Vector3(-814.0f, 40.0f, -595.0f));
 
     // Create the vehicle logic component
     vehicle_ = vehicleNode->CreateComponent<Vehicle>();
@@ -432,6 +432,31 @@ void MayaScape::CreateScene() {
     auto* shape =
             terrainNode->CreateComponent<CollisionShape>();
     shape->SetTerrain();*/
+
+
+        Node* objectNode = scene_->CreateChild("RaceTrack");
+        Vector3 position(-200.0f, terrain_->GetHeight(position)+2.0f, -300.0f);
+     //   position.y_ = terrain_->GetHeight(position) - 0.1f;
+        objectNode->SetPosition(position);
+        // Create a rotation quaternion from up vector to terrain normal
+        objectNode->SetRotation(Quaternion(Vector3::UP, terrain_->GetNormal(position)));
+        Node* adjNode = objectNode->CreateChild("AdjNode");
+        adjNode->SetRotation(Quaternion(0.0, 0.0, 0.0f));
+
+        objectNode->SetScale(30.0f);
+
+        auto* object = adjNode->CreateComponent<StaticModel>();
+        std::string mdlPath = "Models/Tracks/Models/trackA.mdl";
+        std::string matPath = "Models/Tracks/Models/trackA.txt";
+        object->SetModel(cache->GetResource<Model>(mdlPath.c_str()));
+        object->ApplyMaterialList(matPath.c_str());
+        object->SetCastShadows(true);
+
+//        auto* body = adjNode->CreateComponent<RigidBody>();
+ //       body->SetCollisionLayer(2);
+  //      auto* shape = objectNode->CreateComponent<CollisionShape>();
+   //     shape->SetTriangleMesh(object->GetModel(), 0);
+
 
     // Create 1000 mushrooms in the terrain. Always face outward along the terrain normal
     const unsigned NUM_MUSHROOMS = 1000;
@@ -547,6 +572,11 @@ void MayaScape::CreateScene() {
     if (!genotypeBkgTexture)
         return;
 
+    // Get steering wheel texture
+    Texture2D *steerWheelTexture = cache->GetResource<Texture2D>("Textures/steer-wheel.png");
+    if (!steerWheelTexture)
+        return;
+
     // Create sprite and add to the UI layout
     powerBarP1Sprite_ = ui->GetRoot()->CreateChild<Sprite>();
     powerBarBkgP1Sprite_ = ui->GetRoot()->CreateChild<Sprite>();
@@ -558,7 +588,9 @@ void MayaScape::CreateScene() {
     velBarBkgP1Sprite_ = ui->GetRoot()->CreateChild<Sprite>();
 
     miniMapP1Sprite_ = ui->GetRoot()->CreateChild<Sprite>();
-    miniMapBkgSprite_= ui->GetRoot()->CreateChild<Sprite>();
+    miniMapBkgSprite_ = ui->GetRoot()->CreateChild<Sprite>();
+
+    steerWheelSprite_ = ui->GetRoot()->CreateChild<Sprite>();
 
     // Set sprite texture
     powerBarP1Sprite_->SetTexture(powerBarTexture);
@@ -572,6 +604,8 @@ void MayaScape::CreateScene() {
 
     miniMapP1Sprite_->SetTexture(miniMapP1Texture);
     miniMapBkgSprite_->SetTexture(miniMapBkgTexture);
+
+    steerWheelSprite_->SetTexture(steerWheelTexture);
 
     int textureWidth;
     int textureHeight;
@@ -686,6 +720,28 @@ void MayaScape::CreateScene() {
     miniMapP1Sprite_->SetVisible(true);
     miniMapBkgSprite_->SetVisible(true);
 
+    textureWidth = steerWheelTexture->GetWidth();
+    textureHeight = steerWheelTexture->GetHeight();
+
+    float steerWheelX = 900.0f;
+    float steerWheelY = 600.0f-15.0f;
+
+    steerWheelSprite_->SetScale(256.0f / textureWidth);
+    steerWheelSprite_->SetSize(textureWidth, textureHeight);
+    steerWheelSprite_->SetHotSpot(textureWidth/2, textureHeight/2);
+    steerWheelSprite_->SetAlignment(HA_LEFT, VA_TOP);
+    steerWheelSprite_->SetPosition(Vector2(steerWheelX,  steerWheelY));
+    steerWheelSprite_->SetOpacity(0.5f);
+    // Set a low priority so that other UI elements can be drawn on top
+    steerWheelSprite_->SetPriority(-100);
+   // steerWheelSprite_->SetHotSpot(steerWheelX, steerWheelY);]
+
+//   steerWheelSprite_->SetPivot(-10,-10);
+//    steerWheelSprite_->SetHotSpot(-5.0f,-5.0f);
+
+    steerWheelSprite_->SetVisible(true);
+
+
     // Create the UI for displaying the remaining lifes
     auto *lifeUI = ui->GetRoot()->CreateChild<BorderImage>("Life2");
     lifeUI->SetTexture(cache->GetResource<Texture2D>("Textures/jiva2d.png"));
@@ -737,6 +793,7 @@ void MayaScape::CreateScene() {
 
     // Load default track
 
+    /*
     // Create tile map for track from tmx file
     SharedPtr<Node> tileMapNode(scene_->CreateChild("TileMap"));
 //    tileMapNode->SetPosition(Vector3(vehicle_->GetNode()->GetPosition().x_, 0.0f, vehicle_->GetNode()->GetPosition().z_));
@@ -757,7 +814,7 @@ void MayaScape::CreateScene() {
     tileMap_->SetTmxFile(tmxFile);
     const TileMapInfo2D &info = tileMap_->GetInfo();
     URHO3D_LOGINFOF("tileMap=%f x %f", info.GetMapWidth(), info.GetMapHeight());
-
+*/
 //    tileMap->Set
 /*
     // Create balloon object
@@ -1632,8 +1689,15 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 
 
 
+    // Update mini map for P1 position
 //    miniMapP1Sprite_->SetPosition(Vector2(776.0f-16.0f, 300.0f));
     miniMapP1Sprite_->SetPosition(Vector2(miniMapP1X+xRange-16.0f, miniMapP1Y+zRange));
+
+
+    float steering = vehicle_->GetSteering();
+//    Quaternion vRot = vehicle_->GetNode()->GetRotation();
+
+    steerWheelSprite_->SetRotation(360.0f*steering);
 
     int i = 0;
 
@@ -1693,6 +1757,16 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 
     if (vehicle_)
     {
+
+        std::string playerInfo;
+        char str[40];
+
+        Vector3 pos = vehicle_->GetNode()->GetPosition();
+        sprintf(str, "%f,%f,%f", pos.x_, pos.y_, pos.z_);
+        playerInfo.clear();
+        playerInfo.append("Vehicle position (x,y,z) -> ").append(str);
+        debugText_[i]->SetText(playerInfo.c_str());
+
         /*
         i++;
         playerInfo.clear();

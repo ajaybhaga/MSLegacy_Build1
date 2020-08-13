@@ -398,7 +398,6 @@ Vector3 TileMapLayer3D::CalculateTileShift(const TmxTileLayer2D* tileLayer, cons
         int m = y % 2;
         xShift = 2.0f;// allows squeeze
 
-
         URHO3D_LOGINFOF("W TileMapLayer3D::SetTileLayer -> m, x [%d, %d]", m, x);
 
         if (m == 1) {
@@ -407,8 +406,6 @@ Vector3 TileMapLayer3D::CalculateTileShift(const TmxTileLayer2D* tileLayer, cons
             yShift = -yScale;
         }
 //        zShift = 20.0f;
-
-// M
 
     } else {
 
@@ -462,6 +459,19 @@ Vector3 TileMapLayer3D::CalculateTileShift(const TmxTileLayer2D* tileLayer, cons
     // Adjacent E is same
     if (adjETileId == tileId) {
 
+        int m = y % 2;
+        xShift = 2.0f;// allows squeeze
+
+        URHO3D_LOGINFOF("E TileMapLayer3D::SetTileLayer -> m, x [%d, %d]", m, x);
+
+        if (m == 1) {
+            yShift = yScale;
+        } else {
+            yShift = -yScale;
+        }
+//        zShift = 20.0f;
+
+
     } else {
 
         // Top left
@@ -513,6 +523,18 @@ Vector3 TileMapLayer3D::CalculateTileShift(const TmxTileLayer2D* tileLayer, cons
     // Adjacent N is same
     if (adjNTileId == tileId) {
 
+        int m = x % 2;
+        yShift = 2.0f;// allows squeeze
+
+        URHO3D_LOGINFOF("N TileMapLayer3D::SetTileLayer -> m, x [%d, %d]", m, x);
+
+        if (m == 1) {
+            xShift = -xScale;
+        } else {
+            xShift = xScale;
+        }
+        zShift = 20.0f;
+
     } else {
 
         // DETECTED - twice
@@ -563,6 +585,19 @@ Vector3 TileMapLayer3D::CalculateTileShift(const TmxTileLayer2D* tileLayer, cons
 
     // Adjacent S is same
     if (adjSTileId == tileId) {
+
+        int m = x % 2;
+        yShift = 2.0f;// allows squeeze
+
+        URHO3D_LOGINFOF("S TileMapLayer3D::SetTileLayer -> m, x [%d, %d]", m, x);
+
+        if (m == 1) {
+            xShift = xScale;
+        } else {
+            xShift = -xScale;
+        }
+
+//        zShift = 40.0f;
 
     } else {
 
@@ -723,6 +758,7 @@ void TileMapLayer3D::SetTileLayer(const TmxTileLayer2D* tileLayer) {
                     elevation = -0.6f;
                 }
 
+                float stretch = 0.0f;
                 if (doGrid) {
 //                tileStr = path + "grid.mdl";
                     tileStr = path + "square.mdl";
@@ -739,6 +775,7 @@ void TileMapLayer3D::SetTileLayer(const TmxTileLayer2D* tileLayer) {
                                 matStr = path + "1.txt";
 
                                 scale = 0.041f;
+                                stretch = 0.05f;
                                 elevation = 2.0f;
                                 rot = Quaternion(180.0f, 90.0f, 90.0f);
                                 break;
@@ -747,6 +784,7 @@ void TileMapLayer3D::SetTileLayer(const TmxTileLayer2D* tileLayer) {
                                 tileStr = path + "1.mdl";
                                 matStr = path + "1.txt";
                                 scale = 0.041f;
+                                stretch = 0.05f;
                                 elevation = 2.0f;
                                 rot = Quaternion(90.0f, 90.0f, 90.0f);
 
@@ -932,7 +970,7 @@ void TileMapLayer3D::SetTileLayer(const TmxTileLayer2D* tileLayer) {
                 }
                 tileNode->SetPosition(Vector3(tileShift.x_ + tilePos.x_ + xoffset, tileShift.y_ + tilePos.y_,
                                               tileShift.z_ + elevation));
-                tileNode->SetScale(Vector3(scale, scale, scale));
+                tileNode->SetScale(Vector3(scale, scale, scale+stretch));
 //
                 staticObject->SetModel(cache->GetResource<Model>(buffer));
                 //    String matFile = GetSubsystem<FileSystem>()->GetProgramDir() + "Data/" + matStr.c_str();
