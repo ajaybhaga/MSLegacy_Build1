@@ -446,6 +446,27 @@ void MayaScape::CreateScene() {
 
     terrain_->SetOccluder(true);
 
+    Vector3 hsl_ = terrain_->GetMarkerMap()->GetPixel(vx, vz).ToHSL();
+
+
+    // Search for track marker
+    int sp = -1;
+    for (int k = 0; k < terrain_->GetMarkerMap()->GetHeight(); k++) {
+        for (int j = 0; j < terrain_->GetMarkerMap()->GetWidth(); j++) {
+            Vector3 hsl_  = terrain_->GetMarkerMap()->GetPixel(k, j).ToHSL();
+
+
+            URHO3D_LOGINFOF("terrain marker map=[%f,%f]", info.GetMapWidth(), info.GetMapHeight());
+
+
+
+            if (sp != -1) {
+
+            }
+        }
+    }
+
+
     RigidBody* body = terrainNode->CreateComponent<RigidBody>();
     body->SetCollisionLayer(2); // Use layer bitmask 2 for static geometry
     CollisionShape* shape = terrainNode->CreateComponent<CollisionShape>();
@@ -1874,7 +1895,9 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
             int vx = (shiftedRange.x_ / mapSize) * terrain_->GetMarkerMap()->GetWidth();
             int vz = (shiftedRange.z_ / mapSize) * terrain_->GetMarkerMap()->GetHeight();
 
-            sprintf(str, "pixel [%d,%d] -> %d", vx, vz, terrain_->GetMarkerMap()->GetPixel(vx, vz).ToUInt());
+            Vector3 hsl_ = terrain_->GetMarkerMap()->GetPixel(vx, vz).ToHSL();
+
+            sprintf(str, "pixel [%d,%d] -> (%f, %f, %f)", vx, vz, hsl_.x_, hsl_.y_, hsl_.z_);
             playerInfo.clear();
             playerInfo.append("Vehicle (x,z) -> ").append(str);
             debugText_[i]->SetText(playerInfo.c_str());
