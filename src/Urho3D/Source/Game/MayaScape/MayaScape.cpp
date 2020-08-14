@@ -357,6 +357,22 @@ void MayaScape::CreateVehicle() {
     vehicle_ = vehicleNode->CreateComponent<Vehicle>();
     vehicle_->Init();
 
+    // Create a directional light with cascaded shadow mapping
+    vehicleHeadLamp_ = scene_->CreateChild("DirectionalLight");
+    vehicleHeadLamp_->SetPosition(Vector3(vehicleNode->GetPosition().x_, 100.0f, vehicleNode->GetPosition().z_));
+    vehicleHeadLamp_->SetDirection(Vector3(vehicleNode->GetRotation().x_, vehicleNode->GetRotation().y_, vehicleNode->GetRotation().z_));
+
+
+    Light* light = vehicleHeadLamp_->CreateComponent<Light>();
+    light->SetRadius(0.03f);
+    light->SetLightType(LIGHT_DIRECTIONAL);
+    light->SetBrightness(0.24);
+    light->SetCastShadows(true);
+ //   light->SetShadowBias(BiasParameters(0.00025f, 0.5f));
+//    light->SetShadowCascade(CascadeParameters(10.0f, 50.0f, 200.0f, 0.0f, 0.8f));
+  //  light->SetSpecularIntensity(0.01f);
+
+
     // Place on at corner of map
     TerrainPatch* p = terrain_->GetPatch(0, 0);
     IntVector2 v = p->GetCoordinates();
@@ -400,6 +416,7 @@ void MayaScape::CreateScene() {
     zone->SetFogEnd(500.0f);
     zone->SetBoundingBox(BoundingBox(-2000.0f, 2000.0f));
 
+    /*
     // Create a directional light with cascaded shadow mapping
     Node* lightNode = scene_->CreateChild("DirectionalLight");
     lightNode->SetDirection(Vector3(0.3f, -0.5f, 0.425f));
@@ -409,7 +426,7 @@ void MayaScape::CreateScene() {
     light->SetShadowBias(BiasParameters(0.00025f, 0.5f));
     light->SetShadowCascade(CascadeParameters(10.0f, 50.0f, 200.0f, 0.0f, 0.8f));
     light->SetSpecularIntensity(0.5f);
-
+*/
     sample2D_->scene_ = scene_;
 ///
 
@@ -546,7 +563,7 @@ void MayaScape::CreateScene() {
         return;
 
     // Get RPM bar texture
-    Texture2D *rpmBarTexture = cache->GetResource<Texture2D>("Textures/powerbar.png");
+    Texture2D *rpmBarTexture = cache->GetResource<Texture2D>("Textures/rpm.png");
     if (!rpmBarTexture)
         return;
 
@@ -556,7 +573,7 @@ void MayaScape::CreateScene() {
         return;
 
     // Get velocity bar texture
-    Texture2D *velBarTexture = cache->GetResource<Texture2D>("Textures/powerbar.png");
+    Texture2D *velBarTexture = cache->GetResource<Texture2D>("Textures/velocity.png");
     if (!rpmBarTexture)
         return;
 
@@ -613,13 +630,23 @@ void MayaScape::CreateScene() {
     rpmBarP1Sprite_->SetTexture(rpmBarTexture);
     rpmBarBkgP1Sprite_->SetTexture(rpmBarBkgTexture);
 
-    velBarP1Sprite_->SetTexture(rpmBarTexture);
+    velBarP1Sprite_->SetTexture(velBarTexture);
     velBarBkgP1Sprite_->SetTexture(rpmBarBkgTexture);
 
     miniMapP1Sprite_->SetTexture(miniMapP1Texture);
     miniMapBkgSprite_->SetTexture(miniMapBkgTexture);
 
     steerWheelSprite_->SetTexture(steerWheelTexture);
+
+    float textOverlap = 245.0f;
+
+    auto *powerBarText = ui->GetRoot()->CreateChild<Text>("powerBarText");
+    powerBarText->SetAlignment(HA_LEFT, VA_TOP);
+    powerBarText->SetPosition(300.0f-textOverlap, 20.0);
+    powerBarText->SetFont(font, 15);
+    powerBarText->SetTextEffect(TE_SHADOW);
+    powerBarText->SetText(String("HEALTH"));
+    powerBarText ->SetVisible(true);
 
     int textureWidth;
     int textureHeight;
@@ -649,6 +676,15 @@ void MayaScape::CreateScene() {
     powerBarBkgP1Sprite_->SetVisible(true);
 
 
+    auto *rpmBarText = ui->GetRoot()->CreateChild<Text>("rpmBarText");
+    rpmBarText->SetAlignment(HA_LEFT, VA_TOP);
+    rpmBarText->SetPosition(300.0f-textOverlap, 170.0);
+    rpmBarText->SetFont(font, 15);
+    rpmBarText->SetTextEffect(TE_SHADOW);
+    rpmBarText->SetText(String("RPM"));
+    rpmBarText ->SetVisible(true);
+
+
     textureWidth = rpmBarTexture->GetWidth();
     textureHeight = rpmBarTexture->GetHeight();
 
@@ -672,6 +708,14 @@ void MayaScape::CreateScene() {
 
     rpmBarP1Sprite_->SetVisible(true);
     rpmBarBkgP1Sprite_->SetVisible(true);
+
+    auto *velBarText = ui->GetRoot()->CreateChild<Text>("velBarText");
+    velBarText->SetAlignment(HA_LEFT, VA_TOP);
+    velBarText->SetPosition(300.0f-textOverlap, 90.0);
+    velBarText->SetFont(font, 15);
+    velBarText->SetTextEffect(TE_SHADOW);
+    velBarText->SetText(String("SPEED"));
+    velBarText ->SetVisible(true);
 
 
     textureWidth = rpmBarTexture->GetWidth();
@@ -777,7 +821,7 @@ void MayaScape::CreateScene() {
     for (int i = 0; i < NUM_DEBUG_FIELDS; i++) {
         debugText_[i] = lifeUI->CreateChild<Text>("DebugText1");
         debugText_[i]->SetAlignment(HA_LEFT, VA_CENTER);
-        debugText_[i]->SetPosition(10.0f, 60.0 + (i * 20));
+        debugText_[i]->SetPosition(10.0f, 300.0 + (i * 20));
         debugText_[i]->SetFont(font, 8);
         debugText_[i]->SetTextEffect(TE_SHADOW);
         debugText_[i]->SetVisible(true);
@@ -1055,7 +1099,10 @@ void MayaScape::CreateScene() {
     if (tileMapLayer)
         sample2D_->CreateCollisionShapesFromTMXObjects(tileMapNode, tileMapLayer, info);
 */
-    // Create a directional light to the world so that we can see something. The light scene node's orientation controls the
+    // Create a directional
+    //
+    //
+    // to the world so that we can see something. The light scene node's orientation controls the
     // light direction; we will use the SetDirection() function which calculates the orientation from a forward direction vector.
     // The light will use default settings (white light, no shadows)
 /*    Node *lightNode = scene_->CreateChild("DirectionalLight");
@@ -1661,7 +1708,7 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
      }
 
 
-    int life = 0;
+    int life = 100;
     if (player_) {
         life = player_->life_;
     }
@@ -1714,6 +1761,23 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 //    Quaternion vRot = vehicle_->GetNode()->GetRotation();
 
     steerWheelSprite_->SetRotation(360.0f*steering);
+    vehicleHeadLamp_->SetPosition(Vector3(vehicle_->GetNode()->GetPosition().x_, vehicle_->GetNode()->GetPosition().y_+5.0f, vehicle_->GetNode()->GetPosition().z_));
+    vehicleHeadLamp_->SetDirection(Vector3(vehicle_->GetNode()->GetRotation().x_, 1.0f, vehicle_->GetNode()->GetRotation().z_));
+
+    Light* light = vehicleHeadLamp_->GetComponent<Light>();
+   // Light* light = vehicleHeadLamp_->CreateComponent<Light>();
+    //light->SetLightType(LIGHT_SPOT)
+    light->SetLightType(LIGHT_POINT);
+    light->SetRange(30.0f);
+//    ;
+
+    float rpmLightFactor = 40.0f;
+    float rpmLight = rpm/4500.0f;
+    if (rpmLight > 0.8f) rpmLight = 0.8f;
+    light->SetBrightness(0.2f+(rpmLight*rpmLightFactor));
+    light->SetCastShadows(true);
+    //   light->SetShadowBias(BiasParameters(0.00025f, 0.5f));
+
 
     int i = 0;
 

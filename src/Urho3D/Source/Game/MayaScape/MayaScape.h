@@ -153,6 +153,7 @@ private:
 
     /// The controllable vehicle component.
     WeakPtr<Vehicle> vehicle_;
+    WeakPtr<Node> vehicleHeadLamp_;
 
     WeakPtr<Node> raceTrack_;
     WeakPtr<CollisionShape> trackColShape_;
