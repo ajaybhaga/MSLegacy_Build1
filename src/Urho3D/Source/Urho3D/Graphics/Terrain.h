@@ -64,6 +64,10 @@ public:
     void SetSmoothing(bool enable);
     /// Set heightmap image. Dimensions should be a power of two + 1. Uses 8-bit grayscale, or optionally red as MSB and green as LSB for 16-bit accuracy. Return true if successful.
     bool SetHeightMap(Image* image);
+
+    /// Set marker map image. Dimensions should be a power of two + 1. Uses 8-bit grayscale, or optionally red as MSB and green as LSB for 16-bit accuracy. Return true if successful.
+    bool SetMarkerMap(Image* image);
+
     /// Set material.
     void SetMaterial(Material* material);
     /// Set north (positive Z) neighbor terrain for seamless LOD changes across terrains.
@@ -124,6 +128,9 @@ public:
 
     /// Return heightmap image.
     Image* GetHeightMap() const;
+    /// Return marker map image.
+    Image* GetMarkerMap() const;
+
     /// Return material.
     Material* GetMaterial() const;
     /// Return patch by index.
@@ -210,6 +217,9 @@ public:
     ResourceRef GetHeightMapAttr() const;
     /// Return material attribute.
     ResourceRef GetMaterialAttr() const;
+    // Return marker pixel
+    float GetMarkerPixel(int x, int z) const;
+
 
 private:
     /// Regenerate terrain geometry.
@@ -230,6 +240,10 @@ private:
     void SetPatchNeighbors(TerrainPatch* patch);
     /// Set heightmap image and optionally recreate the geometry immediately. Return true if successful.
     bool SetHeightMapInternal(Image* image, bool recreateNow);
+
+    /// Set marker map image and optionally recreate the geometry immediately. Return true if successful.
+    bool SetMarkerMapInternal(Image* image, bool recreateNow);
+
     /// Handle heightmap image reload finished.
     void HandleHeightMapReloadFinished(StringHash eventType, VariantMap& eventData);
     /// Handle neighbor terrain geometry being created. Update the edge patch neighbors as necessary.
@@ -245,8 +259,14 @@ private:
     SharedPtr<IndexBuffer> indexBuffer_;
     /// Heightmap image.
     SharedPtr<Image> heightMap_;
+    /// Marker image.
+    SharedPtr<Image> markerMap_;
+
     /// Height data.
     SharedArrayPtr<float> heightData_;
+    /// Marker data.
+    SharedArrayPtr<float> markerData_;
+
     /// Source height data for smoothing.
     SharedArrayPtr<float> sourceHeightData_;
     /// Material.

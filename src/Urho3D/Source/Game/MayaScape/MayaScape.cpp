@@ -440,6 +440,7 @@ void MayaScape::CreateScene() {
 
     //    terrain->SetHeightMap(cache->GetResource<Image>("Offroad/Terrain/HeightMapRace-257.png"));
 //    terrain->SetMaterial(cache->GetResource<Material>("Offroad/Terrain/TerrainRace-256.xml"));
+    terrain_->SetMarkerMap(cache->GetResource<Image>("Textures/MarkerMap.png"));
     terrain_->SetHeightMap(cache->GetResource<Image>("Textures/HeightMap.png"));
     terrain_->SetMaterial(cache->GetResource<Material>("Materials/Terrain.xml"));
 
@@ -1862,6 +1863,29 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
         playerInfo.clear();
         playerInfo.append("Vehicle minmap pos (x,z) -> ").append(str);
         debugText_[i]->SetText(playerInfo.c_str());
+
+        i++;
+
+
+        if (terrain_->GetMarkerMap()) {
+            //float vx = xRange; // vehicle pos
+            //float vz = zRange;
+            // 1600+1600
+            int vx = (shiftedRange.x_ / mapSize) * terrain_->GetMarkerMap()->GetWidth();
+            int vz = (shiftedRange.z_ / mapSize) * terrain_->GetMarkerMap()->GetHeight();
+
+            sprintf(str, "pixel [%d,%d] -> %d", vx, vz, terrain_->GetMarkerMap()->GetPixel(vx, vz).ToUInt());
+            playerInfo.clear();
+            playerInfo.append("Vehicle (x,z) -> ").append(str);
+            debugText_[i]->SetText(playerInfo.c_str());
+            i++;
+            sprintf(str, "height [%d,%d] -> %d", vx, vz, terrain_->GetHeightMap()->GetPixel(vx, vz).ToUInt());
+            playerInfo.clear();
+            playerInfo.append("Vehicle (x,z) -> ").append(str);
+            debugText_[i]->SetText(playerInfo.c_str());
+            i++;
+
+        }
 
         /*
         i++;
