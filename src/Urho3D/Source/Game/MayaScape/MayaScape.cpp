@@ -351,7 +351,7 @@ void MayaScape::CreateVehicle() {
     Node* vehicleNode = scene_->CreateChild("Vehicle");
 
     // Place on track
-    vehicleNode->SetPosition(Vector3(-814.0f, 40.0f, -595.0f));
+    vehicleNode->SetPosition(Vector3(-814.0f+Random(-400.f, 400.0f), 500.0f, -595.0f+Random(-400.f, 400.0f)));
 
     // Create the vehicle logic component
     vehicle_ = vehicleNode->CreateComponent<Vehicle>();
@@ -435,7 +435,7 @@ void MayaScape::CreateScene() {
     terrainNode->SetPosition(Vector3::ZERO);
     terrain_ = terrainNode->CreateComponent<Terrain>();
     terrain_->SetPatchSize(64);
-    terrain_->SetSpacing(Vector3(2.8f, 1.4f, 2.8f));
+    terrain_->SetSpacing(Vector3(2.8f, 3.0f, 2.8f));
 //    terrain->SetSpacing(Vector3(3.0f, 0.1f, 3.0f)); // Spacing between vertices and vertical resolution of the height map
 
     //    terrain->SetHeightMap(cache->GetResource<Image>("Offroad/Terrain/HeightMapRace-257.png"));
@@ -457,7 +457,7 @@ void MayaScape::CreateScene() {
     auto *graphics = GetSubsystem<Graphics>();
 
     /*
-    auto* body = terrainNode->CreateComponent<RigidBody>();
+    auto* body = terrainNode->CreateComponent<RigidBody>();vehi
     body->SetCollisionLayer(2); // Use layer bitmask 2 for static geometry
     auto* shape =
             terrainNode->CreateComponent<CollisionShape>();
@@ -465,11 +465,11 @@ void MayaScape::CreateScene() {
 
 
         raceTrack_ = scene_->CreateChild("RaceTrack");
-        Vector3 position(-200.0f, terrain_->GetHeight(position)+2.0f, -300.0f);
-     //   position.y_ = terrain_->GetHeight(position) - 0.1f;
+        Vector3 position(-200.0f, 0.0f, -300.0f);
+        position.y_ = terrain_->GetHeight(position) + 20.0f;
         raceTrack_->SetPosition(position);
         // Create a rotation quaternion from up vector to terrain normal
-        raceTrack_->SetRotation(Quaternion(Vector3::UP, terrain_->GetNormal(position)));
+        //raceTrack_->SetRotation(Quaternion(Vector3::UP, terrain_->GetNormal(position)));
         Node* adjNode = raceTrack_->CreateChild("AdjNode");
         adjNode->SetRotation(Quaternion(0.0, 0.0, 0.0f));
 
@@ -1581,6 +1581,15 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
     if (input->GetKeyPress(KEY_C))
         doSpecial_ = !doSpecial_;
 
+    if (input->GetKeyPress(KEY_R)) {
+        // Place on track
+        vehicle_->GetNode()->SetPosition(Vector3(-814.0f+Random(-400.f, 400.0f), 500.0f, -595.0f+Random(-400.f, 400.0f)));
+    }
+
+    if (input->GetKeyPress(KEY_O)) {
+        // Place on track origin
+        vehicle_->GetNode()->SetPosition(Vector3(raceTrack_->GetPosition().x_-600.0f, 500.0f, raceTrack_->GetPosition().z_-300.0f));
+    }
 
     // Check for loading / saving the scene
     if (input->GetKeyPress(KEY_F5))
