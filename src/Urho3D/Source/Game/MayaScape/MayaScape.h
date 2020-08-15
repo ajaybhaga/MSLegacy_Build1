@@ -138,8 +138,10 @@ private:
 
     /// Mini-map P1 sprite.
     SharedPtr<Sprite> miniMapP1Sprite_;
-    /// Mini-map Bkg P1 sprite.
+    /// Mini-map Bkg sprite.
     SharedPtr<Sprite> miniMapBkgSprite_;
+    /// Marker map Bkg sprite.
+    SharedPtr<Sprite> markerMapBkgSprite_;
 
     /// Steering wheel
     SharedPtr<Sprite> steerWheelSprite_;

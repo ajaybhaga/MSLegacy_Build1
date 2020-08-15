@@ -423,8 +423,8 @@ void MayaScape::CreateScene() {
     Zone* zone = zoneNode->CreateComponent<Zone>();
     zone->SetAmbientColor(Color(0.15f, 0.15f, 0.15f));
     zone->SetFogColor(Color(0.5f, 0.5f, 0.7f));
-    zone->SetFogStart(300.0f);
-    zone->SetFogEnd(500.0f);
+    zone->SetFogStart(700.0f);
+    zone->SetFogEnd(900.0f);
     zone->SetBoundingBox(BoundingBox(-2000.0f, 2000.0f));
 
     /*
@@ -446,7 +446,7 @@ void MayaScape::CreateScene() {
     terrainNode->SetPosition(Vector3::ZERO);
     terrain_ = terrainNode->CreateComponent<Terrain>();
     terrain_->SetPatchSize(64);
-    terrain_->SetSpacing(Vector3(2.8f, 3.0f, 2.8f));
+    terrain_->SetSpacing(Vector3(2.8f, 2.2f, 2.8f));
 //    terrain->SetSpacing(Vector3(3.0f, 0.1f, 3.0f)); // Spacing between vertices and vertical resolution of the height map
 
     //    terrain->SetHeightMap(cache->GetResource<Image>("Offroad/Terrain/HeightMapRace-257.png"));
@@ -488,7 +488,7 @@ void MayaScape::CreateScene() {
         }
     }
 
-    int reduceFactor = 280;
+    int reduceFactor = ((float)trees_.Size()*0.98f);
     // Drop trees to reduce saturation of trees
     int reduceSize = Min(trees_.Size(), reduceFactor);
 
@@ -583,7 +583,7 @@ void MayaScape::CreateScene() {
         Node* adjNode = objectNode->CreateChild("AdjNode");
         adjNode->SetRotation(Quaternion(0.0, 0.0, -90.0f));
 
-        objectNode->SetScale(3.5f);
+        objectNode->SetScale(20.0f);
 
         auto* object = adjNode->CreateComponent<StaticModel>();
 
@@ -679,7 +679,7 @@ void MayaScape::CreateScene() {
     //camera->SetOrthoSize((float)graphics->GetHeight() * PIXEL_SIZE);
     camera->SetZoom(0.1f * Min((float) graphics->GetWidth() / 1080.0f, (float) graphics->GetHeight() /
                                                                        768.0f)); // Set zoom according to user's resolution to ensure full visibility (initial zoom (2.0) is set for full visibility at 1280x800 resolution)
-    camera->SetFarClip(400.0f);
+    camera->SetFarClip(1000.0f);
 
     UI *ui = GetSubsystem<UI>();
 
@@ -727,6 +727,10 @@ void MayaScape::CreateScene() {
     if (!miniMapBkgTexture)
         return;
 
+    // Get marker map background texture
+    Texture2D *markerMapBkgTexture = cache->GetResource<Texture2D>("Textures/MarkerMap.png");
+    if (!markerMapBkgTexture)
+        return;
 
     // Get genotype texture
     Texture2D *genotypeTexture = cache->GetResource<Texture2D>("Textures/genotype.png");
@@ -755,6 +759,7 @@ void MayaScape::CreateScene() {
 
     miniMapP1Sprite_ = ui->GetRoot()->CreateChild<Sprite>();
     miniMapBkgSprite_ = ui->GetRoot()->CreateChild<Sprite>();
+    markerMapBkgSprite_ = ui->GetRoot()->CreateChild<Sprite>();
 
     steerWheelSprite_ = ui->GetRoot()->CreateChild<Sprite>();
 
@@ -770,6 +775,7 @@ void MayaScape::CreateScene() {
 
     miniMapP1Sprite_->SetTexture(miniMapP1Texture);
     miniMapBkgSprite_->SetTexture(miniMapBkgTexture);
+    markerMapBkgSprite_->SetTexture(markerMapBkgTexture);
 
     steerWheelSprite_->SetTexture(steerWheelTexture);
 
@@ -906,12 +912,27 @@ void MayaScape::CreateScene() {
     miniMapBkgSprite_->SetHotSpot(textureWidth, textureHeight);
     miniMapBkgSprite_->SetAlignment(HA_LEFT, VA_TOP);
     miniMapBkgSprite_->SetPosition(Vector2(miniMapX,  miniMapY));
-    miniMapBkgSprite_->SetOpacity(0.5f);
+    miniMapBkgSprite_->SetOpacity(0.2f);
     // Set a low priority so that other UI elements can be drawn on top
     miniMapBkgSprite_->SetPriority(-100);
 
     miniMapP1Sprite_->SetVisible(true);
     miniMapBkgSprite_->SetVisible(true);
+
+
+    textureWidth = markerMapBkgTexture->GetWidth();
+    textureHeight = markerMapBkgTexture->GetHeight();
+
+    markerMapBkgSprite_->SetScale(256.0f / textureWidth);
+    markerMapBkgSprite_->SetSize(textureWidth, textureHeight);
+    markerMapBkgSprite_->SetHotSpot(textureWidth, textureHeight);
+    markerMapBkgSprite_->SetAlignment(HA_LEFT, VA_TOP);
+    markerMapBkgSprite_->SetPosition(Vector2(miniMapX,  miniMapY));
+    markerMapBkgSprite_->SetOpacity(0.5f);
+    // Set a low priority so that other UI elements can be drawn on top
+    miniMapBkgSprite_->SetPriority(-100);
+    markerMapBkgSprite_->SetVisible(true);
+
 
     textureWidth = steerWheelTexture->GetWidth();
     textureHeight = steerWheelTexture->GetHeight();
@@ -1881,14 +1902,25 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
     powerBarP1Sprite_->SetSize(power, v.y_);
 
     float maxRPM = 8000.0f;
+    float clampedRPM = vehicle_->GetCurrentRPM();
+    if (clampedRPM > maxRPM) {
+        clampedRPM = maxRPM;
+    }
+
     v = rpmBarBkgP1Sprite_->GetSize();
-    int rpm = ((vehicle_->GetCurrentRPM()/maxRPM)* v.x_);
+    int rpm = ((clampedRPM/maxRPM)* v.x_);
     rpmBarP1Sprite_->SetSize(rpm, v.y_);
 
 
+    float maxSpeed = 220.0f;
+    float clampedSpeed = vehicle_->GetSpeedKmH();
+    if (clampedSpeed > maxSpeed) {
+        clampedSpeed = maxSpeed;
+    }
+
     // Cap speed at 220 KmH
     v = velBarBkgP1Sprite_->GetSize();
-    int velocity = ((vehicle_->GetSpeedKmH()/220.0f)* v.x_);
+    int velocity = ((clampedSpeed/maxSpeed) * v.x_);
     velBarP1Sprite_->SetSize(velocity, v.y_);
 
 //    float maxX = terrain_->GetPatchSize()*terrain_->GetNumPatches().x_;

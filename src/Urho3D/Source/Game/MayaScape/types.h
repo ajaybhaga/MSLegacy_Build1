@@ -42,7 +42,7 @@ typedef int32_t  SDWORD;
 #define SDWORD_MIN	INT32_MIN
 #define SDWORD_MAX	INT32_MAX
 
-const float CAMERA_DISTANCE = 200.0f;
+const float CAMERA_DISTANCE = 300.0f;
 
 #define MAX_PLAYERS         11                 ///< Maximum number of players in the game.
 
