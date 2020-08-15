@@ -359,7 +359,7 @@ void MayaScape::CreateVehicle() {
     Node* vehicleNode = scene_->CreateChild("Vehicle");
 
     // Place on track
-    vehicleNode->SetPosition(Vector3(-814.0f+Random(-400.f, 400.0f), 500.0f, -595.0f+Random(-400.f, 400.0f)));
+    vehicleNode->SetPosition(Vector3(-814.0f+Random(-400.f, 400.0f), 400.0f, -595.0f+Random(-400.f, 400.0f)));
 
     // Create the vehicle logic component
     vehicle_ = vehicleNode->CreateComponent<Vehicle>();
@@ -468,7 +468,6 @@ void MayaScape::CreateScene() {
             Vector3 hsl_ = terrain_->GetMarkerMap()->GetPixel(k, j).ToHSL();
             //URHO3D_LOGINFOF("terrain marker map[x,y]=[%f,%f,%f]", j, k, hsl_.x_, hsl_.y_, hsl_.z_);
 
-
             Vector3 bkgMarkerToken = Vector3(0.5, 1, 0.5); // Black
             Vector3 trackMarkerToken = Vector3(0.500000059604645,1,0.643137276172638); // #494949
             Vector3 treeMarkerToken = Vector3(0.5, 1, 0.594117641448975); // #303030
@@ -487,6 +486,14 @@ void MayaScape::CreateScene() {
             }
 
         }
+    }
+
+    int reduceFactor = 280;
+    // Drop trees to reduce saturation of trees
+    int reduceSize = Min(trees_.Size(), reduceFactor);
+
+    for (int j = 0; j < reduceSize; j++) {
+        trees_.Erase(Random(0, trees_.Size()), 1);
     }
 
     URHO3D_LOGINFOF("***** TREE COUNT: [%d]", trees_.Size());
@@ -548,9 +555,6 @@ void MayaScape::CreateScene() {
 
     // Place trees based on markers
 
-    // Convert marker position to world position for track
-    float treePosX = ((float)trackX / (float)terrain_->GetMarkerMap()->GetWidth())*mapSize;
-    float treePosZ = ((float)trackY / (float)terrain_->GetMarkerMap()->GetHeight())*mapSize;
 
 
     // Convert from mini map to world position
@@ -561,6 +565,11 @@ void MayaScape::CreateScene() {
     //
     for (unsigned i = 0; i < trees_.Size(); ++i)
     {
+
+        // Convert marker position to world position for track
+        float treePosX = ((float)trees_[i].x_ / (float)terrain_->GetMarkerMap()->GetWidth())*mapSize;
+        float treePosZ = ((float)trees_[i].z_ / (float)terrain_->GetMarkerMap()->GetHeight())*mapSize;
+
         Node* objectNode = scene_->CreateChild("Tree");
         Vector3 position(treePosX, 0.0f, treePosZ);
         position.y_ = terrain_->GetHeight(position) - 0.1f;
@@ -1713,6 +1722,10 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
     }
 
     if (input->GetKeyPress(KEY_O)) {
+
+        // Set focus to vehicle
+        focusIndex_ = 0;
+
         // Place on track origin
         vehicle_->GetNode()->SetPosition(Vector3(raceTrack_->GetPosition().x_-600.0f, 500.0f, raceTrack_->GetPosition().z_-300.0f));
     }
