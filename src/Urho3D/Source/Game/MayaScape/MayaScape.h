@@ -107,6 +107,9 @@ private:
     WeakPtr<Character2D> agents_[MAX_AGENTS];
 
     WeakPtr<Terrain> terrain_;
+    Vector<Vector3> trees_;
+    Vector<Vector3> focusObjects_;
+    unsigned int focusIndex_;
 
     WeakPtr<TileMap3D> tileMap_;
 

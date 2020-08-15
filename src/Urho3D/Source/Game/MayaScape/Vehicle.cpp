@@ -90,7 +90,7 @@ Vehicle::Vehicle(Context* context)
     m_fEngineForce = 0.0f;
     m_fBreakingForce = 20.0f;
 
-    m_fmaxEngineForce = 1200.f;
+    m_fmaxEngineForce = 1800.f;
 
 //    m_fmaxEngineForce = 950.f;
     m_fmaxBreakingForce = 800.f;

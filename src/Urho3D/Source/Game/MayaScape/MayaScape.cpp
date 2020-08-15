@@ -118,6 +118,11 @@
 #include "shared_libs.h"
 #include "types.h"
 
+float mapSize = 3000.0f;
+float miniMapWidth = 256.0f;
+float miniMapHeight = 256.0f;
+
+
 URHO3D_DEFINE_APPLICATION_MAIN(MayaScape)
 
 MayaScape::MayaScape(Context *context) :
@@ -315,6 +320,9 @@ void MayaScape::Start() {
 
     context_->RegisterSubsystem(new GameController(context_));
 
+    // Reset focus index
+    focusIndex_ = 0;
+
     // Create the scene content
     CreateScene();
 
@@ -356,6 +364,9 @@ void MayaScape::CreateVehicle() {
     // Create the vehicle logic component
     vehicle_ = vehicleNode->CreateComponent<Vehicle>();
     vehicle_->Init();
+
+    // Store initial vehicle position as focus
+    focusObjects_.Push(vehicle_->GetNode()->GetPosition());
 
     // Create a directional light with cascaded shadow mapping
     vehicleHeadLamp_ = scene_->CreateChild("DirectionalLight");
@@ -446,48 +457,71 @@ void MayaScape::CreateScene() {
 
     terrain_->SetOccluder(true);
 
-    Vector3 hsl_ = terrain_->GetMarkerMap()->GetPixel(vx, vz).ToHSL();
-
+    // TRACK MARKER
+    // HSL -> 0.500000059604645,1,0.643137276172638
 
     // Search for track marker
-    int sp = -1;
+    int trackX = 0;
+    int trackY = 0;
     for (int k = 0; k < terrain_->GetMarkerMap()->GetHeight(); k++) {
         for (int j = 0; j < terrain_->GetMarkerMap()->GetWidth(); j++) {
-            Vector3 hsl_  = terrain_->GetMarkerMap()->GetPixel(k, j).ToHSL();
+            Vector3 hsl_ = terrain_->GetMarkerMap()->GetPixel(k, j).ToHSL();
+            //URHO3D_LOGINFOF("terrain marker map[x,y]=[%f,%f,%f]", j, k, hsl_.x_, hsl_.y_, hsl_.z_);
 
 
-            URHO3D_LOGINFOF("terrain marker map=[%f,%f]", info.GetMapWidth(), info.GetMapHeight());
+            Vector3 bkgMarkerToken = Vector3(0.5, 1, 0.5); // Black
+            Vector3 trackMarkerToken = Vector3(0.500000059604645,1,0.643137276172638); // #494949
+            Vector3 treeMarkerToken = Vector3(0.5, 1, 0.594117641448975); // #303030
 
+            if (hsl_ == bkgMarkerToken)
+                continue;
 
-
-            if (sp != -1) {
-
+            if (hsl_ == treeMarkerToken) {
+                trees_.Push(Vector3((float)j, 0.0f, (float)k));
+            } else if (hsl_ == trackMarkerToken) {
+                trackX = j;
+                trackY = k;
+            } else {
+                // Store track marker
+                URHO3D_LOGINFOF("***** UNKNOWN terrain marker map[%d,%d]=[%f,%f,%f]", j, k, hsl_.x_, hsl_.y_, hsl_.z_);
             }
+
         }
     }
+
+    URHO3D_LOGINFOF("***** TREE COUNT: [%d]", trees_.Size());
 
 
     RigidBody* body = terrainNode->CreateComponent<RigidBody>();
     body->SetCollisionLayer(2); // Use layer bitmask 2 for static geometry
     CollisionShape* shape = terrainNode->CreateComponent<CollisionShape>();
 
-
     // Assigns terrain collision map (calculated based on heightmap)
     shape->SetTerrain();
 
- //
-    auto *graphics = GetSubsystem<Graphics>();
+    // Load race track at track marker
+
+    // Convert marker position to world position for track
+    int w = terrain_->GetMarkerMap()->GetWidth();
+    int h = terrain_->GetMarkerMap()->GetHeight();
+
+    float trackPosX = ((float)trackX / (float)w)*mapSize/2;
+    float trackPosZ = ((float)trackY / (float)h)*mapSize/2;
+
+
+    // Convert from mini map to world position
+//    Vector3 shiftedRange = Vector3(trackPosX, 0, trackPosZ) - Vector3(mapSize/2, mapSize/2, mapSize/2);
+
+    URHO3D_LOGINFOF("-----> SET RACE TRACK TO location in world space [%f,%f,%f]", trackPosX, 0.0f, trackPosZ);
 
     /*
-    auto* body = terrainNode->CreateComponent<RigidBody>();vehi
-    body->SetCollisionLayer(2); // Use layer bitmask 2 for static geometry
-    auto* shape =
-            terrainNode->CreateComponent<CollisionShape>();
-    shape->SetTerrain();*/
-
+    // 1600+1600
+    float xRange = (shiftedRange.x_*mapSize) / miniMapWidth;
+    float zRange = (shiftedRange.z_*mapSize) / miniMapHeight;
+*/
 
         raceTrack_ = scene_->CreateChild("RaceTrack");
-        Vector3 position(-200.0f, 0.0f, -300.0f);
+        Vector3 position(trackPosX, 0.0f, trackPosZ);
         position.y_ = terrain_->GetHeight(position) + 20.0f;
         raceTrack_->SetPosition(position);
         // Create a rotation quaternion from up vector to terrain normal
@@ -511,6 +545,74 @@ void MayaScape::CreateScene() {
         trackColShape_->SetTriangleMesh(object->GetModel(), 0);
 //        trackColShape_->SetConvexHull(model);
 
+
+    // Place trees based on markers
+
+    // Convert marker position to world position for track
+    float treePosX = ((float)trackX / (float)terrain_->GetMarkerMap()->GetWidth())*mapSize;
+    float treePosZ = ((float)trackY / (float)terrain_->GetMarkerMap()->GetHeight())*mapSize;
+
+
+    // Convert from mini map to world position
+//    Vector3 shiftedRange = Vector3(trackPosX, 0, trackPosZ) - Vector3(mapSize/2, mapSize/2, mapSize/2);
+
+    URHO3D_LOGINFOF("-----> SET RACE TRACK TO location in world space [%f,%f,%f]", trackPosX, 0.0f, trackPosZ);
+
+    //
+    for (unsigned i = 0; i < trees_.Size(); ++i)
+    {
+        Node* objectNode = scene_->CreateChild("Tree");
+        Vector3 position(treePosX, 0.0f, treePosZ);
+        position.y_ = terrain_->GetHeight(position) - 0.1f;
+        objectNode->SetPosition(position);
+
+        // Store tree position as focus
+        focusObjects_.Push(position);
+
+        // Create a rotation quaternion from up vector to terrain normal
+        objectNode->SetRotation(Quaternion(Vector3::UP, terrain_->GetNormal(position)));
+        Node* adjNode = objectNode->CreateChild("AdjNode");
+        adjNode->SetRotation(Quaternion(0.0, 0.0, -90.0f));
+
+        objectNode->SetScale(3.5f);
+
+        auto* object = adjNode->CreateComponent<StaticModel>();
+
+        // Random
+        int r = std::round(Random(0.0f, 5.0f));
+        switch (r) {
+            case 0:
+                object->SetModel(cache->GetResource<Model>("Models/AssetPack/tree-baobab_orange.mdl"));
+                break;
+            case 1:
+                object->SetModel(cache->GetResource<Model>("Models/AssetPack/tree-birch02.mdl"));
+                break;
+            case 2:
+                object->SetModel(cache->GetResource<Model>("Models/AssetPack/tree-elipse.mdl"));
+                break;
+            case 3:
+                object->SetModel(cache->GetResource<Model>("Models/AssetPack/tree-fir.mdl"));
+                break;
+            case 4:
+                object->SetModel(cache->GetResource<Model>("Models/AssetPack/tree-oak.mdl"));
+                break;
+            case 5:
+                object->SetModel(cache->GetResource<Model>("Models/AssetPack/tree-lime.mdl"));
+                break;
+        }
+
+        //       object->SetMaterial(cache->GetResource<Material>("Materials/LOWPOLY_COLORS.xml")
+        object->SetMaterial(cache->GetResource<Material>("Materials/LOWPOLY-COLORS.xml"));
+        object->SetCastShadows(true);
+
+        auto* body = adjNode->CreateComponent<RigidBody>();
+        body->SetCollisionLayer(2);
+        auto* shape = objectNode->CreateComponent<CollisionShape>();
+        shape->SetTriangleMesh(object->GetModel(), 0);
+    }
+
+    //
+/*
     // Create 1000 mushrooms in the terrain. Always face outward along the terrain normal
     const unsigned NUM_MUSHROOMS = 1000;
     for (unsigned i = 0; i < NUM_MUSHROOMS; ++i)
@@ -559,8 +661,10 @@ void MayaScape::CreateScene() {
         body->SetCollisionLayer(2);
         auto* shape = objectNode->CreateComponent<CollisionShape>();
         shape->SetTriangleMesh(object->GetModel(), 0);
-    }
+    }*/
 
+
+    auto *graphics = GetSubsystem<Graphics>();
 
     //camera->SetOrthographic(true);
     //camera->SetOrthoSize((float)graphics->GetHeight() * PIXEL_SIZE);
@@ -843,7 +947,7 @@ void MayaScape::CreateScene() {
     for (int i = 0; i < NUM_DEBUG_FIELDS; i++) {
         debugText_[i] = lifeUI->CreateChild<Text>("DebugText1");
         debugText_[i]->SetAlignment(HA_LEFT, VA_CENTER);
-        debugText_[i]->SetPosition(10.0f, 300.0 + (i * 20));
+        debugText_[i]->SetPosition(10.0f, 500.0 + (i * 20));
         debugText_[i]->SetFont(font, 8);
         debugText_[i]->SetTextEffect(TE_SHADOW);
         debugText_[i]->SetVisible(true);
@@ -1613,6 +1717,21 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
         vehicle_->GetNode()->SetPosition(Vector3(raceTrack_->GetPosition().x_-600.0f, 500.0f, raceTrack_->GetPosition().z_-300.0f));
     }
 
+    // Toggle through focus objects
+    if (input->GetKeyPress(KEY_T)) {
+
+        //1448.78039550781,0,1507.31701660156
+        //Vector3 trackMarkerPos = Vector3(724.390197753906,0,753.658508300781);
+        // Place on at focus object
+//        vehicle_->GetNode()->SetPosition(Vector3(focusObjects_[focusIndex_].x_, 500.0f, focusObjects_[focusIndex_].z_));
+
+        // Increment focus object
+        focusIndex_++;
+    }
+
+    // Clamp focus index
+    focusIndex_ = focusIndex_ % focusObjects_.Size();
+
     // Check for loading / saving the scene
     if (input->GetKeyPress(KEY_F5))
         sample2D_->SaveScene(false);
@@ -1759,9 +1878,6 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
     int velocity = ((vehicle_->GetSpeedKmH()/220.0f)* v.x_);
     velBarP1Sprite_->SetSize(velocity, v.y_);
 
-    float miniMapWidth = 256.0f;
-    float miniMapHeight = 256.0f;
-
 //    float maxX = terrain_->GetPatchSize()*terrain_->GetNumPatches().x_;
 //    float maxY = terrain_->GetPatchSize()*terrain_->GetNumPatches().y_;
 
@@ -1772,7 +1888,7 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
     // Position
     //Vector3 position((float)x * spacing_.x_, GetRawHeight(xPos, zPos), (float)z * spacing_.z_);
 
-    float mapSize = 3000.0f;
+    // Calculate mini map position
     Vector3 shiftedRange = vehicle_->GetNode()->GetPosition() + Vector3(mapSize/2, mapSize/2, mapSize/2);
 
     // 1600+1600
@@ -1795,12 +1911,12 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
     vehicleHeadLamp_->SetPosition(Vector3(vehicle_->GetNode()->GetPosition().x_, vehicle_->GetNode()->GetPosition().y_+5.0f, vehicle_->GetNode()->GetPosition().z_));
     vehicleHeadLamp_->SetDirection(Vector3(vehicle_->GetNode()->GetRotation().x_, 1.0f, vehicle_->GetNode()->GetRotation().z_));
 
+    // Update vehicle head lamp lighting
     Light* light = vehicleHeadLamp_->GetComponent<Light>();
    // Light* light = vehicleHeadLamp_->CreateComponent<Light>();
     //light->SetLightType(LIGHT_SPOT)
     light->SetLightType(LIGHT_POINT);
     light->SetRange(30.0f);
-//    ;
 
     float rpmLightFactor = 40.0f;
     float rpmLight = rpm/4500.0f;
@@ -1808,6 +1924,9 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
     light->SetBrightness(0.2f+(rpmLight*rpmLightFactor));
     light->SetCastShadows(true);
     //   light->SetShadowBias(BiasParameters(0.00025f, 0.5f));
+
+    // Update focus objects
+    focusObjects_[0] = vehicle_->GetNode()->GetPosition(); // Vehicle
 
 
     int i = 0;
@@ -1883,6 +2002,13 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
         sprintf(str, "%f,%f", xRange, zRange);
         playerInfo.clear();
         playerInfo.append("Vehicle minmap pos (x,z) -> ").append(str);
+        debugText_[i]->SetText(playerInfo.c_str());
+
+        i++;
+
+        sprintf(str, "focusObjects[%d]=[%f,%f,%f]", focusIndex_, focusObjects_[focusIndex_].x_, focusObjects_[focusIndex_].y_, focusObjects_[focusIndex_].z_);
+        playerInfo.clear();
+        playerInfo.append("focusObject information pos (x,y,z) -> ").append(str);
         debugText_[i]->SetText(playerInfo.c_str());
 
         i++;
@@ -2056,6 +2182,15 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
         drawDebug_ = !drawDebug_;
     }
 
+    // Check for loading / saving the scene
+    if (input->GetKeyPress(KEY_K))
+    {
+        File saveFile(context_, GetSubsystem<FileSystem>()->GetProgramDir() + "Data/Scenes/MayaScape_Output.xml",
+                      FILE_WRITE);
+        scene_->SaveXML(saveFile);
+    }
+
+
     // stat
 #ifdef SHOW_STATS
     framesCount_++;
@@ -2184,14 +2319,18 @@ void MayaScape::HandlePostUpdate(StringHash eventType, VariantMap &eventData) {
         dir = dir * Quaternion(vehicle_->controls_.yaw_, Vector3::UP);
         dir = dir * Quaternion(vehicle_->controls_.pitch_, Vector3::RIGHT);
 
-        Vector3 vehiclePos = vehicleNode->GetPosition();
-        float curDist = (vehiclePos - targetCameraPos_).Length();
-
+        // Calculate ray based on focus object
+        float curDist = (focusObjects_[focusIndex_] - targetCameraPos_).Length();
         curDist = SpringDamping(curDist, CAMERA_DISTANCE, springVelocity_, damping, maxVel, timeStep);
-        targetCameraPos_ = vehiclePos - dir * Vector3(0.0f, 0.0f, curDist);
+
+        // Calculate position based on focus object
+        Vector3 targetPos = focusObjects_[focusIndex_] - dir * Vector3(0.0f, 0.0f, curDist);
+
+        // Set camera target position
+        targetCameraPos_ = targetPos;
 
         Vector3 cameraTargetPos = targetCameraPos_;
-        Vector3 cameraStartPos = vehiclePos;
+        Vector3 cameraStartPos = focusObjects_[focusIndex_];
 
         // Raycast camera against static objects (physics collision mask 2)
         // and move it closer to the vehicle if something in between
