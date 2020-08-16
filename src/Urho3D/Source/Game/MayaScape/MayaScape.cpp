@@ -512,9 +512,11 @@ void MayaScape::CreateScene() {
     int w = terrain_->GetMarkerMap()->GetWidth();
     int h = terrain_->GetMarkerMap()->GetHeight();
 
-    float trackPosX = ((float)trackX / (float)w)*mapSize/2;
-    float trackPosZ = ((float)trackY / (float)h)*mapSize/2;
 
+    float trackOffsetX = -mapSize/2;
+    float trackOffsetY = -mapSize/2;
+    float trackPosX = (((float)trackX / (float)w)*mapSize)+trackOffsetX;
+    float trackPosZ = (((float)trackY / (float)h)*mapSize)+trackOffsetY;
 
     // Convert from mini map to world position
 //    Vector3 shiftedRange = Vector3(trackPosX, 0, trackPosZ) - Vector3(mapSize/2, mapSize/2, mapSize/2);
@@ -566,9 +568,12 @@ void MayaScape::CreateScene() {
     for (unsigned i = 0; i < trees_.Size(); ++i)
     {
 
+
+        float treeOffsetX = -mapSize/2;
+        float treeOffsetY = -mapSize/2;
         // Convert marker position to world position for track
-        float treePosX = ((float)trees_[i].x_ / (float)terrain_->GetMarkerMap()->GetWidth())*mapSize;
-        float treePosZ = ((float)trees_[i].z_ / (float)terrain_->GetMarkerMap()->GetHeight())*mapSize;
+        float treePosX = (((float)trees_[i].x_ / (float)terrain_->GetMarkerMap()->GetWidth())*mapSize)+treeOffsetX;
+        float treePosZ = (((float)trees_[i].z_ / (float)terrain_->GetMarkerMap()->GetHeight())*mapSize)+treeOffsetY;
 
         Node* objectNode = scene_->CreateChild("Tree");
         Vector3 position(treePosX, 0.0f, treePosZ);
@@ -1739,7 +1744,7 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 
     if (input->GetKeyPress(KEY_R)) {
         // Place on track
-        vehicle_->GetNode()->SetPosition(Vector3(-814.0f+Random(-400.f, 400.0f), 500.0f, -595.0f+Random(-400.f, 400.0f)));
+        vehicle_->GetNode()->SetPosition(Vector3(raceTrack_->GetPosition().x_+Random(-mapSize/4, mapSize/4), 500.0f, raceTrack_->GetPosition().z_+Random(-mapSize/4, mapSize/4)));
     }
 
     if (input->GetKeyPress(KEY_O)) {
@@ -1748,7 +1753,7 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
         focusIndex_ = 0;
 
         // Place on track origin
-        vehicle_->GetNode()->SetPosition(Vector3(raceTrack_->GetPosition().x_-600.0f, 500.0f, raceTrack_->GetPosition().z_-300.0f));
+        vehicle_->GetNode()->SetPosition(Vector3(raceTrack_->GetPosition().x_, 500.0f, raceTrack_->GetPosition().z_));
     }
 
     // Toggle through focus objects
