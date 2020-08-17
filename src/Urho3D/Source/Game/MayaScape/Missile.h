@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Urho3D/Scene/LogicComponent.h>
+#include <Urho3D/Graphics/StaticModel.h>
 #include "GameObject.h"
 
 using namespace Urho3D;
@@ -29,6 +30,15 @@ private:
 	/// Time the node has lasted for
 	float duration_;
 
+    Vector3 force_;
+    Node* pNode_;
+    RigidBody* pRigidBody_;
+    CollisionShape* pCollisionShape_;
+    StaticModel* pObject_;
+
+//    float timer;
+    bool active_;
+
 public:
 	float GetThrust() { return thrust; }
 	void SetThrust(float m_thrust) { thrust = m_thrust; }
@@ -44,7 +54,6 @@ public:
 	void SetProducerid(int m_producerid) { producerid_ = m_producerid; }
 
 	/// Life-cycle function
-public:
 	/// Construct.
 	Missile(Context* context);
 	Missile(Context* context, SharedPtr<Node>producer);
@@ -58,7 +67,6 @@ public:
 	void Update(float timeStep);
 
 	/// Event handle functions
-public:
 	/// When the missile has detected some heatsource, add it into the tracking queue.
 	void HandleContactBegin(StringHash eventType, VariantMap& eventData);
 	/// When the missle lost the target

@@ -74,15 +74,15 @@ void Player::RegisterObject(Context* context)
 // This function is called only from the main program when initially creating
 // the vehicle, not on scene load
 //=============================================================================
-void Player::Init()
+void Player::Init(Node* node)
 {
     ResourceCache* cache = GetSubsystem<ResourceCache>();
 
-    Node* adjNode = GetNode()->CreateChild("AdjNode");
+    Node* adjNode = node->CreateChild("AdjNode");
     adjNode->SetRotation(Quaternion(0.0, 0.0, -90.0f));
 
     // Init vehicle
-    Node* vehicleNode = GetNode()->CreateChild("Vehicle");
+    Node* vehicleNode = node->CreateChild("Vehicle");
 
     // Place on track
     vehicleNode->SetPosition(Vector3(-814.0f+Random(-400.f, 400.0f), 400.0f, -595.0f+Random(-400.f, 400.0f)));
@@ -95,7 +95,7 @@ void Player::Init()
 //    focusObjects_.Push(vehicle_->GetNode()->GetPosition());
 
     // Create a directional light with cascaded shadow mapping
-    vehicleHeadLamp_ = GetNode()->CreateChild("DirectionalLight");
+    vehicleHeadLamp_ = node->CreateChild("DirectionalLight");
     vehicleHeadLamp_->SetPosition(Vector3(vehicleNode->GetPosition().x_, 100.0f, vehicleNode->GetPosition().z_));
     vehicleHeadLamp_->SetDirection(Vector3(vehicleNode->GetRotation().x_, vehicleNode->GetRotation().y_, vehicleNode->GetRotation().z_));
 

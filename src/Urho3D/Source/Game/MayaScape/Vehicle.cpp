@@ -140,6 +140,8 @@ Vehicle::Vehicle(Context* context)
     // sound
     playAccelerationSoundInAir_ = true;
 
+
+
 }
 
 //=============================================================================

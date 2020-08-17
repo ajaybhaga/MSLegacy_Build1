@@ -135,7 +135,7 @@ MayaScape::MayaScape(Context *context) :
     Vehicle::RegisterObject(context);
     RaycastVehicle::RegisterObject(context);
     WheelTrackModel::RegisterObject(context);
-
+    Missile::RegisterObject(context);
     Player::RegisterObject(context);
 
 
@@ -365,7 +365,7 @@ void MayaScape::CreatePlayer() {
 
     // Create the vehicle logic component
     player_ = playerNode->CreateComponent<Player>();
-    player_->Init();
+    player_->Init(scene_);
 
     // Store initial player position as focus
     focusObjects_.Push(player_->GetNode()->GetPosition());
