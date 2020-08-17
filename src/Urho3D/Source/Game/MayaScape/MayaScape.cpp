@@ -2028,8 +2028,9 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 
     // Update mini map for P1 position
 //    miniMapP1Sprite_->SetPosition(Vector2(776.0f-16.0f, 300.0f));
+    float startRotOffset = 180.0f;
     miniMapP1Sprite_->SetPosition(Vector2(miniMapP1X-xRange+0.0f, miniMapP1Y-zRange+0.0f));
-    miniMapP1Sprite_->SetRotation(vehicleRot_.YawAngle());
+    miniMapP1Sprite_->SetRotation(vehicleRot_.YawAngle()+startRotOffset);
 
     float wpOffsetX = -mapSize/2;
     float wpOffsetY = -mapSize/2;
