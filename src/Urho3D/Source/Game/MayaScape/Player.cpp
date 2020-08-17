@@ -233,7 +233,7 @@ void Player::FixedUpdate(float timeStep)
 }
 
 
-void Player::Fire()
+void Player::Fire(Vector3 target)
 {
     node_ = GetNode();
 	Scene* scene = GetScene();
@@ -270,7 +270,7 @@ void Player::Fire()
         Missile* newM = bullet0->CreateComponent<Missile>(LOCAL);
         Node* tgt = scene->CreateChild("missileTarget", LOCAL);
         //tgt->>SetPosition(0f,0f,0f);
-        tgt->SetPosition(Vector3(0,0,0));
+        tgt->SetPosition(target);
         newM->AddTarget(SharedPtr<Node>(tgt));
         // Assign the producer node
 //        n = node_;

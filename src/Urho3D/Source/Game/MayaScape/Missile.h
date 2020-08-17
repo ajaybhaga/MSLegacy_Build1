@@ -2,6 +2,7 @@
 
 #include <Urho3D/Scene/LogicComponent.h>
 #include <Urho3D/Graphics/StaticModel.h>
+#include <Urho3D/Graphics/ParticleEmitter.h>
 #include "GameObject.h"
 
 using namespace Urho3D;
@@ -20,10 +21,11 @@ private:
 	/// Boom Damage
 	float damage;
 	/// Missile Node
-	SharedPtr<Node>pNode_;
+	SharedPtr<Node> node_;
     SharedPtr<RigidBody> pRigidBody_;
     SharedPtr<CollisionShape> pCollisionShape_;
     SharedPtr<StaticModel> pObject_;
+    SharedPtr<ParticleEmitter> pParticleEmitter_;
 
 	/// Target Node
 	Vector<SharedPtr<Node>>targetnodes_;

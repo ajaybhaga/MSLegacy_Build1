@@ -1824,7 +1824,16 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 
         if (player_->GetLastFire() > 2.0f) {
             player_->SetLastFire(0);
-            player_->Fire();
+
+
+            float wpOffsetX = -mapSize/2;
+            float wpOffsetY = -mapSize/2;
+            // Convert marker position to world position for waypoint
+            float wpPosX = (((float)waypoints_[wpActiveIndex_].x_ / (float)terrain_->GetMarkerMap()->GetWidth())*mapSize)+wpOffsetX;
+            float wpPosZ = (((float)waypoints_[wpActiveIndex_].z_ / (float)terrain_->GetMarkerMap()->GetHeight())*mapSize)+wpOffsetY;
+
+
+            player_->Fire(Vector3(wpPosX, 0.0f, wpPosZ));
         }
 
         URHO3D_LOGINFOF("last fire=%f", player_->GetLastFire());

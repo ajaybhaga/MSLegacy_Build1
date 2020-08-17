@@ -229,7 +229,7 @@ public:
     SharedPtr<Node> GetVehicleHeadLamp() { return vehicleHeadLamp_; }
 
 	/// Fight
-	void Fire();
+    void Fire(Vector3 target);
 
 	/// Function
 	Player(Context* context);

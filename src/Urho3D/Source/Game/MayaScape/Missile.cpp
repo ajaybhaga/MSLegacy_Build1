@@ -15,7 +15,8 @@
 #include <Urho3D/Physics/Constraint.h>
 #include <Urho3D/Graphics/Material.h>
 #include <Urho3D/Graphics/Model.h>
-
+#include <Urho3D/Graphics/ParticleEmitter.h>
+#include <Urho3D/Graphics/ParticleEffect.h>
 #include <Urho3D/Urho2D/CollisionBox2D.h>
 #include <Urho3D/Urho2D/CollisionCircle2D.h>
 #include <Urho3D/Urho2D/PhysicsWorld2D.h>
@@ -41,7 +42,7 @@
 
 Missile::Missile(Context* context) : GameObject(context)
 {
-	SetThrust(2.0f);
+	SetThrust(140.0f);
 	SetDetectionRange(3.0f);
 	SetBoomRange(0.3f);
 	SetDamage(20.0f);
@@ -51,7 +52,7 @@ Missile::Missile(Context* context) : GameObject(context)
 Missile::Missile(Context* context, SharedPtr<Node>producer) : GameObject(context)
 {
 	SetProducer(producer);
-	SetThrust(2.0f);
+	SetThrust(140.0f);
 	SetDetectionRange(3.0f);
 	SetBoomRange(0.3f);
 	SetDamage(20.0f);
@@ -88,17 +89,17 @@ void Missile::Start()
 	SubscribeToEvent(node_, E_NODEENDCONTACT2D, URHO3D_HANDLER(Missile, HandleContactEnd));
 */
 
-    pNode_ = GetScene()->CreateChild("missile");
+    node_ = GetScene()->CreateChild("missile");
 //    pNode_->SetPosition(Vector3(producer_->GetPosition()));
-    pNode_->SetRotation(Quaternion(0.0f, 0.0f, 0.0f));
+    node_->SetRotation(Quaternion(0.0f, 0.0f, 0.0f));
 
 //    pObject_ = pNode->CreateComponent<StaticModel>();
  //   pObject->SetModel(pRes->GetResource<Model>("Models/Torus.mdl"));
   //  pObject->SetMaterial(pRes->GetResource<Material>("Materials/Stone.xml"));
    // pObject->SetCastShadows(true);
-    pCollisionShape_ = pNode_->CreateComponent<CollisionShape>();
-    pObject_ = pNode_->CreateComponent<StaticModel>();
-    pRigidBody_ = pNode_->CreateComponent<RigidBody>();
+    pCollisionShape_ = node_->CreateComponent<CollisionShape>();
+    pObject_ = node_->CreateComponent<StaticModel>();
+    pRigidBody_ = node_->CreateComponent<RigidBody>();
 
     pRigidBody_->SetMass(1.0f);
     pRigidBody_->SetUseGravity(false);
@@ -137,19 +138,28 @@ void Missile::Start()
   //  pCollisionShape_->GetNode()->SetScale(Vector3(0.3f, 0.3f, 0.3f));
     pCollisionShape_->GetNode()->SetScale(6.0f);
 
+    // particle emitter
+    Node *pNodeEmitter = GetScene()->CreateChild();
+//    pNodeEmitter->SetPosition( emitPos );
+    pParticleEmitter_ = pNodeEmitter->CreateComponent<ParticleEmitter>();
+    pParticleEmitter_->SetEffect( cache->GetResource<ParticleEffect>("Offroad/Particles/Dust.xml"));
+    pParticleEmitter_->SetEmitting( false );
+
+//    particleEmitterNodeList_.Push( pNodeEmitter );
+
+
+
 }
 
 void Missile::SnapToProducer() {
     if (producer_) {
-        pNode_->SetPosition(producer_->GetPosition());
-        GetNode()->SetPosition(pNode_->GetPosition());
-        pRigidBody_->SetPosition(pNode_->GetPosition());
+        node_->SetPosition(producer_->GetPosition());
+        GetNode()->SetPosition(node_->GetPosition());
+        pRigidBody_->SetPosition(node_->GetPosition());
         //		bullet0->GetComponent<RigidBody2D>()->SetLinearVelocity(Vector2(towards_.x_, towards_.y_).Normalized() * 10.0f);
-        URHO3D_LOGDEBUGF("Missile::SnapToProducer() -> %d, [%f,%f,%f]", id_, pNode_->GetPosition().x_,
-                         pNode_->GetPosition().y_,
-                         pNode_->GetPosition().z_);
-
-
+        URHO3D_LOGDEBUGF("Missile::SnapToProducer() -> %d, [%f,%f,%f]", id_, node_->GetPosition().x_,
+                         node_->GetPosition().y_,
+                         node_->GetPosition().z_);
     }
 }
 
@@ -160,37 +170,53 @@ void Missile::Update(float timeStep)
 
 void Missile::FixedUpdate(float timeStep)
 {
+
+    float MissileLife = 5.0f;
 	/// Update the duration
 	duration_ += timeStep;
 	// Clear the missiles 
-	if (duration_ > 0.3f) node_->Remove();
+	if (duration_ > MissileLife) node_->Remove();
 
 
+	Vector3 lockTarget;
 
     if (pRigidBody_) {
 
+        if (targetnodes_.Empty()) return;
+
+
+        pParticleEmitter_->GetNode()->SetPosition(node_->GetPosition());
+        pParticleEmitter_->SetEmitting(true);
+
         // Set Rotation
-        Vector3 velocity = pRigidBody_->GetLinearVelocity();
+        Vector3 velocity = Vector3(pRigidBody_->GetLinearVelocity());
+      //  node_->
 //edit
         //	node_->SetWorldRotation(Quaternion(Vector3::UP, velocity));
         // Apply thrust to the missile
-        pRigidBody_->ApplyForce(velocity.Normalized() * thrust);
+//        pRigidBody_->ApplyForce(velocity.Normalized() * thrust);
+
+        // Set lock target to vehicle
+        lockTarget = targetnodes_[0]->GetPosition();
+
+        // Calculate the force
+        Vector3 force = lockTarget - node_->GetPosition();
+        force.Normalize();
+        // Track it!
+        pRigidBody_->ApplyForce(force * thrust);
+//            pRigidBody_->ApplyForce(velocity.Normalized()*thrust);
+
         // Tracking targets
-        if (targetnodes_.Empty()) return;
+
         for (int i = 0; i < targetnodes_.Size(); i++) {
             //Toolkit::Print(targetnodes_[i]->GetName());
 
 
             //HeatSource *heatsource = targetnodes_[i]->GetComponent<HeatSource>();
             //float attraction = heatsource->GetAttraction();
-            float attraction = 1.0f;
+            float attraction = 10.0f;
 
-            // Calculate the force
-            Vector3 force = targetnodes_[i]->GetPosition() - node_->GetPosition();
-            force.Normalize();
-            // Track it!
-            pRigidBody_->ApplyForce(force * attraction);
-            pRigidBody_->ApplyForce(velocity.Normalized()*thrust);
+ //           pRigidBody_->ApplyForce(velocity.Normalized()*100.0f);
 
 
 //            URHO3D_LOGDEBUGF("Missile::FixedUpdate(): pRigidBody_->ApplyForce -> [%s, %f,%f]", attraction, force);
