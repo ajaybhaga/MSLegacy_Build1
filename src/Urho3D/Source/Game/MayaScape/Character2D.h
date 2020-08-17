@@ -25,25 +25,12 @@
 #include <Urho3D/Input/Controls.h>
 #include <Urho3D/Scene/LogicComponent.h>
 #include <Urho3D/Graphics/BillboardSet.h>
+#include "Player.h"
 //#include "MayaScape/Vehicle.h"
 
 // All Urho3D classes reside in namespace Urho3D
 using namespace Urho3D;
 
-const float MOVE_SPEED = 30.0f;
-const float CHAR_YAW_SENSITIVITY = 0.1f;
-const int LIFES = 3;
-
-struct PlayerState {
-    bool onGround;
-    bool jump;
-    float lastJump;
-    bool walk;
-    float lastWalk;
-    bool kick;
-    float lastKick;
-    Vector3 moveDir;
-};
 
 /// Character2D component controlling Imp behavior.
 class Character2D : public LogicComponent

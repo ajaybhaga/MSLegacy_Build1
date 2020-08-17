@@ -26,7 +26,10 @@
 #include "Game.h"
 #include "Sample2D.h"
 #include "Vehicle.h"
+#include "Player.h"
 
+
+class Player;
 class Character2D;
 class Sample2D;
 class EvolutionManager;
@@ -77,8 +80,8 @@ public:
 private:
     /// Construct the scene content.
     void CreateScene();
-
-    void CreateVehicle();
+    void CreatePlayer();
+    void SetCameraTarget();
 
     /// Subscribe to application-wide logic update events.
     void SubscribeToEvents();
@@ -109,9 +112,15 @@ private:
     // Display Genetic Algorithm Evolution Manager statistics
     void ShowEvolutionManagerStats();
 
-    /// The controllable character component.
-    WeakPtr<Character2D> player_;
-    WeakPtr<Character2D> agents_[MAX_AGENTS];
+
+
+        /// The controllable character component.
+//    WeakPtr<Character2D> player_;
+//    WeakPtr<Character2D> agents_[MAX_AGENTS];
+
+    SharedPtr<Player> player_; // This player
+    SharedPtr<Player> agents_[MAX_AGENTS]; // Agents
+
 
     WeakPtr<Terrain> terrain_;
     Vector<Vector3> trees_;
@@ -162,19 +171,12 @@ private:
     /// Steering wheel
     SharedPtr<Sprite> steerWheelSprite_;
 
-
-
     /// Particle pool
     ParticlePool particlePool_[20];
 
     #define NUM_DEBUG_FIELDS 8
     // Debug text
     Text* debugText_[NUM_DEBUG_FIELDS];
-
-
-    /// The controllable vehicle component.
-    WeakPtr<Vehicle> vehicle_;
-    WeakPtr<Node> vehicleHeadLamp_;
 
     WeakPtr<Node> raceTrack_;
     WeakPtr<CollisionShape> trackColShape_;

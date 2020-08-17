@@ -23,6 +23,9 @@
 
 #include <Urho3D/Input/Controls.h>
 #include <Urho3D/Scene/LogicComponent.h>
+#include <Urho3D/Audio/SoundSource3D.h>
+#include <Urho3D/Audio/Sound.h>
+
 #include "RaycastVehicle.h"
 
 //#include "Character2D.h"
@@ -43,11 +46,6 @@ class RaycastVehicle;
 
 //=============================================================================
 //=============================================================================
-const int CTRL_FORWARD = 1;
-const int CTRL_BACK = 2;
-const int CTRL_LEFT = 4;
-const int CTRL_RIGHT = 8;
-const int CTRL_SPACE = 16;
 
 const float YAW_SENSITIVITY = 0.1f;
 const float ENGINE_POWER = 10.0f;

@@ -44,9 +44,11 @@
 #include "Vehicle.h"
 
 #include "WheelTrackModel.h"
+#include "types.h"
 
 #include <SDL/SDL_log.h>
 #include <Urho3D/DebugNew.h>
+
 
 //=============================================================================
 //=============================================================================

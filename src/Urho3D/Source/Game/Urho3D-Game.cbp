@@ -366,6 +366,21 @@
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/positiondef.h">
 			<Option target="MayaScape"/>
 		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/projectile/BUFFList.h">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/projectile/GameObject.h">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/projectile/Missile.cpp">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/projectile/Missile.h">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/projectile/Toolkit.h">
+			<Option target="MayaScape"/>
+		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/shared_libs.h">
 			<Option target="MayaScape"/>
 		</Unit>
