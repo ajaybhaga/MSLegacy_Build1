@@ -118,6 +118,8 @@
 #include "shared_libs.h"
 #include "types.h"
 #include "Player.h"
+#include "Bullet.h"
+#include "AP.h"
 
 float mapSize = 3000.0f;
 float miniMapWidth = 256.0f;
@@ -136,6 +138,8 @@ MayaScape::MayaScape(Context *context) :
     RaycastVehicle::RegisterObject(context);
     WheelTrackModel::RegisterObject(context);
     Missile::RegisterObject(context);
+    Bullet::RegisterObject(context);
+    AP::RegisterObject(context);
     Player::RegisterObject(context);
 
 
@@ -365,7 +369,7 @@ void MayaScape::CreatePlayer() {
 
     // Create the vehicle logic component
     player_ = playerNode->CreateComponent<Player>();
-    player_->Init(scene_);
+    player_->Init();
 
     // Store initial player position as focus
     focusObjects_.Push(player_->GetNode()->GetPosition());
@@ -2210,11 +2214,15 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
             vehicle_->controls_.Set(CTRL_RIGHT, input->GetKeyDown(KEY_D));
             vehicle_->controls_.Set(CTRL_SPACE, input->GetKeyDown(KEY_SPACE));
 */
+
             player_->GetVehicle()->controls_.Set(CTRL_FORWARD, input->GetKeyDown(KEY_W) | player_->GetVehicle()->controls_.IsDown(BUTTON_B));
             player_->GetVehicle()->controls_.Set(CTRL_BACK, input->GetKeyDown(KEY_S) | player_->GetVehicle()->controls_.IsDown(BUTTON_DPAD_DOWN));
             player_->GetVehicle()->controls_.Set(CTRL_LEFT, input->GetKeyDown(KEY_A) | player_->GetVehicle()->controls_.IsDown(BUTTON_DPAD_LEFT));
             player_->GetVehicle()->controls_.Set(CTRL_RIGHT, input->GetKeyDown(KEY_D) | player_->GetVehicle()->controls_.IsDown(BUTTON_DPAD_RIGHT));
             player_->GetVehicle()->controls_.Set(CTRL_SPACE, input->GetKeyDown(KEY_SPACE) | player_->GetVehicle()->controls_.IsDown(BUTTON_X));
+
+            // Set player to vehicle control
+            player_->SetControls(player_->GetVehicle()->controls_);
 
             // Add yaw & pitch from the mouse motion or touch input. Used only for the camera, does not affect motion
             if (touchEnabled_)

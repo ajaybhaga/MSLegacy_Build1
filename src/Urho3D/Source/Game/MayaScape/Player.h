@@ -177,7 +177,7 @@ private:
 
 	///Life-cycle functions
 public:
-    void Init(Node *node);
+    void Init();
 
     void Start();
 	void Update(float timeStep);
