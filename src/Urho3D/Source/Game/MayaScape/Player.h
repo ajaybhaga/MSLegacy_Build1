@@ -190,7 +190,7 @@ public:
 	void SetLife(int m_life) { life_ = m_life; }
 
 	float GetLastFire() { return lastFire_; }
-	void SetLastFire(float lastFire_) { lastFire_; };
+	void SetLastFire(float lastFire) { lastFire_ = lastFire; };
 
 	float GetMass() { return mass_; }
 	void SetMass(float m_mass) { mass_ = m_mass; }

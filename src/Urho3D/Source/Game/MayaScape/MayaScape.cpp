@@ -124,7 +124,7 @@
 float mapSize = 3000.0f;
 float miniMapWidth = 256.0f;
 float miniMapHeight = 256.0f;
-
+#define WaitTimeNextFire 2.0f
 
 URHO3D_DEFINE_APPLICATION_MAIN(MayaScape)
 
@@ -1750,36 +1750,41 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 
     if (player_) {
 
-    /*
-        // Determine zoom by getting average distance from all players
-        for (int i = 0; i < EvolutionManager::getInstance()->getAgents().size(); i++) {
+        GameController *gameController = GetSubsystem<GameController>();
+        player_->GetVehicle()->controls_.buttons_ = 0;
+        gameController->UpdateControlInputs(player_->GetVehicle()->controls_);
 
-            // Update player location for AI
-            agents_[i]->playerPos_ = player_->GetNode()->GetPosition();
 
-            Vector3 p1 = player_->GetNode()->GetPosition();
-            p1.z_ = 0;
-            Vector3 p2 = agents_[i]->GetNode()->GetPosition();
-            p2.z_ = 0;
-            float delta = p1.DistanceToPoint(p2);
-            deltaSum += delta;
-        }
+        /*
+            // Determine zoom by getting average distance from all players
+            for (int i = 0; i < EvolutionManager::getInstance()->getAgents().size(); i++) {
 
-        float avgDelta = ((float) deltaSum) / ((float) EvolutionManager::getInstance()->getAgents().size());
-        float factor;
+                // Update player location for AI
+                agents_[i]->playerPos_ = player_->GetNode()->GetPosition();
 
-        if (avgDelta > 5.0f) {
-            factor = 1.0f - avgDelta * 0.02f;
-        } else {
-            factor = 1.0f + avgDelta * 0.02f;
-        }
+                Vector3 p1 = player_->GetNode()->GetPosition();
+                p1.z_ = 0;
+                Vector3 p2 = agents_[i]->GetNode()->GetPosition();
+                p2.z_ = 0;
+                float delta = p1.DistanceToPoint(p2);
+                deltaSum += delta;
+            }
 
-        factor = 1.0f;
+            float avgDelta = ((float) deltaSum) / ((float) EvolutionManager::getInstance()->getAgents().size());
+            float factor;
 
-        zoom_ = Clamp(zoom_ * factor, CAMERA_MIN_DIST, CAMERA_MAX_DIST);
-        cameraNode_->GetComponent<Camera>()->SetZoom(zoom_);
+            if (avgDelta > 5.0f) {
+                factor = 1.0f - avgDelta * 0.02f;
+            } else {
+                factor = 1.0f + avgDelta * 0.02f;
+            }
 
-   */
+            factor = 1.0f;
+
+            zoom_ = Clamp(zoom_ * factor, CAMERA_MIN_DIST, CAMERA_MAX_DIST);
+            cameraNode_->GetComponent<Camera>()->SetZoom(zoom_);
+
+       */
     }
 
     //    URHO3D_LOGINFOF("delta=%f", delta);
@@ -1820,11 +1825,10 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 
     }
 //    player_->GetVehicle()->controls_
-    if (player_->GetVehicle()->controls_.buttons_ & CONTROLLER_BUTTON_Y) {
+    if (player_->GetVehicle()->controls_.IsDown(BUTTON_Y)) {
 
-        if (player_->GetLastFire() > 2.0f) {
+        if (player_->GetLastFire() > WaitTimeNextFire) {
             player_->SetLastFire(0);
-
 
             float wpOffsetX = -mapSize/2;
             float wpOffsetY = -mapSize/2;
@@ -1832,11 +1836,11 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
             float wpPosX = (((float)waypoints_[wpActiveIndex_].x_ / (float)terrain_->GetMarkerMap()->GetWidth())*mapSize)+wpOffsetX;
             float wpPosZ = (((float)waypoints_[wpActiveIndex_].z_ / (float)terrain_->GetMarkerMap()->GetHeight())*mapSize)+wpOffsetY;
 
-
+            URHO3D_LOGINFOF("Fire=%f", player_->GetLastFire());
             player_->Fire(Vector3(wpPosX, 0.0f, wpPosZ));
+        } else {
+            URHO3D_LOGINFOF("Waiting last fire=%f", player_->GetLastFire());
         }
-
-        URHO3D_LOGINFOF("last fire=%f", player_->GetLastFire());
 
     }
 
@@ -1874,8 +1878,6 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
     if (input->GetKeyPress(KEY_F7))
         ReloadScene(false);
 
-    GameController *gameController = GetSubsystem<GameController>();
-    gameController->UpdateControlInputs(player_->GetVehicle()->controls_);
 
     if (player_) {
 
@@ -2234,11 +2236,14 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
             vehicle_->controls_.Set(CTRL_SPACE, input->GetKeyDown(KEY_SPACE));
 */
 
-            player_->GetVehicle()->controls_.Set(CTRL_FORWARD, input->GetKeyDown(KEY_W) | player_->GetVehicle()->controls_.IsDown(BUTTON_B));
+
+//            player_->GetVehicle()->controls_.Set(CTRL_FORWARD, input->GetKeyDown(KEY_W) | player_->GetVehicle()->controls_.IsDown(BUTTON_B));
             player_->GetVehicle()->controls_.Set(CTRL_BACK, input->GetKeyDown(KEY_S) | player_->GetVehicle()->controls_.IsDown(BUTTON_DPAD_DOWN));
             player_->GetVehicle()->controls_.Set(CTRL_LEFT, input->GetKeyDown(KEY_A) | player_->GetVehicle()->controls_.IsDown(BUTTON_DPAD_LEFT));
             player_->GetVehicle()->controls_.Set(CTRL_RIGHT, input->GetKeyDown(KEY_D) | player_->GetVehicle()->controls_.IsDown(BUTTON_DPAD_RIGHT));
-            player_->GetVehicle()->controls_.Set(CTRL_E, input->GetKeyDown(KEY_E) | player_->GetVehicle()->controls_.IsDown(BUTTON_X));
+//            player_->GetVehicle()->controls_.Set(CTRL_SPACE, input->GetKeyDown(KEY_B) | player_->GetVehicle()->controls_.IsDown(BUTTON_B));
+
+//            player_->GetVehicle()->controls_.Set(CTRL_E, input->GetKeyDown(KEY_E) | player_->GetVehicle()->controls_.IsDown(CONTROLLER_BUTTON_A));
 
             // Set player to vehicle control
             player_->SetControls(player_->GetVehicle()->controls_);
