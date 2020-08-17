@@ -11,6 +11,7 @@
 #include <limits.h>
 #include <ctype.h>
 #include <stdint.h>
+#include <Urho3D/Math/Vector3.h>
 
 
 /// The number of time units per second of the game clock.
@@ -57,6 +58,7 @@ typedef uint16_t PlayerMask;
  *	Global Definitions (CONSTANTS)
  */
 /***************************************************************************/
+
 #define LONG_WAY			(1<<15)
 #define BUTTON_DEPTH		2000 // will be stretched to 16000
 

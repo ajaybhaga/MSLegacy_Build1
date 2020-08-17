@@ -33,6 +33,13 @@ class EvolutionManager;
 
 #define MAX_AGENTS 1024 // Set max limit for agents (used for storage)
 
+// Marker Map Tokens
+using namespace Urho3D;
+Vector3 bkgMarkerToken = Vector3(0.5, 1, 0.5); // Black
+Vector3 trackMarkerToken = Vector3(0.500000059604645,1,0.643137276172638); // #494949
+Vector3 treeMarkerToken = Vector3(0.5, 1, 0.594117641448975); // #303030
+Vector3 waypointToken = Vector3(0.5,1.00000035762787,0.927451014518738); // #dadada
+
 struct ParticlePool {
     bool used; // Is particle emitter used?
     int usedBy; // Node id using particle emitter
@@ -108,6 +115,11 @@ private:
 
     WeakPtr<Terrain> terrain_;
     Vector<Vector3> trees_;
+
+    Vector<Vector3> waypoints_;
+    unsigned int wpStartIndex_;
+    unsigned int wpActiveIndex_;
+
     Vector<Vector3> focusObjects_;
     unsigned int focusIndex_;
 
@@ -138,6 +150,10 @@ private:
 
     /// Mini-map P1 sprite.
     SharedPtr<Sprite> miniMapP1Sprite_;
+
+    /// Mini-map waypoint sprite.
+    SharedPtr<Sprite> miniMapWPSprite_;
+
     /// Mini-map Bkg sprite.
     SharedPtr<Sprite> miniMapBkgSprite_;
     /// Marker map Bkg sprite.

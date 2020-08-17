@@ -468,9 +468,6 @@ void MayaScape::CreateScene() {
             Vector3 hsl_ = terrain_->GetMarkerMap()->GetPixel(k, j).ToHSL();
             //URHO3D_LOGINFOF("terrain marker map[x,y]=[%f,%f,%f]", j, k, hsl_.x_, hsl_.y_, hsl_.z_);
 
-            Vector3 bkgMarkerToken = Vector3(0.5, 1, 0.5); // Black
-            Vector3 trackMarkerToken = Vector3(0.500000059604645,1,0.643137276172638); // #494949
-            Vector3 treeMarkerToken = Vector3(0.5, 1, 0.594117641448975); // #303030
 
             if (hsl_ == bkgMarkerToken)
                 continue;
@@ -480,6 +477,8 @@ void MayaScape::CreateScene() {
             } else if (hsl_ == trackMarkerToken) {
                 trackX = j;
                 trackY = k;
+            } else if (hsl_ == waypointToken) {
+                waypoints_.Push((Vector3((float)j, 0.0f, (float)k)));
             } else {
                 // Store track marker
                 URHO3D_LOGINFOF("***** UNKNOWN terrain marker map[%d,%d]=[%f,%f,%f]", j, k, hsl_.x_, hsl_.y_, hsl_.z_);
@@ -497,7 +496,7 @@ void MayaScape::CreateScene() {
     }
 
     URHO3D_LOGINFOF("***** TREE COUNT: [%d]", trees_.Size());
-
+    URHO3D_LOGINFOF("***** WAYPOINT COUNT: [%d]", waypoints_.Size());
 
     RigidBody* body = terrainNode->CreateComponent<RigidBody>();
     body->SetCollisionLayer(2); // Use layer bitmask 2 for static geometry
@@ -564,11 +563,9 @@ void MayaScape::CreateScene() {
 
     URHO3D_LOGINFOF("-----> SET RACE TRACK TO location in world space [%f,%f,%f]", trackPosX, 0.0f, trackPosZ);
 
-    //
+    // Place trees
     for (unsigned i = 0; i < trees_.Size(); ++i)
     {
-
-
         float treeOffsetX = -mapSize/2;
         float treeOffsetY = -mapSize/2;
         // Convert marker position to world position for track
@@ -614,6 +611,46 @@ void MayaScape::CreateScene() {
                 object->SetModel(cache->GetResource<Model>("Models/AssetPack/tree-lime.mdl"));
                 break;
         }
+
+        //       object->SetMaterial(cache->GetResource<Material>("Materials/LOWPOLY_COLORS.xml")
+        object->SetMaterial(cache->GetResource<Material>("Materials/LOWPOLY-COLORS.xml"));
+        object->SetCastShadows(true);
+
+        auto* body = adjNode->CreateComponent<RigidBody>();
+        body->SetCollisionLayer(2);
+        auto* shape = objectNode->CreateComponent<CollisionShape>();
+        shape->SetTriangleMesh(object->GetModel(), 0);
+    }
+
+    // Place waypoints
+
+    // Store focusObjects index for waypoint reference
+    wpStartIndex_ = focusObjects_.Size()+1;
+    for (unsigned i = 0; i < waypoints_.Size(); ++i)
+    {
+        float wpOffsetX = -mapSize/2;
+        float wpOffsetY = -mapSize/2;
+        // Convert marker position to world position for track
+        float wpPosX = (((float)waypoints_[i].x_ / (float)terrain_->GetMarkerMap()->GetWidth())*mapSize)+wpOffsetX;
+        float wpPosZ = (((float)waypoints_[i].z_ / (float)terrain_->GetMarkerMap()->GetHeight())*mapSize)+wpOffsetY;
+
+        Node* objectNode = scene_->CreateChild("Waypoint");
+        Vector3 position(wpPosX, 0.0f, wpPosZ);
+        position.y_ = terrain_->GetHeight(position) - 0.1f;
+        objectNode->SetPosition(position);
+
+        // Store tree position as focus
+        focusObjects_.Push(position);
+
+        // Create a rotation quaternion from up vector to terrain normal
+        objectNode->SetRotation(Quaternion(Vector3::UP, terrain_->GetNormal(position)));
+        Node* adjNode = objectNode->CreateChild("AdjNode");
+        adjNode->SetRotation(Quaternion(0.0, 0.0, -90.0f));
+
+        objectNode->SetScale(20.0f);
+
+        auto* object = adjNode->CreateComponent<StaticModel>();
+         object->SetModel(cache->GetResource<Model>("Models/AssetPack/castle-flag.mdl"));
 
         //       object->SetMaterial(cache->GetResource<Material>("Materials/LOWPOLY_COLORS.xml")
         object->SetMaterial(cache->GetResource<Material>("Materials/LOWPOLY-COLORS.xml"));
@@ -727,6 +764,11 @@ void MayaScape::CreateScene() {
     if (!miniMapP1Texture)
         return;
 
+    // Get mini map waypoint texture
+    Texture2D *miniMapWPTexture = cache->GetResource<Texture2D>("Textures/minimap-wp.png");
+    if (!miniMapWPTexture)
+        return;
+
     // Get mini map background texture
     Texture2D *miniMapBkgTexture = cache->GetResource<Texture2D>("Textures/minimap-bk.png");
     if (!miniMapBkgTexture)
@@ -755,33 +797,27 @@ void MayaScape::CreateScene() {
     // Create sprite and add to the UI layout
     powerBarP1Sprite_ = ui->GetRoot()->CreateChild<Sprite>();
     powerBarBkgP1Sprite_ = ui->GetRoot()->CreateChild<Sprite>();
-
     rpmBarP1Sprite_ = ui->GetRoot()->CreateChild<Sprite>();
     rpmBarBkgP1Sprite_ = ui->GetRoot()->CreateChild<Sprite>();
-
     velBarP1Sprite_ = ui->GetRoot()->CreateChild<Sprite>();
     velBarBkgP1Sprite_ = ui->GetRoot()->CreateChild<Sprite>();
-
     miniMapP1Sprite_ = ui->GetRoot()->CreateChild<Sprite>();
+    miniMapWPSprite_ = ui->GetRoot()->CreateChild<Sprite>();
     miniMapBkgSprite_ = ui->GetRoot()->CreateChild<Sprite>();
     markerMapBkgSprite_ = ui->GetRoot()->CreateChild<Sprite>();
-
     steerWheelSprite_ = ui->GetRoot()->CreateChild<Sprite>();
 
     // Set sprite texture
     powerBarP1Sprite_->SetTexture(powerBarTexture);
     powerBarBkgP1Sprite_->SetTexture(powerBarBkgTexture);
-
     rpmBarP1Sprite_->SetTexture(rpmBarTexture);
     rpmBarBkgP1Sprite_->SetTexture(rpmBarBkgTexture);
-
     velBarP1Sprite_->SetTexture(velBarTexture);
     velBarBkgP1Sprite_->SetTexture(rpmBarBkgTexture);
-
     miniMapP1Sprite_->SetTexture(miniMapP1Texture);
+    miniMapWPSprite_->SetTexture(miniMapWPTexture);
     miniMapBkgSprite_->SetTexture(miniMapBkgTexture);
     markerMapBkgSprite_->SetTexture(markerMapBkgTexture);
-
     steerWheelSprite_->SetTexture(steerWheelTexture);
 
     float textOverlap = 245.0f;
@@ -906,6 +942,25 @@ void MayaScape::CreateScene() {
     // Set a low priority so that other UI elements can be drawn on top
     miniMapP1Sprite_->SetPriority(-100);
 
+
+    textureWidth = miniMapWPTexture->GetWidth();
+    textureHeight = miniMapWPTexture->GetHeight();
+
+    //   float miniMapP1X = 776.0f+45.0f;
+    //   float miniMapP1Y = 300.0f-15.0f;
+
+    miniMapWPSprite_->SetScale(0.4);//256.0f / textureWidth);
+    miniMapWPSprite_->SetSize(textureWidth, textureHeight);
+    miniMapWPSprite_->SetHotSpot(textureWidth/2, textureHeight/2);
+    miniMapWPSprite_->SetAlignment(HA_LEFT, VA_TOP);
+//    miniMapP1Sprite_->SetPosition(Vector2(miniMapP1X-16.0f, miniMapP1Y));
+//    miniMapP1Sprite_->SetPosition(Vector2(miniMapP1X+256.0f-16.0f, miniMapP1Y));
+
+    miniMapWPSprite_->SetOpacity(0.9f);
+    // Set a low priority so that other UI elements can be drawn on top
+    miniMapWPSprite_->SetPriority(-100);
+
+
     textureWidth = miniMapBkgTexture->GetWidth();
     textureHeight = miniMapBkgTexture->GetHeight();
 
@@ -922,6 +977,7 @@ void MayaScape::CreateScene() {
     miniMapBkgSprite_->SetPriority(-100);
 
     miniMapP1Sprite_->SetVisible(true);
+    miniMapWPSprite_->SetVisible(true);
     miniMapBkgSprite_->SetVisible(true);
 
 
@@ -1756,6 +1812,20 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
         vehicle_->GetNode()->SetPosition(Vector3(raceTrack_->GetPosition().x_, 500.0f, raceTrack_->GetPosition().z_));
     }
 
+
+    if (input->GetKeyPress(KEY_R)) {
+        wpActiveIndex_ = 0;
+    }
+
+    if (input->GetKeyPress(KEY_N)) {
+        wpActiveIndex_++;
+
+        wpActiveIndex_ = wpActiveIndex_ % waypoints_.Size();
+        // Place on track origin
+//        vehicle_->GetNode()->SetPosition(Vector3(raceTrack_->GetPosition().x_, 500.0f, raceTrack_->GetPosition().z_));
+    }
+
+
     // Toggle through focus objects
     if (input->GetKeyPress(KEY_T)) {
 
@@ -1952,6 +2022,24 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 //    miniMapP1Sprite_->SetPosition(Vector2(776.0f-16.0f, 300.0f));
     miniMapP1Sprite_->SetPosition(Vector2(miniMapP1X-xRange+0.0f, miniMapP1Y-zRange+0.0f));
     miniMapP1Sprite_->SetRotation(vehicleRot_.YawAngle());
+
+    // Calculate mini map position for waypoint
+    shiftedRange = waypoints_[wpActiveIndex_] + Vector3(mapSize/2, mapSize/2, mapSize/2);
+
+    // 1600+1600
+    xRange = (shiftedRange.x_/mapSize) * miniMapWidth;
+    zRange = (shiftedRange.z_/mapSize) * miniMapHeight;
+
+    float miniMapWPX = miniMapBkgSprite_->GetPosition().x_;
+    float miniMapWPY = miniMapBkgSprite_->GetPosition().y_;
+
+
+    // Update mini map for WP position
+//    miniMapP1Sprite_->SetPosition(Vector2(776.0f-16.0f, 300.0f));
+    miniMapWPSprite_->SetPosition(Vector2(miniMapWPX-xRange, miniMapWPY-zRange));
+//    miniMapWPSprite_->SetRotation(vehicleRot_.YawAngle());
+
+
 
 
     float steering = vehicle_->GetSteering();
