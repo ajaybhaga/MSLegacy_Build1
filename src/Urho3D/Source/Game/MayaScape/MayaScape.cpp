@@ -1819,8 +1819,8 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 //        vehicle_->GetNode()->SetPosition(Vector3(-mapSize/2, 200.0f, -mapSize/2));
 
     }
-
-    if (input->GetKeyPress(KEY_B)) {
+//    player_->GetVehicle()->controls_
+    if (player_->GetVehicle()->controls_.buttons_ & CONTROLLER_BUTTON_Y) {
 
         if (player_->GetLastFire() > 2.0f) {
             player_->SetLastFire(0);
@@ -2238,10 +2238,11 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
             player_->GetVehicle()->controls_.Set(CTRL_BACK, input->GetKeyDown(KEY_S) | player_->GetVehicle()->controls_.IsDown(BUTTON_DPAD_DOWN));
             player_->GetVehicle()->controls_.Set(CTRL_LEFT, input->GetKeyDown(KEY_A) | player_->GetVehicle()->controls_.IsDown(BUTTON_DPAD_LEFT));
             player_->GetVehicle()->controls_.Set(CTRL_RIGHT, input->GetKeyDown(KEY_D) | player_->GetVehicle()->controls_.IsDown(BUTTON_DPAD_RIGHT));
-            player_->GetVehicle()->controls_.Set(CTRL_SPACE, input->GetKeyDown(KEY_SPACE) | player_->GetVehicle()->controls_.IsDown(BUTTON_X));
+            player_->GetVehicle()->controls_.Set(CTRL_E, input->GetKeyDown(KEY_E) | player_->GetVehicle()->controls_.IsDown(BUTTON_X));
 
             // Set player to vehicle control
             player_->SetControls(player_->GetVehicle()->controls_);
+
 
             // Add yaw & pitch from the mouse motion or touch input. Used only for the camera, does not affect motion
             if (touchEnabled_)
@@ -2271,7 +2272,7 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 
         }
         else
-            player_->GetVehicle()->controls_.Set(CTRL_FORWARD | CTRL_BACK | CTRL_LEFT | CTRL_RIGHT, false);
+            player_->GetVehicle()->controls_.Set(CTRL_FORWARD | CTRL_BACK | CTRL_LEFT | CTRL_RIGHT | CTRL_SPACE, false);
 
         // speed
         char buff[20];
