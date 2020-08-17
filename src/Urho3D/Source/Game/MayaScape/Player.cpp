@@ -64,7 +64,9 @@ Player::Player(Context* context) : GameObject(context)
 	///4test
 	nettest1209_ = 0;
 
-    bulletType_ = "AP";
+    bulletType_ = "CB";
+    lastFire_ = 0;
+//    bulletType_ = "AP";
 }
 
 void Player::RegisterObject(Context* context)
@@ -177,8 +179,11 @@ void Player::Update(float timeStep)
 }
 
 void Player::FixedUpdate(float timeStep)
-{		
+{
+    lastFire_ += timeStep;
+
 	/// Clients should not update the component on its own
+	controls_ = vehicle_->controls_;
 
 
 	Node* node = GetNode();
@@ -214,10 +219,8 @@ void Player::FixedUpdate(float timeStep)
 		// The towards vector according to the angle
 		towards_ = Vector3(cos(angle * PI / 180.0f), sin(angle * PI / 180.0f), 0.0f);
 	}
-	/// 4Test
-	if (controls_.IsDown(CTRL_SPACE)) {
-		Fire();
-	}
+
+
 
 	///Rotate the Player
 	//node->SetRotation(Quaternion(Vector3(0.0f, 1.0f, 0.0f), towards_));
@@ -232,25 +235,57 @@ void Player::FixedUpdate(float timeStep)
 
 void Player::Fire()
 {
-	Node* node = GetNode();
+    node_ = GetNode();
 	Scene* scene = GetScene();
 
     URHO3D_LOGDEBUG("Player::Fire()");
 
-
     // 4test
 	// Only for test
 	if (bulletType_ == "AP") {
+/*
 		testcnt_++;
 		Node* bullet0 = scene->CreateChild("bullet", REPLICATED);
 		bullet0->CreateComponent<AP>(LOCAL);
 		// Set the ownership of the bullet to the Player
-		bullet0->GetComponent<AP>()->SetProducer(node);
+	//	bullet0->GetComponent<AP>()->SetProducer(node);
 		// Set the position and rotation of the bullet
 		bullet0->SetWorldPosition(node->GetPosition() + towards_.Normalized()*0.2f);
 		bullet0->SetWorldRotation(Quaternion(Vector3::UP, towards_));
 //		bullet0->GetComponent<RigidBody2D>()->SetLinearVelocity(Vector2(towards_.x_, towards_.y_).Normalized() * 10.0f);
-        URHO3D_LOGDEBUGF("Player::Fire() -> %d", testcnt_);
+        URHO3D_LOGDEBUGF("Player::Fire() -> %d", testcnt_);*/
+    } else {
+	    //
+        // bulletType_ = "CB"
+        testcnt_++;
+
+        /*
+        if (testcnt_ > 4) {
+            return;
+        }*/
+
+
+        SharedPtr<Node> n;
+        Node* bullet0 = scene->CreateChild("bullet", REPLICATED);
+        Missile* newM = bullet0->CreateComponent<Missile>(LOCAL);
+        Node* tgt = scene->CreateChild("missileTarget", LOCAL);
+        //tgt->>SetPosition(0f,0f,0f);
+        tgt->SetPosition(Vector3(0,0,0));
+        newM->AddTarget(SharedPtr<Node>(tgt));
+        // Assign the producer node
+//        n = node_;
+        // Set the ownership of the bullet to the Player
+        bullet0->GetComponent<Missile>()->SetProducer(SharedPtr<Node>(vehicle_->GetNode()));
+        newM->SnapToProducer();
+        // Set the position and rotation of the bullet
+//        bullet0->SetWorldPosition(node_->GetPosition() + towards_.Normalized()*0.2f);
+ //       bullet0->SetWorldRotation(Quaternion(Vector3::UP, towards_));
+//		bullet0->GetComponent<RigidBody2D>()->SetLinearVelocity(Vector2(towards_.x_, towards_.y_).Normalized() * 10.0f);
+        URHO3D_LOGDEBUGF("Player::Fire() -> %d, [%f,%f,%f]", testcnt_, newM->GetNode()->GetPosition().x_,
+                         newM->GetNode()->GetPosition().y_,
+                         newM->GetNode()->GetPosition().z_);
+
+
     }
 }
 

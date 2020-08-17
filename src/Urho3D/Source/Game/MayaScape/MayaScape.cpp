@@ -1820,6 +1820,16 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 
     }
 
+    if (input->GetKeyPress(KEY_B)) {
+
+        if (player_->GetLastFire() > 2.0f) {
+            player_->SetLastFire(0);
+            player_->Fire();
+        }
+
+        URHO3D_LOGINFOF("last fire=%f", player_->GetLastFire());
+
+    }
 
     if (input->GetKeyPress(KEY_R)) {
         wpActiveIndex_ = 0;

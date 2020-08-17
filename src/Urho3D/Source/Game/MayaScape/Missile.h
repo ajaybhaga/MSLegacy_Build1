@@ -20,7 +20,11 @@ private:
 	/// Boom Damage
 	float damage;
 	/// Missile Node
-	SharedPtr<Node>node_;
+	SharedPtr<Node>pNode_;
+    SharedPtr<RigidBody> pRigidBody_;
+    SharedPtr<CollisionShape> pCollisionShape_;
+    SharedPtr<StaticModel> pObject_;
+
 	/// Target Node
 	Vector<SharedPtr<Node>>targetnodes_;
 	/// Owner of the missile
@@ -31,15 +35,14 @@ private:
 	float duration_;
 
     Vector3 force_;
-    Node* pNode_;
-    RigidBody* pRigidBody_;
-    CollisionShape* pCollisionShape_;
-    StaticModel* pObject_;
 
 //    float timer;
     bool active_;
 
 public:
+
+    void AddTarget(SharedPtr<Node> targetnode) { targetnodes_.Push(targetnode); }
+
 	float GetThrust() { return thrust; }
 	void SetThrust(float m_thrust) { thrust = m_thrust; }
 	float GetDetectionRange() { return detectionRange; }
@@ -53,7 +56,9 @@ public:
 	int GetProducerid() { return producerid_; }
 	void SetProducerid(int m_producerid) { producerid_ = m_producerid; }
 
-	/// Life-cycle function
+    void SnapToProducer();
+
+        /// Life-cycle function
 	/// Construct.
 	Missile(Context* context);
 	Missile(Context* context, SharedPtr<Node>producer);

@@ -86,6 +86,7 @@ private:
     SharedPtr<Vehicle> vehicle_;
     SharedPtr<Node> vehicleHeadLamp_;
 
+    float lastFire_;
 
     // Previous state
     PlayerState prevState_;
@@ -108,7 +109,6 @@ private:
     Vector3 force_;
     Vector3 offset_;
 
-    Node* pNode_;
     RigidBody* pRigidBody_;
     CollisionShape* pCollisionShape_;
     StaticModel* pObject_;
@@ -188,6 +188,9 @@ public:
 	/// Parameter function
 	int GetLife() { return life_; }
 	void SetLife(int m_life) { life_ = m_life; }
+
+	float GetLastFire() { return lastFire_; }
+	void SetLastFire(float lastFire_) { lastFire_; };
 
 	float GetMass() { return mass_; }
 	void SetMass(float m_mass) { mass_ = m_mass; }
