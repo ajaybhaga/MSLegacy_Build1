@@ -1809,7 +1809,15 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
         focusIndex_ = 0;
 
         // Place on track origin
-        vehicle_->GetNode()->SetPosition(Vector3(raceTrack_->GetPosition().x_, 500.0f, raceTrack_->GetPosition().z_));
+//        vehicle_->GetNode()->SetPosition(Vector3(raceTrack_->GetPosition().x_, 500.0f, raceTrack_->GetPosition().z_));
+
+
+        // TOP LEFT EDGE
+//        vehicle_->GetNode()->SetPosition(Vector3(mapSize/2, 200.0f, mapSize/2));
+
+        // BOTTOM RIGHT EDGE
+//        vehicle_->GetNode()->SetPosition(Vector3(-mapSize/2, 200.0f, -mapSize/2));
+
     }
 
 
@@ -2000,13 +2008,13 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 
 //    float maxX = terrain_->GetPatchSize()*terrain_->GetNumPatches().x_;
 //    float maxY = terrain_->GetPatchSize()*terrain_->GetNumPatches().y_;
-
-    float maxX = terrain_->GetHeightMap()->GetWidth()*terrain_->GetPatchSize();
-    float maxY = terrain_->GetHeightMap()->GetHeight()*terrain_->GetPatchSize();
-
     //
     // Position
     //Vector3 position((float)x * spacing_.x_, GetRawHeight(xPos, zPos), (float)z * spacing_.z_);
+
+
+//    float maxX = terrain_->GetHeightMap()->GetWidth()*terrain_->GetPatchSize();
+//    float maxY = terrain_->GetHeightMap()->GetHeight()*terrain_->GetPatchSize();
 
     // Calculate mini map position
     Vector3 shiftedRange = vehicle_->GetNode()->GetPosition() + Vector3(mapSize/2, mapSize/2, mapSize/2);
@@ -2023,8 +2031,14 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
     miniMapP1Sprite_->SetPosition(Vector2(miniMapP1X-xRange+0.0f, miniMapP1Y-zRange+0.0f));
     miniMapP1Sprite_->SetRotation(vehicleRot_.YawAngle());
 
+    float wpOffsetX = -mapSize/2;
+    float wpOffsetY = -mapSize/2;
+    // Convert marker position to world position for waypoint
+    float wpPosX = (((float)waypoints_[wpActiveIndex_].x_ / (float)terrain_->GetMarkerMap()->GetWidth())*mapSize)+wpOffsetX;
+    float wpPosZ = (((float)waypoints_[wpActiveIndex_].z_ / (float)terrain_->GetMarkerMap()->GetHeight())*mapSize)+wpOffsetY;
+
     // Calculate mini map position for waypoint
-    shiftedRange = waypoints_[wpActiveIndex_] + Vector3(mapSize/2, mapSize/2, mapSize/2);
+    shiftedRange = Vector3(wpPosX, 0.0f, wpPosZ) + Vector3(mapSize/2, mapSize/2, mapSize/2);
 
     // 1600+1600
     xRange = (shiftedRange.x_/mapSize) * miniMapWidth;
