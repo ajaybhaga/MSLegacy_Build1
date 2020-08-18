@@ -66,6 +66,7 @@ class Player : public GameObject
 
 	/// parameter
     unsigned int wpActiveIndex_;
+    int targetAgentIndex_;
 public:
 	float mass_;
 	float speed_;
@@ -116,7 +117,7 @@ public:
     StaticModel* pObject_;
     //Missile playerMissile_;
 
-
+    float changeTargetTime_;
 
     bool doJump_;
 
@@ -154,6 +155,7 @@ public:
 
     int agentIndex;
 
+
     SharedPtr<Node> genotypeNode_; // Scene node displaying genotype
     SharedPtr<BillboardSet> genotypeBBSet_; // Billboard set for genotype
 
@@ -190,6 +192,7 @@ private:
     int mapDim_;
     Vector3 toTarget_ = Vector3::ZERO;
 
+
     ///Life-cycle functions
 public:
     void Init();
@@ -220,6 +223,10 @@ public:
 	    }
 
 	    waypoints_ = newWPs;
+	}
+
+	void SetTarget(Vector3 toTarget) {
+	    toTarget_ = toTarget;
 	}
 
     int getAgentIndex() const {
@@ -271,6 +278,7 @@ public:
 
 	/// Fight
     void Fire(Vector3 target);
+    void Fire();
 
 	/// Function
 	Player(Context* context);

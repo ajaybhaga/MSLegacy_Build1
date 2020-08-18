@@ -72,6 +72,8 @@
 #include <Urho3D/Physics/CollisionShape.h>
 #include <Urho3D/Physics/Constraint.h>
 #include <Urho3D/Physics/PhysicsWorld.h>
+#include <Urho3D/Physics/PhysicsUtils.h>
+
 //#include <Urho3D/Physics/RaycastVehicle.h>
 #include <Urho3D/Physics/RigidBody.h>
 #include <Urho3D/Resource/ResourceCache.h>
@@ -392,7 +394,7 @@ void MayaScape::CreateAgents() {
         agents_[i]->SetWaypoints((&waypointsWorld_));
 
         // Place on track
-        agentNode->SetPosition(Vector3(-814.0f+Random(-400.f, 400.0f), 400.0f, -595.0f+Random(-400.f, 400.0f)));
+        agents_[i]->GetNode()->SetPosition(Vector3(-814.0f+Random(-400.f, 400.0f), 400.0f, -595.0f+Random(-400.f, 400.0f)));
 
         // Store initial player position as focus
 //        focusObjects_.Push(player_->GetNode()->GetPosition());
@@ -401,7 +403,7 @@ void MayaScape::CreateAgents() {
 //        TerrainPatch* p = terrain_->GetPatch(0, 0);
  //       IntVector2 v = p->GetCoordinates();
 
-        agentNode->SetRotation(Quaternion(0.0, -90.0, 0.0));
+        agents_[i]->GetNode()->SetRotation(Quaternion(0.0, -90.0, 0.0));
 
 
         // Create the vehicle logic component
@@ -1934,6 +1936,15 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 
     if (player_) {
 
+//        Vector3 targetAgent = agents_[player_->targetAgentIndex_]->GetVehicle()->GetNode()->GetPosition();
+
+        btTransform trans;
+        agents_[player_->targetAgentIndex_]->vehicle_->GetRaycastVehicle()->getWorldTransform(trans);
+        Vector3 posWS = ToVector3(trans.getOrigin());
+        Vector3 targetAgent = posWS;
+        player_->SetTarget(targetAgent);
+
+
         GameController *gameController = GetSubsystem<GameController>();
         player_->GetVehicle()->controls_.buttons_ = 0;
         gameController->UpdateControlInputs(player_->GetVehicle()->controls_);
@@ -1984,8 +1995,17 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
         drawDebug_ = !drawDebug_;
 
     // Toggle debug geometry with 'C' key
-    if (input->GetKeyPress(KEY_C))
-        doSpecial_ = !doSpecial_;
+    player_->changeTargetTime_ += timeStep;
+
+    if ((player_->GetVehicle()->controls_.IsDown(BUTTON_X)) || (input->GetKeyPress(KEY_C))) {
+        if (player_->changeTargetTime_ > 0.04f)
+        player_->targetAgentIndex_++;
+        player_->targetAgentIndex_ = player_->targetAgentIndex_ % EvolutionManager::getInstance()->getAgents().size();
+        player_->changeTargetTime_ = 0;
+    }
+
+
+//        doSpecial_ = !doSpecial_;
 
     if (input->GetKeyPress(KEY_R)) {
         // Place on track
@@ -2025,12 +2045,13 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 
             URHO3D_LOGINFOF("Fire=%f", player_->GetLastFire());
 
-            player_->Fire(Vector3(wpPosX, 0.0f, wpPosZ));
+            player_->Fire();
         } else {
             URHO3D_LOGINFOF("Waiting last fire=%f", player_->GetLastFire());
         }
 
     }
+
 
     if (input->GetKeyPress(KEY_R)) {
         player_->wpActiveIndex_ = 0;

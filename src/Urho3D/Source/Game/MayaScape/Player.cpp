@@ -71,6 +71,7 @@ Player::Player(Context* context) : GameObject(context)
 
     bulletType_ = "CB";
     lastFire_ = 0;
+    targetAgentIndex_ = 0;
 //    bulletType_ = "AP";
 }
 
@@ -102,7 +103,7 @@ void Player::Init()
 //    SetControls(ve)
 
     wpActiveIndex_ = 0;
-
+    targetAgentIndex_ = 0;
 
     pRigidBody_ = vehicleNode->CreateComponent<RigidBody>();
 //    pRigidBody_->SetMass(1.0f);
@@ -247,35 +248,50 @@ void Player::FixedUpdate(float timeStep)
 	/// If the Player'hp <=0 ,then destroy it.
 	if (GetHp() <= 0.0f) this->Destroyed();
 
-	// Only pass once rigid body is setup
-	if (pRigidBody_) {
-        // Compute steer force
-        ComputeSteerForce();
-        if (force_ != Vector3::ZERO) {
+	if (toTarget_ != Vector3::ZERO) {
+        // Only pass once rigid body is setup
+        if (pRigidBody_) {
+            // Compute steer force
+            ComputeSteerForce();
+            if (force_ != Vector3::ZERO) {
 
 //            force_ = Vector3(1.0f, 0.0f, 1.0f);
 
-            if (wpActiveIndex_ < 0)
-                return;
+                if (wpActiveIndex_ < 0)
+                    return;
 
-            float wpOffsetX = -mapDim_/2;
-            float wpOffsetY = -mapDim_/2;
-            // Convert marker position to world position for track
-  //          float wpPosX = (((float)waypoints_->At(wpActiveIndex_).x_ / (float)miniMapWidth_)*mapDim_)+wpOffsetX;
+                float wpOffsetX = -mapDim_ / 2;
+                float wpOffsetY = -mapDim_ / 2;
+                // Convert marker position to world position for track
+                //          float wpPosX = (((float)waypoints_->At(wpActiveIndex_).x_ / (float)miniMapWidth_)*mapDim_)+wpOffsetX;
 //            float wpPosZ = (((float)waypoints_->At(wpActiveIndex_).z_ / (float)miniMapHeight_)*mapDim_)+wpOffsetY;
 
 
-            // Calculate distance to waypoint
-            toTarget_ = pRigidBody_->GetPosition() - Vector3(waypoints_->At(wpActiveIndex_).x_, waypoints_->At(wpActiveIndex_).y_, waypoints_->At(wpActiveIndex_).z_) + Vector3(1500,0,1500);
-
-            float steering = -toTarget_.Normalized().DotProduct((vehicle_->GetNode()->GetDirection()))+0.5f;
-            URHO3D_LOGINFOF("***** Player - Vehicle Steer [%f]", vehicle_->GetSteering());
-            URHO3D_LOGINFOF("***** Player - waypoint [%d]=[%f,%f,%f,%f]", wpActiveIndex_, waypoints_->At(wpActiveIndex_).x_, waypoints_->At(wpActiveIndex_).y_, waypoints_->At(wpActiveIndex_).z_, steering);
+                //Vector3 tgt = Vector3(waypoints_->At(wpActiveIndex_).x_, waypoints_->At(wpActiveIndex_).y_, waypoints_->At(wpActiveIndex_).z_);
 
 
+                // Calculate distance to waypoint
+                Vector3 v = vehicle_->GetNode()->GetPosition() - toTarget_;// + Vector3(-1500,0,-1500);
+                float steering = v.Normalized().DotProduct((vehicle_->GetNode()->GetDirection()))+0.4f;
+/*
+                if (steering > 1.0f) {
+                    steering = -1.0f;
+                }
+
+                if (steering < -1.0f) {
+                    steering = 1.0f;
+                }
+*/
+                URHO3D_LOGINFOF("***** Player - Vehicle Steer [%f]", vehicle_->GetSteering());
+                URHO3D_LOGINFOF("***** Player - waypoint [%d]=[%f,%f,%f,%f]", wpActiveIndex_,
+                                waypoints_->At(wpActiveIndex_).x_, waypoints_->At(wpActiveIndex_).y_,
+                                waypoints_->At(wpActiveIndex_).z_, steering);
+                URHO3D_LOGINFOF("***** Player - target =[%f,%f,%f]", toTarget_.x_, toTarget_.y_, toTarget_.z_);
+
+            // Enable auto-steering
             vehicle_->UpdateSteering(steering);
 
-            //vehicle_->GetRigidBody()->
+                //vehicle_->GetRigidBody()->
 //            pRigidBody_->ApplyForce(force_);
 /*
 
@@ -304,12 +320,17 @@ void Player::FixedUpdate(float timeStep)
                 p.y_ = 150.0f;
                 pRigidBody_->SetPosition(p);
             }*/
+            }
+
+
         }
-
-
     }
 }
 
+
+void Player::Fire() {
+    Fire(toTarget_);
+}
 
 void Player::Fire(Vector3 target)
 {
@@ -537,10 +558,11 @@ void Player::DebugDraw(const Color &color)
 
         vehicle_->GetRaycastVehicle()->DrawDebugGeometry(dbgRenderer, false);
 
+//        ToQuaternion(trans.getRotation()),
         // dbgRenderer->AddBoundingBox(bbox, mat34, color);
 //        dbgRenderer->AddLine(posWS, posWS + node_->R, color);
-        dbgRenderer->AddLine(posWS, posWS + node_->GetDirection()*40.0f, Color::CYAN);
-        dbgRenderer->AddLine(posWS, posWS + toTarget_*40.0f, Color::RED);
+        dbgRenderer->AddLine(posWS, posWS + this->vehicle_->GetNode()->GetDirection()*40.0f, Color::CYAN);
+        dbgRenderer->AddLine(posWS, toTarget_, Color::RED);
 
 
 
