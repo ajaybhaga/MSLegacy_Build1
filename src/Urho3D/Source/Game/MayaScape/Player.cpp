@@ -96,6 +96,17 @@ void Player::Init()
     vehicle_->Init();
 //    SetControls(ve)
 
+    wpActiveIndex_ = 0;
+
+
+    pRigidBody_ = vehicleNode->CreateComponent<RigidBody>();
+//    pRigidBody_->SetMass(1.0f);
+//    pRigidBody_->SetUseGravity(false);
+ //   pRigidBody_->SetTrigger(true);
+
+
+//    pRigidBody_ = vehicle_->GetRigidBody();
+
     // Store initial vehicle position as focus
 //    focusObjects_.Push(vehicle_->GetNode()->GetPosition());
 
@@ -230,6 +241,46 @@ void Player::FixedUpdate(float timeStep)
 
 	/// If the Player'hp <=0 ,then destroy it.
 	if (GetHp() <= 0.0f) this->Destroyed();
+
+	// Only pass once rigid body is setup
+	if (pRigidBody_) {
+        // Compute steer force
+        ComputeSteerForce();
+
+        if (force_ != Vector3::ZERO) {
+            // Apply steering force
+            pRigidBody_->ApplyForce(force_);
+
+
+            Vector3 vel = pRigidBody_->GetLinearVelocity();
+
+            float d = vel.Length();
+            if (d < 10.0f) {
+                d = 10.0f;
+                pRigidBody_->SetLinearVelocity(vel.Normalized() * d);
+            } else if (d > 50.0f) {
+                d = 50.0f;
+                pRigidBody_->SetLinearVelocity(vel.Normalized() * d);
+            }
+
+            Quaternion endRot = Quaternion(0, 0, 0);
+            Vector3 nVel = vel.Normalized();
+            endRot.FromLookRotation(nVel, Vector3::UP);
+            endRot = endRot * Quaternion(90, 0, 0);
+            pRigidBody_->SetRotation(endRot);
+
+            Vector3 p = pRigidBody_->GetPosition();
+            if (p.y_ < 10.0f) {
+                p.y_ = 10.0f;
+                pRigidBody_->SetPosition(p);
+            } else if (p.y_ > 150.0f) {
+                p.y_ = 150.0f;
+                pRigidBody_->SetPosition(p);
+            }
+        }
+
+
+    }
 }
 
 
@@ -293,4 +344,133 @@ void Player::Destroyed()
 {
 	Node* node = GetNode();
 	node->Remove();
+}
+
+void Player::ComputeSteerForce() {
+
+    //set the force member variable to zero
+    force_ = Vector3(0, 0, 0);
+
+    if (!waypoints_)
+        return;
+
+    if ((!pRigidBody_) || (waypoints_->Empty())) {
+      return;
+    }
+    //Attraction force
+/*
+    Vector3 CoM; //centre of mass, accumulated total
+    int nAttract = 0; //count number of neighbours
+    //set the force member variable to zero
+    force_ = Vector3(0, 0, 0);
+    //Search Neighbourhood
+    for (int i = 0; i < numberOfBoids; i++)
+    {
+        //the current boid?
+        if (this == &boidList[i]) continue;
+        //sep = vector position of this boid from current oid
+        Vector3 sep = pRigidBody->GetPosition() - boidList[i].pRigidBody->GetPosition();
+        float d = sep.Length(); //distance of boid
+        if (d < Range_FAttract)
+        {
+            //with range, so is a neighbour
+            CoM += boidList[i].pRigidBody->GetPosition();
+            nAttract++;
+        }
+    }
+    if (nAttract > 0)
+    {
+        CoM /= nAttract;
+        Vector3 dir = (CoM - pRigidBody->GetPosition()).Normalized();
+        Vector3 vDesired = dir * FAttract_Vmax;
+        force += (vDesired - pRigidBody->GetLinearVelocity())*FAttract_Factor;
+    }
+    if (nAttract > 5)
+    {
+        // stop checking once 5 neighbours have been found
+        return;
+    }
+
+    //seperation force
+    Vector3 sepForce;
+    int nRepel = 0;
+    for (int i = 0; i < numberOfBoids; i++)
+    {
+        //the current boid?
+        if (this == &boidList[i]) continue;
+        //sep = vector position of this boid from current oid
+        Vector3 sep = pRigidBody->GetPosition() - boidList[i].pRigidBody->GetPosition();
+        float d = sep.Length(); //distance of boid
+        if (d < Range_FRepel)
+        {
+            sepForce += (sep / sep.Length());
+            nRepel++;
+        }
+    }
+    if (nRepel > 0)
+    {
+        sepForce *= FRepel_Factor;
+        force += sepForce;
+    }
+    if (nRepel > 5)
+    {
+        // stop checking once 5 neighbours have been found
+        return;
+    }
+    */
+
+    //Allignment direction
+    Vector3 align;
+    int nAlign = 0;
+
+
+    //sep = vector position of this boid from current oid
+
+//    Vector3 sep = pRigidBody->GetPosition() - boidList[i].pRigidBody->GetPosition();
+//    float d = sep.Length(); //distance of boid
+//    if (d < Range_FRepel)
+
+
+    Vector3 toTarget;
+    if (!waypoints_->Empty()) {
+        // Calculate distance to waypoint
+        toTarget = pRigidBody_->GetPosition() - waypoints_->At(wpActiveIndex_);
+    } else {
+        // Calculate distance to origin (if not waypoints)
+        toTarget = pRigidBody_->GetPosition() - Vector3(0,0,0);
+    }
+
+
+    //    Vector3 dir = sep.Normalized();
+//    float d = sep.Length(); // distance of boid
+
+    //float steer = toTarget * speed / d;
+
+    float speed = 10.0f;
+    Vector3 desiredVelocity = toTarget.Normalized() * speed;
+
+
+    /*
+    if (d < Range_FAlign)
+    {
+        align += boidList[i].pRigidBody->GetLinearVelocity();
+        nAlign++;
+    }*/
+
+    force_ += (desiredVelocity - pRigidBody_->GetLinearVelocity());
+
+    /*
+    if (nAlign > 0)
+    {
+        align /= nAlign;
+
+        Vector3 finalVel = align;
+
+//        force_ += (finalVel - pRigidBody_->GetLinearVelocity()) * FAlign_Factor;
+    }
+    if (nAlign > 5)
+    {
+        // stop checking once 5 neighbours have been found
+        return;
+    }*/
 }

@@ -89,6 +89,10 @@ public:
         raycastVehicle_->SetAngularVelocity( Vector3::ZERO );
     }
 
+    btRigidBody* GetRigidBody() {
+        raycastVehicle_->GetBody();
+    }
+
     float GetSpeedKmH() const { return raycastVehicle_->GetCurrentSpeedKmHour(); }
     float GetSpeedMPH() const { return raycastVehicle_->GetCurrentSpeedKmHour()*KMH_TO_MPH; }
     void SetDbgRender(bool enable) { dbgRender_ = enable; }

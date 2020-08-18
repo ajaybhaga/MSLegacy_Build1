@@ -121,6 +121,12 @@
 #include "Bullet.h"
 #include "AP.h"
 
+#include "boids.h"
+
+int numOfBoidsets = 10; // needs to be an even number for the boid splitting to work properly
+int updateCycleIndex = 0;
+BoidSet boids[10]; // 10 x 20 boids
+
 float mapSize = 3000.0f;
 float miniMapWidth = 256.0f;
 float miniMapHeight = 256.0f;
@@ -331,8 +337,19 @@ void MayaScape::Start() {
     // Create the scene content
     CreateScene();
 
+    CreateAgents();
+
     CreatePlayer();
-   // targetCameraPos_ = Vector3(0.0f, 40.0f, CAMERA_DISTANCE);
+
+    ResourceCache* cache = GetSubsystem<ResourceCache>();
+    // Create boids
+    for (int i = 0; i < numOfBoidsets; i++)
+    {
+        boids[i].Initialise(cache, scene_, Vector3(0.0f, 20.0f, 0.0f));
+    }
+
+
+    // targetCameraPos_ = Vector3(0.0f, 40.0f, CAMERA_DISTANCE);
 
     fpsTimer_.Reset();
     framesCount_ = 0;
@@ -340,7 +357,7 @@ void MayaScape::Start() {
     UI *ui = GetSubsystem<UI>();
 
     // Create the UI content
-    sample2D_->CreateUIContent("MayaScape Game Engine v0.1");
+    sample2D_->CreateUIContent("MayaScape v0.1");
 //    auto* ui = GetSubsystem<UI>();
     Button *playButton = static_cast<Button *>(ui->GetRoot()->GetChild("PlayButton", true));
     SubscribeToEvent(playButton, E_RELEASED, URHO3D_HANDLER(MayaScape, HandlePlayButton));
@@ -360,6 +377,173 @@ void MayaScape::Stop() {
     Game::Stop();
 }
 
+void MayaScape::CreateAgents() {
+
+    ResourceCache* cache = GetSubsystem<ResourceCache>();
+
+    float agentDropBoxSize = 200.0f;
+    for (int i = 0; i < EvolutionManager::getInstance()->getAgents().size(); i++) {
+
+        // Create AI player character
+        //modelNode = sample2D_->CreateCharacter(0.0f, Vector3(3.5f + Random(-agentDropBoxSize, agentDropBoxSize), 80.0f, 0.0f + Random(-agentDropBoxSize, agentDropBoxSize)), 2);
+        //agents_[i] = modelNode->CreateComponent<Character2D>(); // Create a logic component to handle character behavior
+//        agents_[i]->agentIndex = i;
+        Node* agentNode = scene_->CreateChild("Player");
+
+        // Create the vehicle logic component
+        agents_[i] = agentNode->CreateComponent<Player>();
+        agents_[i]->Init();
+        agents_[i]->SetWaypoints((&waypoints_));
+
+        // Place on track
+        agentNode->SetPosition(Vector3(-814.0f+Random(-400.f, 400.0f), 400.0f, -595.0f+Random(-400.f, 400.0f)));
+
+        // Store initial player position as focus
+//        focusObjects_.Push(player_->GetNode()->GetPosition());
+
+        // Place on at corner of map
+//        TerrainPatch* p = terrain_->GetPatch(0, 0);
+ //       IntVector2 v = p->GetCoordinates();
+
+        agentNode->SetRotation(Quaternion(0.0, -90.0, 0.0));
+
+
+        // Create the vehicle logic component
+        //   agents_[i]->vehicle_ = modelNode->CreateComponent<Vehicle>();
+        // Create the rendering and physics components
+        //    agents_[i]->vehicle_->Init();
+
+//        String name = String("AI-Bear-P") + String(i);
+  //      agents_[i]->GetNode()->SetName(name.CString());
+        agents_[i]->isAI_ = true;
+//        agents_[i]->playerPos_ = player_->GetNode()->GetPosition();
+        agents_[i]->id_ = 1 + i;
+        agents_[i]->type_ = 2;
+
+        agents_[i]->genotypeNode_ = scene_->CreateChild("Genotype " + i);
+        agents_[i]->powerbarNode_ = scene_->CreateChild("Powerbar " + i);
+
+        // Get AI position
+        Vector3 aiPos = agents_[i]->GetNode()->GetPosition();
+
+        // Powerbar
+        // Create billboard sets (powerbars)
+        //const unsigned NUM_BILLBOARDNODES = 10;//NUM_AI;
+
+
+        // A single billboard for each parameter of genotype
+        const unsigned NUM_BILLBOARDS = EvolutionManager::getInstance()->getAgents()[0]->genotype->getParameterCount();
+
+        // BillboardSet* billboardObject;
+
+                Node* pbNode = scene_->CreateChild("PowerBar");
+//        smokeNode->SetPosition(Vector3(Random(200.0f) - 100.0f, Random(20.0f) + 10.0f, Random(200.0f) - 100.0f));
+        //pbNode->SetPosition(Vector3(3.5f+Random(-2.0f,2.0f), 20.0f, 0.0f));
+        pbNode->SetPosition(Vector3(-0.02f, 0.25f, 0.0f));
+//        pbNode->SetScale(Vector3(0.5f,0.5f,0.5f));
+        auto* billboardObject = pbNode->CreateComponent<BillboardSet>();
+        billboardObject->SetNumBillboards(NUM_BILLBOARDS);
+        billboardObject->SetMaterial(cache->GetResource<Material>("Materials/PowerBar.xml"));
+        billboardObject->SetSorted(true);
+
+        for (unsigned j = 0; j < NUM_BILLBOARDS; ++j)
+        {
+            Billboard* bb = billboardObject->GetBillboard(j);
+//            bb->position_ = Vector3(Random(12.0f) - 6.0f, Random(8.0f) - 4.0f, -5.0f);
+            bb->position_ = Vector3(aiPos.x_, aiPos.y_, 0.0f);
+            bb->size_ = Vector2((256.0f/512.0f)*0.06f, (256.0f/144.0f)*0.06f);
+            bb->rotation_ = 90.0f; //Random() * 360.0f;
+            bb->enabled_ = true;
+
+//            bb->uv_ = Rect(left,top,right,bottom);
+            bb->uv_ = Rect(0.0,0.5,1.0,1.0);
+
+            // After modifying the billboards, they need to be "committed" so that the BillboardSet updates its internals
+            billboardObject->Commit();
+        }
+
+/*
+        // Genotype
+
+        //Node* gtNode = scene_->CreateChild("Genotype");
+        //pbNode->SetPosition(Vector3(3.5f+Random(-2.0f,2.0f), 20.0f, 0.0f));
+
+        agents_[i]->genotypeNode_->SetPosition(Vector3(-0.24f, 0.25f, 0.0f));
+//        pbNode->SetScale(Vector3(0.5f,0.5f,0.5f));
+        agents_[i]->genotypeBBSet_ = agents_[i]->genotypeNode_->CreateComponent<BillboardSet>();
+        agents_[i]->genotypeBBSet_->SetNumBillboards(NUM_BILLBOARDS);
+        agents_[i]->genotypeBBSet_->SetMaterial(cache->GetResource<Material>("Materials/Genotype.xml"));
+        agents_[i]->genotypeBBSet_->SetSorted(true);
+
+        // Draw billboard for each genotype parameter -> alpha based on value
+
+        for (unsigned j = 0; j < NUM_BILLBOARDS; ++j) {
+            Billboard *bb = agents_[i]->genotypeBBSet_->GetBillboard(j);
+
+            // Get genotype parameters
+            for (int g = 0; g < EvolutionManager::getInstance()->getAgents()[i]->genotype->getParameterCount(); g++) {
+                float parameter = EvolutionManager::getInstance()->getAgents()[i]->genotype->getParameter(g);
+
+                // Set alpha based on parameter
+               //bb->color_ = Urho3D::Color(parameter, parameter, parameter);
+
+                //URHO3D_LOGINFOF("Agent [%d]: genotype parameter[%d] -> %f", i, g, parameter);
+
+                //float fx = 0.5;
+                //	float fy = fx / (m_i_width / m_i_height);
+                //	m_bb->size_ = Vector2(fx, fy);
+
+                // Diminish height of genotype billboard by parameter value
+                bb->size_ = Vector2((1.0f) * 0.05f * parameter, (0.1f) * 0.05f);
+            }
+
+//            bb->size_ = Vector2((256.0f/8.0f)*0.06f, (256.0f/144.0f)*0.06f);
+        //    bb->size_ = Vector2((1.0f) * 0.05f, (0.1f) * 0.05f);
+
+            //float fx = 0.5;
+            //	float fy = fx / (m_i_width / m_i_height);
+            //	m_bb->size_ = Vector2(fx, fy);
+
+            bb->rotation_ = 90.0f; //Random() * 360.0f;
+            bb->enabled_ = true;
+
+//            bb->uv_ = Rect(left,top,right,bottom);
+            bb->uv_ = Rect(0.0, 0.0, 1.0, 1.0);
+
+            // After modifying the billboards, they need to be "committed" so that the BillboardSet updates its internals
+            agents_[i]->genotypeBBSet_->Commit();
+        }
+*/
+        // Powerbar
+
+        agents_[i]->powerbarNode_->SetPosition(Vector3(0.0, 0.25f, 0.0f));
+        agents_[i]->powerbarBBSet_ = agents_[i]->powerbarNode_->CreateComponent<BillboardSet>();
+        agents_[i]->powerbarBBSet_->SetNumBillboards(1);
+        agents_[i]->powerbarBBSet_->SetMaterial(cache->GetResource<Material>("Materials/PowerBar.xml"));
+        agents_[i]->powerbarBBSet_->SetSorted(true);
+
+        // Draw billboard for each genotype parameter -> alpha based on value
+
+        // Single billboard for power meter
+        for (unsigned j = 0; j < 1; ++j) {
+            Billboard *bb = agents_[i]->powerbarBBSet_->GetBillboard(j);
+
+//            bb->size_ = Vector2((256.0f/8.0f)*0.06f, (256.0f/144.0f)*0.06f);
+            bb->size_ = Vector2((1.0f) * 0.05f, (0.1f) * 0.05f);
+
+            bb->rotation_ = 90.0f; //Random() * 360.0f;
+            bb->enabled_ = true;
+
+//            bb->uv_ = Rect(left,top,right,bottom);
+            bb->uv_ = Rect(0.0, 0.0, 1.0, 1.0);
+
+            // After modifying the billboards, they need to be "committed" so that the BillboardSet updates its internals
+            agents_[i]->powerbarBBSet_->Commit();
+        }
+    }
+
+}
+
 
 void MayaScape::CreatePlayer() {
     Node* playerNode = scene_->CreateChild("Player");
@@ -370,6 +554,12 @@ void MayaScape::CreatePlayer() {
     // Create the vehicle logic component
     player_ = playerNode->CreateComponent<Player>();
     player_->Init();
+
+    int size = waypoints_.Size();
+
+//    Vector<Vector3>* wp = &waypoints_;
+
+    player_->SetWaypoints((&waypoints_));
 
     // Store initial player position as focus
     focusObjects_.Push(player_->GetNode()->GetPosition());
@@ -1813,6 +2003,9 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
         // Set focus to vehicle
         focusIndex_ = 0;
 
+        // 453 -202
+        player_->GetVehicle()->GetNode()->SetPosition(Vector3(453.0f, 500.0f, -202.0f));
+
         // Place on track origin
 //        vehicle_->GetNode()->SetPosition(Vector3(raceTrack_->GetPosition().x_, 500.0f, raceTrack_->GetPosition().z_));
 
@@ -2237,11 +2430,11 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 */
 
 
-//            player_->GetVehicle()->controls_.Set(CTRL_FORWARD, input->GetKeyDown(KEY_W) | player_->GetVehicle()->controls_.IsDown(BUTTON_B));
+            player_->GetVehicle()->controls_.Set(CTRL_FORWARD, input->GetKeyDown(KEY_W) | player_->GetVehicle()->controls_.IsDown(BUTTON_B));
             player_->GetVehicle()->controls_.Set(CTRL_BACK, input->GetKeyDown(KEY_S) | player_->GetVehicle()->controls_.IsDown(BUTTON_DPAD_DOWN));
             player_->GetVehicle()->controls_.Set(CTRL_LEFT, input->GetKeyDown(KEY_A) | player_->GetVehicle()->controls_.IsDown(BUTTON_DPAD_LEFT));
             player_->GetVehicle()->controls_.Set(CTRL_RIGHT, input->GetKeyDown(KEY_D) | player_->GetVehicle()->controls_.IsDown(BUTTON_DPAD_RIGHT));
-//            player_->GetVehicle()->controls_.Set(CTRL_SPACE, input->GetKeyDown(KEY_B) | player_->GetVehicle()->controls_.IsDown(BUTTON_B));
+            player_->GetVehicle()->controls_.Set(CTRL_SPACE, input->GetKeyDown(KEY_SPACE) | player_->GetVehicle()->controls_.IsDown(BUTTON_X));
 
 //            player_->GetVehicle()->controls_.Set(CTRL_E, input->GetKeyDown(KEY_E) | player_->GetVehicle()->controls_.IsDown(CONTROLLER_BUTTON_A));
 
@@ -2372,6 +2565,25 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
                       FILE_WRITE);
         scene_->SaveXML(saveFile);
     }
+
+    // updating half the boids at a time depending on the update cycle index
+    if (updateCycleIndex == 0)
+    {
+        for (int i = 0; i < (numOfBoidsets/2); i++)
+        {
+            boids[i].Update(timeStep);
+        }
+        updateCycleIndex = 1;
+    }
+    else if (updateCycleIndex == 1)
+    {
+        for (int i = (numOfBoidsets / 2); i < numOfBoidsets; i++)
+        {
+            boids[i].Update(timeStep);
+        }
+        updateCycleIndex = 0;
+    }
+
 
 
     // stat

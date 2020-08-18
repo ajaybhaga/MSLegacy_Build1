@@ -406,8 +406,8 @@ void Vehicle::FixedUpdate(float timeStep)
 
     if (controls_.buttons_ & CTRL_SPACE)
     {
- //       braking = true;
-  //      accelerator = 0.0f;
+        braking = true;
+        accelerator = 0.0f;
     }
 
     if (raycastVehicle_) {

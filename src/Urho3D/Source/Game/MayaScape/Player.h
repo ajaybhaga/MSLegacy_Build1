@@ -65,7 +65,7 @@ class Player : public GameObject
 	URHO3D_OBJECT(Player, LogicComponent);
 
 	/// parameter
-private:
+public:
 	float mass_;
 	float speed_;
 	float maxSpeed_;
@@ -109,10 +109,13 @@ private:
     Vector3 force_;
     Vector3 offset_;
 
+    Node* pNode_;
     RigidBody* pRigidBody_;
     CollisionShape* pCollisionShape_;
     StaticModel* pObject_;
     //Missile playerMissile_;
+
+
 
     bool doJump_;
 
@@ -148,12 +151,6 @@ private:
     bool onSlope_;
     bool isAI_;
 
-    Vector3 playerPos_;
-    bool doMove_;
-    bool chooseMove_;
-    float lastMove_;
-    float currMove_;
-
     int agentIndex;
 
     SharedPtr<Node> genotypeNode_; // Scene node displaying genotype
@@ -161,6 +158,16 @@ private:
 
     SharedPtr<Node> powerbarNode_; // Scene node displaying powerbar
     SharedPtr<BillboardSet> powerbarBBSet_; // Billboard set for powerbar
+
+
+
+    static float Range_FAttract;
+    static float Range_FRepel;
+    static float Range_FAlign;
+    static float FAttract_Factor;
+    static float FRepel_Factor;
+    static float FAlign_Factor;
+    static float FAttract_Vmax;
 
 
     //
@@ -175,19 +182,47 @@ private:
 	//Vector<Bullet*> bullets_;
 	String bulletType_;
 
+    Vector<Vector3>* waypoints_ = nullptr;
+    unsigned int wpActiveIndex_;
+
 	///Life-cycle functions
 public:
     void Init();
-
     void Start();
 	void Update(float timeStep);
 	void FixedUpdate(float timeStep);
 	/// Customized functions
 	void Destroyed();
+	void ComputeSteerForce();
 
 	/// Parameter function
 	int GetLife() { return life_; }
 	void SetLife(int m_life) { life_ = m_life; }
+
+	void SetWaypoints(const Vector<Vector3>* waypoints) {
+
+	    if (waypoints_) {
+            delete waypoints_;
+            waypoints_ = nullptr;
+        }
+
+	    Vector<Vector3>* newWPs = new Vector<Vector3>();
+	    // Copy waypoints into local list
+	    for (int i = 0; i < waypoints->Size(); i++) {
+	        newWPs->Push(Vector3(waypoints->At(i)));
+	    }
+
+	    waypoints_ = newWPs;
+	}
+
+    int getAgentIndex() const {
+        return agentIndex;
+    }
+
+    void setAgentIndex(int agentIndex) {
+        Player::agentIndex = agentIndex;
+    }
+
 
 	float GetLastFire() { return lastFire_; }
 	void SetLastFire(float lastFire) { lastFire_ = lastFire; };
@@ -237,5 +272,6 @@ public:
 	static void RegisterObject(Context* context);
 	/// initiate weapons
 	void InitiateWeapons();
+
 };
 
