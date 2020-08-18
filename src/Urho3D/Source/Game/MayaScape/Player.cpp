@@ -94,7 +94,7 @@ void Player::Init()
     Node* vehicleNode = GetScene()->CreateChild("Vehicle");
 
     // Place on track
-    vehicleNode->SetPosition(Vector3(-814.0f+Random(-400.f, 400.0f), 400.0f, -595.0f+Random(-400.f, 400.0f)));
+    vehicleNode->SetPosition(Vector3(-814.0f+Random(-400.f, 400.0f), 150.0f, -595.0f+Random(-400.f, 400.0f)));
 
     // Create the vehicle logic component
     vehicle_ = vehicleNode->CreateComponent<Vehicle>();
@@ -266,9 +266,9 @@ void Player::FixedUpdate(float timeStep)
 
 
             // Calculate distance to waypoint
-            toTarget_ = pRigidBody_->GetPosition() - Vector3(waypoints_->At(wpActiveIndex_).x_, waypoints_->At(wpActiveIndex_).y_, waypoints_->At(wpActiveIndex_).z_);
+            toTarget_ = pRigidBody_->GetPosition() - Vector3(waypoints_->At(wpActiveIndex_).x_, waypoints_->At(wpActiveIndex_).y_, waypoints_->At(wpActiveIndex_).z_) + Vector3(1500,0,1500);
 
-            float steering = toTarget_.Normalized().DotProduct((vehicle_->GetNode()->GetDirection()));
+            float steering = -toTarget_.Normalized().DotProduct((vehicle_->GetNode()->GetDirection()))+0.5f;
             URHO3D_LOGINFOF("***** Player - Vehicle Steer [%f]", vehicle_->GetSteering());
             URHO3D_LOGINFOF("***** Player - waypoint [%d]=[%f,%f,%f,%f]", wpActiveIndex_, waypoints_->At(wpActiveIndex_).x_, waypoints_->At(wpActiveIndex_).y_, waypoints_->At(wpActiveIndex_).z_, steering);
 
@@ -475,7 +475,7 @@ void Player::ComputeSteerForce() {
 
     //float steer = toTarget * speed / d;
 
-    float speed = 10.0f;
+    float speed = 1.0f;
     Vector3 desiredVelocity = toTarget.Normalized() * speed;
 
 

@@ -2738,12 +2738,15 @@ void MayaScape::HandlePostUpdate(StringHash eventType, VariantMap &eventData) {
         cameraNode_->SetPosition(cameraTargetPos);
         cameraNode_->SetRotation(dir);
 
+
+        // Always show waypoints
+        player_->DebugDraw(Color::MAGENTA);
+
         if (drawDebug_) {
   //          scene_->GetComponent<PhysicsWorld>()->DrawDebugGeometry(true);
 //            player_->GetVehicle()->DebugDraw(Color::MAGENTA);
-            player_->DebugDraw(Color::MAGENTA);
 
-               terrain_->SetViewMask(0);
+//               terrain_->SetViewMask(0);
 
             trackColShape_->DrawDebugGeometry(scene_->GetComponent<DebugRenderer>(), false);
 
