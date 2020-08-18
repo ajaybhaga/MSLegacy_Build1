@@ -65,6 +65,7 @@ class Player : public GameObject
 	URHO3D_OBJECT(Player, LogicComponent);
 
 	/// parameter
+    unsigned int wpActiveIndex_;
 public:
 	float mass_;
 	float speed_;
@@ -183,9 +184,13 @@ private:
 	String bulletType_;
 
     Vector<Vector3>* waypoints_ = nullptr;
-    unsigned int wpActiveIndex_;
+    // For minimap coordinate conversion
+    int miniMapWidth_;
+    int miniMapHeight_;
+    int mapDim_;
+    Vector3 toTarget_ = Vector3::ZERO;
 
-	///Life-cycle functions
+    ///Life-cycle functions
 public:
     void Init();
     void Start();
@@ -194,8 +199,10 @@ public:
 	/// Customized functions
 	void Destroyed();
 	void ComputeSteerForce();
+    void DebugDraw(const Color &color);
 
-	/// Parameter function
+
+    /// Parameter function
 	int GetLife() { return life_; }
 	void SetLife(int m_life) { life_ = m_life; }
 
@@ -222,7 +229,6 @@ public:
     void setAgentIndex(int agentIndex) {
         Player::agentIndex = agentIndex;
     }
-
 
 	float GetLastFire() { return lastFire_; }
 	void SetLastFire(float lastFire) { lastFire_ = lastFire; };

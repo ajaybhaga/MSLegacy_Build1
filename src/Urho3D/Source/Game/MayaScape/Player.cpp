@@ -6,6 +6,7 @@
 #include <Urho3D/Physics/PhysicsEvents.h>
 #include <Urho3D/Physics/PhysicsWorld.h>
 #include <Urho3D/Physics/RigidBody.h>
+#include <Urho3D/Physics/PhysicsUtils.h>
 #include <Urho3D/Scene/Scene.h>
 #include <Urho3D/Input/Input.h>
 #include <Urho3D/Scene/SceneEvents.h>
@@ -22,8 +23,12 @@
 #include <Urho3D/Urho2D/Sprite2D.h>
 #include <Urho3D/Urho2D/AnimatedSprite2D.h>
 #include <Urho3D/Urho2D/AnimationSet2D.h>
+#include <Urho3D/Graphics/DebugRenderer.h>
 
 #include "Toolkit.h"
+#include <SDL/SDL_log.h>
+#include <Urho3D/DebugNew.h>
+
 
 #include "Player.h"
 #include "RaycastVehicle.h"
@@ -246,11 +251,33 @@ void Player::FixedUpdate(float timeStep)
 	if (pRigidBody_) {
         // Compute steer force
         ComputeSteerForce();
-
         if (force_ != Vector3::ZERO) {
-            // Apply steering force
-            pRigidBody_->ApplyForce(force_);
 
+//            force_ = Vector3(1.0f, 0.0f, 1.0f);
+
+            if (wpActiveIndex_ < 0)
+                return;
+
+            float wpOffsetX = -mapDim_/2;
+            float wpOffsetY = -mapDim_/2;
+            // Convert marker position to world position for track
+  //          float wpPosX = (((float)waypoints_->At(wpActiveIndex_).x_ / (float)miniMapWidth_)*mapDim_)+wpOffsetX;
+//            float wpPosZ = (((float)waypoints_->At(wpActiveIndex_).z_ / (float)miniMapHeight_)*mapDim_)+wpOffsetY;
+
+
+            // Calculate distance to waypoint
+            toTarget_ = pRigidBody_->GetPosition() - Vector3(waypoints_->At(wpActiveIndex_).x_, waypoints_->At(wpActiveIndex_).y_, waypoints_->At(wpActiveIndex_).z_);
+
+            float steering = toTarget_.Normalized().DotProduct((vehicle_->GetNode()->GetDirection()));
+            URHO3D_LOGINFOF("***** Player - Vehicle Steer [%f]", vehicle_->GetSteering());
+            URHO3D_LOGINFOF("***** Player - waypoint [%d]=[%f,%f,%f,%f]", wpActiveIndex_, waypoints_->At(wpActiveIndex_).x_, waypoints_->At(wpActiveIndex_).y_, waypoints_->At(wpActiveIndex_).z_, steering);
+
+
+            vehicle_->UpdateSteering(steering);
+
+            //vehicle_->GetRigidBody()->
+//            pRigidBody_->ApplyForce(force_);
+/*
 
             Vector3 vel = pRigidBody_->GetLinearVelocity();
 
@@ -276,7 +303,7 @@ void Player::FixedUpdate(float timeStep)
             } else if (p.y_ > 150.0f) {
                 p.y_ = 150.0f;
                 pRigidBody_->SetPosition(p);
-            }
+            }*/
         }
 
 
@@ -433,11 +460,13 @@ void Player::ComputeSteerForce() {
 
     Vector3 toTarget;
     if (!waypoints_->Empty()) {
+
+        URHO3D_LOGDEBUGF("Player::ComputeSteerForce() waypoints -> [%d] -> set to  %d", waypoints_->Size(), wpActiveIndex_);
+
         // Calculate distance to waypoint
         toTarget = pRigidBody_->GetPosition() - waypoints_->At(wpActiveIndex_);
     } else {
-        // Calculate distance to origin (if not waypoints)
-        toTarget = pRigidBody_->GetPosition() - Vector3(0,0,0);
+        return;
     }
 
 
@@ -474,3 +503,50 @@ void Player::ComputeSteerForce() {
         return;
     }*/
 }
+
+
+void Player::DebugDraw(const Color &color)
+{
+    if (!vehicle_)
+        return;
+
+    DebugRenderer *dbgRenderer = GetScene()->GetComponent<DebugRenderer>();
+    node_ = GetNode();
+
+
+    if ( dbgRenderer )
+    {
+
+        // draw compound shape bounding box (the inertia bbox)
+        Vector3 localExtents = vehicle_->GetRaycastVehicle()->GetCompoundLocalExtents();
+        Vector3 localCenter  = vehicle_->GetRaycastVehicle()->GetCompooundLocalExtentsCenter();
+        BoundingBox bbox(-localExtents, localExtents);
+
+        btTransform trans;
+        vehicle_->GetRaycastVehicle()->getWorldTransform(trans);
+        Vector3 posWS = ToVector3(trans.getOrigin());
+        Vector3 centerWS = ToQuaternion(trans.getRotation()) * localCenter;
+        posWS += centerWS;
+        Matrix3x4 mat34(posWS, ToQuaternion(trans.getRotation()), 1.0f);
+
+        /*
+        dbgRenderer->AddBoundingBox(bbox, mat34, color);
+        dbgRenderer->AddLine(posWS, posWS + node_->GetUp(), color);
+        dbgRenderer->AddLine(posWS, posWS + node_->GetRight(), color);
+*/
+
+        vehicle_->GetRaycastVehicle()->DrawDebugGeometry(dbgRenderer, false);
+
+        // dbgRenderer->AddBoundingBox(bbox, mat34, color);
+//        dbgRenderer->AddLine(posWS, posWS + node_->R, color);
+        dbgRenderer->AddLine(posWS, posWS + node_->GetDirection()*40.0f, Color::CYAN);
+        dbgRenderer->AddLine(posWS, posWS + toTarget_*40.0f, Color::RED);
+
+
+
+
+
+    }
+}
+
+

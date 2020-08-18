@@ -89,10 +89,6 @@ public:
         raycastVehicle_->SetAngularVelocity( Vector3::ZERO );
     }
 
-    btRigidBody* GetRigidBody() {
-        raycastVehicle_->GetBody();
-    }
-
     float GetSpeedKmH() const { return raycastVehicle_->GetCurrentSpeedKmHour(); }
     float GetSpeedMPH() const { return raycastVehicle_->GetCurrentSpeedKmHour()*KMH_TO_MPH; }
     void SetDbgRender(bool enable) { dbgRender_ = enable; }
@@ -106,6 +102,8 @@ public:
     float GetAngularVelocity() const { return m_fYAngularVelocity; }
 
     float GetSteering() const { return steering_; };
+    void UpdateSteering(float newSteering);
+    Vector3 GetForwardVector() { if (raycastVehicle_) { raycastVehicle_->GetForwardVector(); } else return Vector3::ZERO; }
 
     void DebugDraw(const Color &color);
 
@@ -113,7 +111,6 @@ public:
     Controls controls_;
 
 protected:
-    void UpdateSteering(float newSteering);
 
     void ApplyEngineForces(float accelerator, bool braking);
 
@@ -137,6 +134,10 @@ protected:
 
 //
     SharedPtr<RaycastVehicle> raycastVehicle_;
+public:
+    const SharedPtr<RaycastVehicle> &GetRaycastVehicle() const;
+
+protected:
 
     /// Current left/right steering amount (-1 to 1.)
     float steering_;

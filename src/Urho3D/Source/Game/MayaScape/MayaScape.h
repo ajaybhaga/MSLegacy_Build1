@@ -124,12 +124,12 @@ private:
     SharedPtr<Player> agents_[MAX_AGENTS]; // Agents
 
 
-    WeakPtr<Terrain> terrain_;
+    SharedPtr<Terrain> terrain_;
     Vector<Vector3> trees_;
 
     Vector<Vector3> waypoints_;
+    Vector<Vector3> waypointsWorld_;
     unsigned int wpStartIndex_;
-    unsigned int wpActiveIndex_;
 
     Vector<Vector3> focusObjects_;
     unsigned int focusIndex_;

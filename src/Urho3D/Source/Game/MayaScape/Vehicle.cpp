@@ -139,9 +139,6 @@ Vehicle::Vehicle(Context* context)
 
     // sound
     playAccelerationSoundInAir_ = true;
-
-
-
 }
 
 //=============================================================================
@@ -957,16 +954,14 @@ void Vehicle::DebugDraw(const Color &color)
         dbgRenderer->AddLine(posWS, posWS + node_->GetUp(), color);
         dbgRenderer->AddLine(posWS, posWS + node_->GetRight(), color);
 
-
-
         raycastVehicle_->DrawDebugGeometry(dbgRenderer, false);
 
 
-
-
-
-
     }
+}
+
+const SharedPtr<RaycastVehicle> &Vehicle::GetRaycastVehicle() const {
+    return raycastVehicle_;
 }
 
 

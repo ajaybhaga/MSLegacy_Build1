@@ -68,6 +68,10 @@ const int CTRL_FORWARD = 1;
 const int CTRL_BACK = 2;
 
 
+const float mapSize = 3000.0f;
+const float miniMapWidth = 256.0f;
+const float miniMapHeight = 256.0f;
+const float WaitTimeNextFire = 2.0f;
 
 /***************************************************************************/
 /*

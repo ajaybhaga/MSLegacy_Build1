@@ -127,10 +127,6 @@ int numOfBoidsets = 10; // needs to be an even number for the boid splitting to 
 int updateCycleIndex = 0;
 BoidSet boids[10]; // 10 x 20 boids
 
-float mapSize = 3000.0f;
-float miniMapWidth = 256.0f;
-float miniMapHeight = 256.0f;
-#define WaitTimeNextFire 2.0f
 
 URHO3D_DEFINE_APPLICATION_MAIN(MayaScape)
 
@@ -393,7 +389,7 @@ void MayaScape::CreateAgents() {
         // Create the vehicle logic component
         agents_[i] = agentNode->CreateComponent<Player>();
         agents_[i]->Init();
-        agents_[i]->SetWaypoints((&waypoints_));
+        agents_[i]->SetWaypoints((&waypointsWorld_));
 
         // Place on track
         agentNode->SetPosition(Vector3(-814.0f+Random(-400.f, 400.0f), 400.0f, -595.0f+Random(-400.f, 400.0f)));
@@ -549,17 +545,13 @@ void MayaScape::CreatePlayer() {
     Node* playerNode = scene_->CreateChild("Player");
 
     // Place on track
-    playerNode->SetPosition(Vector3(-814.0f+Random(-400.f, 400.0f), 400.0f, -595.0f+Random(-400.f, 400.0f)));
+    playerNode->SetPosition(Vector3(-814.0f+Random(-400.f, 400.0f), 200.0f, -595.0f+Random(-400.f, 400.0f)));
 
     // Create the vehicle logic component
     player_ = playerNode->CreateComponent<Player>();
     player_->Init();
 
-    int size = waypoints_.Size();
-
-//    Vector<Vector3>* wp = &waypoints_;
-
-    player_->SetWaypoints((&waypoints_));
+    player_->SetWaypoints(&waypointsWorld_);
 
     // Store initial player position as focus
     focusObjects_.Push(player_->GetNode()->GetPosition());
@@ -816,6 +808,8 @@ void MayaScape::CreateScene() {
         // Convert marker position to world position for track
         float wpPosX = (((float)waypoints_[i].x_ / (float)terrain_->GetMarkerMap()->GetWidth())*mapSize)+wpOffsetX;
         float wpPosZ = (((float)waypoints_[i].z_ / (float)terrain_->GetMarkerMap()->GetHeight())*mapSize)+wpOffsetY;
+//terrain_->GetHeight(Vector3(wpPosX, 0.0f, wpPosZ))
+        waypointsWorld_.Push(Vector3(wpPosX, 0, wpPosZ));
 
         Node* objectNode = scene_->CreateChild("Waypoint");
         Vector3 position(wpPosX, 0.0f, wpPosZ);
@@ -2026,10 +2020,11 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
             float wpOffsetX = -mapSize/2;
             float wpOffsetY = -mapSize/2;
             // Convert marker position to world position for waypoint
-            float wpPosX = (((float)waypoints_[wpActiveIndex_].x_ / (float)terrain_->GetMarkerMap()->GetWidth())*mapSize)+wpOffsetX;
-            float wpPosZ = (((float)waypoints_[wpActiveIndex_].z_ / (float)terrain_->GetMarkerMap()->GetHeight())*mapSize)+wpOffsetY;
+            float wpPosX = (((float)waypoints_[player_->wpActiveIndex_].x_ / (float)terrain_->GetMarkerMap()->GetWidth())*mapSize)+wpOffsetX;
+            float wpPosZ = (((float)waypoints_[player_->wpActiveIndex_].z_ / (float)terrain_->GetMarkerMap()->GetHeight())*mapSize)+wpOffsetY;
 
             URHO3D_LOGINFOF("Fire=%f", player_->GetLastFire());
+
             player_->Fire(Vector3(wpPosX, 0.0f, wpPosZ));
         } else {
             URHO3D_LOGINFOF("Waiting last fire=%f", player_->GetLastFire());
@@ -2038,13 +2033,13 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
     }
 
     if (input->GetKeyPress(KEY_R)) {
-        wpActiveIndex_ = 0;
+        player_->wpActiveIndex_ = 0;
     }
 
     if (input->GetKeyPress(KEY_N)) {
-        wpActiveIndex_++;
+        player_->wpActiveIndex_++;
 
-        wpActiveIndex_ = wpActiveIndex_ % waypoints_.Size();
+        player_->wpActiveIndex_ = player_->wpActiveIndex_ % waypoints_.Size();
         // Place on track origin
 //        vehicle_->GetNode()->SetPosition(Vector3(raceTrack_->GetPosition().x_, 500.0f, raceTrack_->GetPosition().z_));
     }
@@ -2248,9 +2243,13 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 
     float wpOffsetX = -mapSize/2;
     float wpOffsetY = -mapSize/2;
+
+    int index = player_->wpActiveIndex_;
+
+    if (index < 0) index = 0;
     // Convert marker position to world position for waypoint
-    float wpPosX = (((float)waypoints_[wpActiveIndex_].x_ / (float)terrain_->GetMarkerMap()->GetWidth())*mapSize)+wpOffsetX;
-    float wpPosZ = (((float)waypoints_[wpActiveIndex_].z_ / (float)terrain_->GetMarkerMap()->GetHeight())*mapSize)+wpOffsetY;
+    float wpPosX = (((float)waypoints_[index].x_ / (float)terrain_->GetMarkerMap()->GetWidth())*mapSize)+wpOffsetX;
+    float wpPosZ = (((float)waypoints_[index].z_ / (float)terrain_->GetMarkerMap()->GetHeight())*mapSize)+wpOffsetY;
 
     // Calculate mini map position for waypoint
     shiftedRange = Vector3(wpPosX, 0.0f, wpPosZ) + Vector3(mapSize/2, mapSize/2, mapSize/2);
@@ -2741,7 +2740,8 @@ void MayaScape::HandlePostUpdate(StringHash eventType, VariantMap &eventData) {
 
         if (drawDebug_) {
   //          scene_->GetComponent<PhysicsWorld>()->DrawDebugGeometry(true);
-            player_->GetVehicle()->DebugDraw(Color::MAGENTA);
+//            player_->GetVehicle()->DebugDraw(Color::MAGENTA);
+            player_->DebugDraw(Color::MAGENTA);
 
                terrain_->SetViewMask(0);
 
