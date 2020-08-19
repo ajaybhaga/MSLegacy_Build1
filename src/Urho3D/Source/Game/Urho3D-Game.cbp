@@ -150,10 +150,61 @@
 				</MakeCommands>
 			</Target>
 		</Build>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/AP.cpp">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/AP.h">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/BUFF.cpp">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/BUFF.h">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/BUFFList.h">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Box.cpp">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Box.h">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Bullet.cpp">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Bullet.h">
+			<Option target="MayaScape"/>
+		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Character2D.cpp">
 			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Character2D.h">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Effect.cpp">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Effect.h">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Effect_Blink.cpp">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Effect_Blink.h">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Effect_Boom.cpp">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Effect_Boom.h">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Effect_Flare.cpp">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Effect_Flare.h">
 			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/GameController.cpp">
@@ -162,10 +213,28 @@
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/GameController.h">
 			<Option target="MayaScape"/>
 		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/GameObject.cpp">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/GameObject.h">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/HeatSource.cpp">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/HeatSource.h">
+			<Option target="MayaScape"/>
+		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/MayaScape.cpp">
 			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/MayaScape.h">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Missile.cpp">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Missile.h">
 			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Object2D.cpp">
@@ -174,10 +243,19 @@
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Object2D.h">
 			<Option target="MayaScape"/>
 		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Player.cpp">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Player.h">
+			<Option target="MayaScape"/>
+		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/RaycastVehicle.cpp">
 			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/RaycastVehicle.h">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/RemoteEvents.h">
 			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Sample2D.cpp">
@@ -186,10 +264,40 @@
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Sample2D.h">
 			<Option target="MayaScape"/>
 		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Skill.cpp">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Skill.h">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Skill_Blink.cpp">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Skill_Blink.h">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Skill_Flare.cpp">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Skill_Flare.h">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Skill_Missile.cpp">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Skill_Missile.h">
+			<Option target="MayaScape"/>
+		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/SmoothStep.cpp">
 			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/SmoothStep.h">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Toolkit.cpp">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Toolkit.h">
 			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/Vehicle.cpp">
@@ -309,6 +417,12 @@
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/block.h">
 			<Option target="MayaScape"/>
 		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/boids.cpp">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/boids.h">
+			<Option target="MayaScape"/>
+		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/fpath.cpp">
 			<Option target="MayaScape"/>
 		</Unit>
@@ -364,21 +478,6 @@
 			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/positiondef.h">
-			<Option target="MayaScape"/>
-		</Unit>
-		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/projectile/BUFFList.h">
-			<Option target="MayaScape"/>
-		</Unit>
-		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/projectile/GameObject.h">
-			<Option target="MayaScape"/>
-		</Unit>
-		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/projectile/Missile.cpp">
-			<Option target="MayaScape"/>
-		</Unit>
-		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/projectile/Missile.h">
-			<Option target="MayaScape"/>
-		</Unit>
-		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/projectile/Toolkit.h">
 			<Option target="MayaScape"/>
 		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/shared_libs.h">

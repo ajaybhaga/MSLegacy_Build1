@@ -282,15 +282,18 @@ void Player::FixedUpdate(float timeStep)
                     steering = 1.0f;
                 }
 */
-                URHO3D_LOGINFOF("***** Player - Vehicle Steer [%f]", vehicle_->GetSteering());
-                URHO3D_LOGINFOF("***** Player - waypoint [%d]=[%f,%f,%f,%f]", wpActiveIndex_,
-                                waypoints_->At(wpActiveIndex_).x_, waypoints_->At(wpActiveIndex_).y_,
-                                waypoints_->At(wpActiveIndex_).z_, steering);
-                URHO3D_LOGINFOF("***** Player - target =[%f,%f,%f]", toTarget_.x_, toTarget_.y_, toTarget_.z_);
 
-            // Enable auto-steering
-            vehicle_->UpdateSteering(steering);
 
+                if (autoSteering_) {
+                    URHO3D_LOGINFOF("***** Player AUTO-STEERING ENABLED - Vehicle Steer [%f]", vehicle_->GetSteering());
+                    URHO3D_LOGINFOF("***** Player - waypoint [%d]=[%f,%f,%f,%f]", wpActiveIndex_,
+                                    waypoints_->At(wpActiveIndex_).x_, waypoints_->At(wpActiveIndex_).y_,
+                                    waypoints_->At(wpActiveIndex_).z_, steering);
+                    URHO3D_LOGINFOF("***** Player - target =[%f,%f,%f]", toTarget_.x_, toTarget_.y_, toTarget_.z_);
+
+                    // Enable auto-steering
+                    vehicle_->UpdateSteering(steering);
+                }
                 //vehicle_->GetRigidBody()->
 //            pRigidBody_->ApplyForce(force_);
 /*
@@ -556,13 +559,13 @@ void Player::DebugDraw(const Color &color)
         dbgRenderer->AddLine(posWS, posWS + node_->GetRight(), color);
 */
 
-        vehicle_->GetRaycastVehicle()->DrawDebugGeometry(dbgRenderer, false);
+//        vehicle_->GetRaycastVehicle()->DrawDebugGeometry(dbgRenderer, false);
 
 //        ToQuaternion(trans.getRotation()),
         // dbgRenderer->AddBoundingBox(bbox, mat34, color);
 //        dbgRenderer->AddLine(posWS, posWS + node_->R, color);
         dbgRenderer->AddLine(posWS, posWS + this->vehicle_->GetNode()->GetDirection()*40.0f, Color::CYAN);
-        dbgRenderer->AddLine(posWS, toTarget_, Color::RED);
+        dbgRenderer->AddLine(posWS, toTarget_, Color::YELLOW);
 
 
 

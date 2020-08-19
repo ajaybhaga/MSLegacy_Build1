@@ -664,7 +664,7 @@ void MayaScape::CreateScene() {
         }
     }
 
-    int reduceFactor = ((float)trees_.Size()*0.98f);
+    int reduceFactor = ((float)trees_.Size()*0.99f);
     // Drop trees to reduce saturation of trees
     int reduceSize = Min(trees_.Size(), reduceFactor);
 
@@ -1997,11 +1997,15 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
     // Toggle debug geometry with 'C' key
     player_->changeTargetTime_ += timeStep;
 
-    if ((player_->GetVehicle()->controls_.IsDown(BUTTON_X)) || (input->GetKeyPress(KEY_C))) {
+    if ((player_->GetVehicle()->controls_.IsDown(BUTTON_Y)) || (input->GetKeyPress(KEY_C))) {
         if (player_->changeTargetTime_ > 0.04f)
         player_->targetAgentIndex_++;
         player_->targetAgentIndex_ = player_->targetAgentIndex_ % EvolutionManager::getInstance()->getAgents().size();
         player_->changeTargetTime_ = 0;
+    }
+
+    if (input->GetKeyPress(KEY_U)) {
+        player_->autoSteering_ = !player_->autoSteering_;
     }
 
 
@@ -2032,7 +2036,7 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 
     }
 //    player_->GetVehicle()->controls_
-    if (player_->GetVehicle()->controls_.IsDown(BUTTON_Y)) {
+    if (player_->GetVehicle()->controls_.IsDown(BUTTON_X)) {
 
         if (player_->GetLastFire() > WaitTimeNextFire) {
             player_->SetLastFire(0);

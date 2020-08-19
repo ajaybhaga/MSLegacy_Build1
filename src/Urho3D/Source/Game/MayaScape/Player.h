@@ -118,6 +118,7 @@ public:
     //Missile playerMissile_;
 
     float changeTargetTime_;
+    bool autoSteering_;
 
     bool doJump_;
 
