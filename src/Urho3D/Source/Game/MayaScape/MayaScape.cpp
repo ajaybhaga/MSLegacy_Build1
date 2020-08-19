@@ -664,7 +664,7 @@ void MayaScape::CreateScene() {
         }
     }
 
-    int reduceFactor = ((float)trees_.Size()*0.99f);
+    int reduceFactor = ((float)trees_.Size()*1.99f);
     // Drop trees to reduce saturation of trees
     int reduceSize = Min(trees_.Size(), reduceFactor);
 
