@@ -49,16 +49,6 @@ Missile::Missile(Context* context) : GameObject(context)
 	duration_ = 0.0f;
 }
 
-Missile::Missile(Context* context, SharedPtr<Node>producer) : GameObject(context)
-{
-	SetProducer(producer);
-	SetThrust(140.0f);
-	SetDetectionRange(3.0f);
-	SetBoomRange(0.3f);
-	SetDamage(20.0f);
-	duration_ = 0.0f;
-}
-
 void Missile::RegisterObject(Context* context)
 {
 	context->RegisterFactory<Missile>();
@@ -89,7 +79,9 @@ void Missile::Start()
 	SubscribeToEvent(node_, E_NODEENDCONTACT2D, URHO3D_HANDLER(Missile, HandleContactEnd));
 */
 
-    node_ = GetScene()->CreateChild("missile");
+//    std::string nodeName = "missile";
+    // Encode owner id in missile name
+    node_ = GetScene()->CreateChild("missile-noname");
 //    pNode_->SetPosition(Vector3(producer_->GetPosition()));
     node_->SetRotation(Quaternion(0.0f, 0.0f, 0.0f));
 
@@ -104,12 +96,12 @@ void Missile::Start()
     pRigidBody_->SetMass(1.0f);
     pRigidBody_->SetUseGravity(false);
     pRigidBody_->SetTrigger(true);
-    pRigidBody_->SetEnabled(true);
 
 //    pCollisionShape = pNode->CreateComponent<CollisionShape>();
 //    pCollisionShape->SetBox(Vector3::ONE);
 
-    pObject_->SetEnabled(true);
+    pRigidBody_->SetEnabled(false);
+    pObject_->SetEnabled(false);
 
     //Node* adjNode = pNode_->CreateChild("AdjNode");
     //adjNode->SetRotation(Quaternion(0.0, 0.0, -90.0f));
@@ -147,20 +139,30 @@ void Missile::Start()
 
 //    particleEmitterNodeList_.Push( pNodeEmitter );
 
-
-
+    // node collision
+    SubscribeToEvent(GetNode(), E_NODECOLLISION, URHO3D_HANDLER(Missile, HandleMissileCollision));
+//    SubscribeToEvent(GetNode(), E_NODECOLLISIONSTART, URHO3D_HANDLER(Missile, HandleNodeCollision));
 }
 
-void Missile::SnapToProducer() {
-    if (producer_) {
-        node_->SetPosition(producer_->GetPosition());
+void Missile::AssignProducer(int producerId, Vector3 spawnLoc) {
+
+    // Update missile name
+    Urho3D::String nodeName = Urho3D::String("missile-") + Urho3D::String(producerId);
+    producerId_ = producerId;
+    node_->SetName(nodeName.CString());
+    //    node_->SetName("updated-missile");
+
+//    node_->SetName("missile-" + producerId_);
+    node_->SetPosition(spawnLoc);
         GetNode()->SetPosition(node_->GetPosition());
         pRigidBody_->SetPosition(node_->GetPosition());
         //		bullet0->GetComponent<RigidBody2D>()->SetLinearVelocity(Vector2(towards_.x_, towards_.y_).Normalized() * 10.0f);
-        URHO3D_LOGDEBUGF("Missile::SnapToProducer() -> %d, [%f,%f,%f]", id_, node_->GetPosition().x_,
+        URHO3D_LOGDEBUGF("Missile::AssignProducer() -> %s, %d, [%f,%f,%f]", nodeName.CString(), producerId_, node_->GetPosition().x_,
                          node_->GetPosition().y_,
                          node_->GetPosition().z_);
-    }
+
+        pRigidBody_->SetEnabled(true);
+        pObject_->SetEnabled(true);
 }
 
 void Missile::Update(float timeStep)
@@ -239,6 +241,49 @@ void Missile::FixedUpdate(float timeStep)
 
 }
 
+/*
+//URHO3D_PARAM(2349, "extraData");
+void Missile::HandleNodeCollision(StringHash eventType, VariantMap & eventData)
+{
+    using namespace NodeCollision;
+
+    // increase score if missile collides with boids
+    Node* collidedNode = static_cast<Node*>(eventData[P_OTHERNODE].GetPtr());
+    URHO3D_LOGDEBUGF("***** Missile::HandleMissileCollision() -> collidedNode: [%s]", collidedNode->GetName().CString());
+
+
+    if (collidedNode->GetName() == "boid")
+    {
+        // emitt particle effect when boid has been hit
+        Node* particle = collidedNode->CreateChild("Particle");
+        particle->SetPosition(Vector3(0.0f, 0.0f, 0.0f));
+        particle->SetScale(2.0f);
+        ParticleEmitter* emitter = particle->CreateComponent<ParticleEmitter>();
+        emitter->SetEffect(GetSubsystem<ResourceCache>()->GetResource<ParticleEffect>("Particle/Burst.xml"));
+    }
+}*/
+
+void Missile::HandleMissileCollision(StringHash eventType, VariantMap & eventData)
+{
+    using namespace NodeCollision;
+
+    // increase score if missile collides with boids
+    Node* collidedNode = static_cast<Node*>(eventData[P_OTHERNODE].GetPtr());
+    URHO3D_LOGDEBUGF("***** Missile::HandleMissileCollision() -> collidedNode: [%s]", collidedNode->GetName().CString());
+
+
+    if (collidedNode->GetName() == "boid")
+    {
+        // emitt particle effect when boid has been hit
+        Node* particle = collidedNode->CreateChild("Particle");
+        particle->SetPosition(Vector3(0.0f, 0.0f, 0.0f));
+        particle->SetScale(2.0f);
+        ParticleEmitter* emitter = particle->CreateComponent<ParticleEmitter>();
+        emitter->SetEffect(GetSubsystem<ResourceCache>()->GetResource<ParticleEffect>("Particle/Burst.xml"));
+    }
+}
+
+/*
 void Missile::HandleContactBegin(StringHash eventType, VariantMap& eventData)
 {	
 	/// Clients should not update the component on its own
@@ -275,4 +320,4 @@ void Missile::HandleContactEnd(StringHash eventType, VariantMap& eventData)
 	if(targetnodes_.Contains(othernode))	targetnodes_.Erase(	targetnodes_.Find(othernode));
 	//Toolkit::Print("lost you!");
 }
-
+*/

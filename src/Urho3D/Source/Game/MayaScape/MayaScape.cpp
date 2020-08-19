@@ -1551,8 +1551,13 @@ void MayaScape::SubscribeToEvents() {
     SubscribeToEvent(E_POSTRENDERUPDATE, URHO3D_HANDLER(MayaScape, HandlePostRenderUpdate));
 
     // Subscribe to Box2D contact listeners
-    SubscribeToEvent(E_PHYSICSBEGINCONTACT2D, URHO3D_HANDLER(MayaScape, HandleCollisionBegin));
-    SubscribeToEvent(E_PHYSICSENDCONTACT2D, URHO3D_HANDLER(MayaScape, HandleCollisionEnd));
+//    SubscribeToEvent(E_PHYSICSBEGINCONTACT2D, URHO3D_HANDLER(MayaScape, HandleCollisionBegin));
+//    SubscribeToEvent(E_PHYSICSENDCONTACT2D, URHO3D_HANDLER(MayaScape, HandleCollisionEnd));
+
+    // node collision
+//    SubscribeToEvent(ClientPlayer->pNode, E_NODECOLLISION, URHO3D_HANDLER(Player, HandleClientPlayerCollision));
+//    SubscribeToEvent(ClientPlayer->playerMissile.pNode, E_NODECOLLISION, URHO3D_HANDLER(Missle, HandleClientMissileCollision));
+
 
     // If the node pointer is non-null, this component has been created into a scene node. Subscribe to physics collisions that
     // concern this scene node
@@ -1561,6 +1566,7 @@ void MayaScape::SubscribeToEvents() {
     // Unsubscribe the SceneUpdate event from base class to prevent camera pitch and yaw in 2D sample
     UnsubscribeFromEvent(E_SCENEUPDATE);
 }
+
 
 /*
 void MayaScape::HandleNodeCollision(StringHash eventType, VariantMap& eventData) {

@@ -82,8 +82,7 @@ void Skill_Missile::FixedUpdate(float timeStep)
 	//Missile* missile = new Missile(context_, node);
 	//missile0->AddComponent(missile, 0, REPLICATED);
 	missile0->CreateComponent<Missile>(LOCAL);
-	missile0->GetComponent<Missile>()->SetProducer(node);
-	missile0->GetComponent<Missile>()->SetProducerid(node->GetID());
+	missile0->GetComponent<Missile>()->SetProducer(node->GetID());
 
 	// Set the position and rotation of the missile
 	Vector3 towards = node->GetComponent<Player>()->GetTowards();

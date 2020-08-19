@@ -213,6 +213,9 @@
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/GameController.h">
 			<Option target="MayaScape"/>
 		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/GameEvents.h">
+			<Option target="MayaScape"/>
+		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/GameObject.cpp">
 			<Option target="MayaScape"/>
 		</Unit>

@@ -187,10 +187,6 @@ private:
 	String bulletType_;
 
     Vector<Vector3>* waypoints_ = nullptr;
-    // For minimap coordinate conversion
-    int miniMapWidth_;
-    int miniMapHeight_;
-    int mapDim_;
     Vector3 toTarget_ = Vector3::ZERO;
 
 
@@ -288,5 +284,10 @@ public:
 	/// initiate weapons
 	void InitiateWeapons();
 
-};
+
+    // Player node collision
+    void HandlePlayerCollision(StringHash eventType, VariantMap &eventData);
+
+
+    };
 

@@ -4,8 +4,11 @@
 #include <Urho3D/Graphics/StaticModel.h>
 #include <Urho3D/Graphics/ParticleEmitter.h>
 #include "GameObject.h"
+#include "Player.h"
 
 using namespace Urho3D;
+
+class Player;
 
 class Missile : public GameObject
 {
@@ -27,12 +30,14 @@ private:
     SharedPtr<StaticModel> pObject_;
     SharedPtr<ParticleEmitter> pParticleEmitter_;
 
+    SharedPtr<Player> owner_;
+
 	/// Target Node
 	Vector<SharedPtr<Node>>targetnodes_;
 	/// Owner of the missile
-	SharedPtr<Node>producer_;
-	/// Owner'ID of the missile
-	int producerid_;
+//	SharedPtr<Node>producer_;
+	/// Owner ID of the missile
+	int producerId_;
 	/// Time the node has lasted for
 	float duration_;
 
@@ -53,17 +58,16 @@ public:
 	void SetBoomRange(float m_boomRange) { boomRange = m_boomRange; }
 	float GetDamage() { return damage; }
 	void SetDamage(float m_damage) { damage = m_damage; }
-	SharedPtr<Node> GetProducer() { return producer_; }
-    void SetProducer(SharedPtr<Node> m_producer) { producer_ = m_producer; }
-	int GetProducerid() { return producerid_; }
-	void SetProducerid(int m_producerid) { producerid_ = m_producerid; }
+	int GetProducer() { return producerId_; }
+    void SetProducer(int producerId) {
+        producerId_ = producerId;
+    }
 
-    void SnapToProducer();
+    void AssignProducer(int producerId, Vector3 spawnLoc);
 
-        /// Life-cycle function
+    /// Life-cycle function
 	/// Construct.
 	Missile(Context* context);
-	Missile(Context* context, SharedPtr<Node>producer);
 	/// Register object factory and attributes.
 	static void RegisterObject(Context* context);
 	/// Handle startup. Called by LogicComponent base class.
@@ -75,8 +79,12 @@ public:
 
 	/// Event handle functions
 	/// When the missile has detected some heatsource, add it into the tracking queue.
-	void HandleContactBegin(StringHash eventType, VariantMap& eventData);
+//	void HandleContactBegin(StringHash eventType, VariantMap& eventData);
 	/// When the missle lost the target
-	void HandleContactEnd(StringHash eventType, VariantMap& eventData);
+//	void HandleContactEnd(StringHash eventType, VariantMap& eventData);
+
+    // Player node collision
+    void HandleNodeCollision(StringHash eventType, VariantMap & eventData);
+    void HandleMissileCollision(StringHash eventType, VariantMap &eventData);
 
 };

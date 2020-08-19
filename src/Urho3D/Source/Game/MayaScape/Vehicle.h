@@ -129,6 +129,7 @@ protected:
     void PostUpdateSound(float timeStep);
 
     void PostUpdateWheelEffects();
+    void HandleVehicleCollision(StringHash eventType, VariantMap & eventData);
 
 protected:
 

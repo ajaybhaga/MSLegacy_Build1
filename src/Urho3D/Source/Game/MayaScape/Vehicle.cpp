@@ -45,6 +45,7 @@
 
 #include "WheelTrackModel.h"
 #include "types.h"
+#include "Missile.h"
 
 #include <SDL/SDL_log.h>
 #include <Urho3D/DebugNew.h>
@@ -173,6 +174,10 @@ void Vehicle::Init()
 {
     ResourceCache* cache = GetSubsystem<ResourceCache>();
 
+    // node collision
+    SubscribeToEvent(GetNode(), E_NODECOLLISION, URHO3D_HANDLER(Vehicle, HandleVehicleCollision));
+
+//E_NODECOLLISIONSTART
     Node* adjNode = node_->CreateChild("AdjNode");
     adjNode->SetRotation(Quaternion(0.0, 0.0, -90.0f));
 
@@ -964,4 +969,48 @@ const SharedPtr<RaycastVehicle> &Vehicle::GetRaycastVehicle() const {
     return raycastVehicle_;
 }
 
+
+void Vehicle::HandleVehicleCollision(StringHash eventType, VariantMap & eventData)
+{
+    using namespace NodeCollision;
+
+    // decrease health if player player collides with boids
+    Node* collidedNode = static_cast<Node*>(eventData[P_OTHERNODE].GetPtr());
+//    static_cast<unsigned int>(owner->vehicle_->GetNode()->GetID());
+    // decrease health if player player collides with boids
+//    Player* player = static_cast<Player*>(eventData["owner"].GetPtr());
+
+    URHO3D_LOGDEBUGF("collide node name: [%s]", collidedNode->GetName().CString());
+    // Get the other colliding body, make sure it is moving (has nonzero mass)
+//    auto* otherBody = static_cast<RigidBody*>(eventData[P_OTHERBODY].GetPtr());
+
+
+    // Pull producer id from name
+    Urho3D::String name = collidedNode->GetName();
+    // Start after hyphen
+    Urho3D::String producerIdStr = name.Substring(name.Find("-")+1);
+    int producerId = Urho3D::ToInt(producerIdStr.CString());
+
+    /*
+    missile-1256
+    [Wed Aug 19 14:18:28 2020] DEBUG: collide node name: [missile-1256]
+    [Wed Aug 19 14:18:28 2020] DEBUG: Vehicle::HandleVehicleCollision() -> MISSILE: [Node, 1515, missile-1256]
+    [Wed Aug 19 14:18:28 2020] DEBUG: Vehicle::HandleVehicleCollision() node [1256] -> OPPONENT COLLISION at node [1515]
+*/
+    if (collidedNode->GetName().StartsWith("missile"))
+    {
+        auto* collidedRB = static_cast<RigidBody*>(eventData[P_OTHERBODY].GetPtr());
+//        auto* collidedMissile = static_cast<Node*>(eventData[{P_OTHERNODE}].GetPtr());
+
+        URHO3D_LOGDEBUGF("Vehicle::HandleVehicleCollision() -> MISSILE: [%s, %d, %s] PRODUCER ID %d", collidedNode->GetTypeName().CString(), collidedNode->GetID(), collidedNode->GetName().CString(), producerId);
+
+
+        // Skip collision if with owner vehicle
+        if (producerId == GetNode()->GetID()) {
+            URHO3D_LOGDEBUGF("Vehicle::HandleVehicleCollision() node [%d] -> SELF COLLISION at node %d", GetNode()->GetID(), collidedNode->GetID());
+        } else {
+            URHO3D_LOGDEBUGF("Vehicle::HandleVehicleCollision() node [%d] -> OPPONENT COLLISION at node [%d]", GetNode()->GetID(), collidedNode->GetID());
+        }
+    }
+}
 

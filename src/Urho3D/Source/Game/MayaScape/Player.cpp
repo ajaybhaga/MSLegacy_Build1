@@ -28,6 +28,7 @@
 #include "Toolkit.h"
 #include <SDL/SDL_log.h>
 #include <Urho3D/DebugNew.h>
+#include <Urho3D/Physics/PhysicsEvents.h>
 
 
 #include "Player.h"
@@ -140,6 +141,7 @@ void Player::Init()
 
     vehicleNode->SetRotation(Quaternion(0.0, -90.0, 0.0));
 
+
 }
 
 void Player::InitiateWeapons()
@@ -151,7 +153,10 @@ void Player::InitiateWeapons()
 void Player::Start()
 {
 	Node* node = GetNode();
-/*
+    // node collision
+    SubscribeToEvent(GetNode(), E_NODECOLLISION, URHO3D_HANDLER(Player, HandlePlayerCollision));
+
+	/*
 	/// sprite
 	ResourceCache* cache = GetSubsystem<ResourceCache>();
 	Sprite2D* sprite2d = cache->GetResource<Sprite2D>("Urho2D/Player.png");
@@ -260,8 +265,8 @@ void Player::FixedUpdate(float timeStep)
                 if (wpActiveIndex_ < 0)
                     return;
 
-                float wpOffsetX = -mapDim_ / 2;
-                float wpOffsetY = -mapDim_ / 2;
+//                float wpOffsetX = -mapDim_ / 2;
+//                float wpOffsetY = -mapDim_ / 2;
                 // Convert marker position to world position for track
                 //          float wpPosX = (((float)waypoints_->At(wpActiveIndex_).x_ / (float)miniMapWidth_)*mapDim_)+wpOffsetX;
 //            float wpPosZ = (((float)waypoints_->At(wpActiveIndex_).z_ / (float)miniMapHeight_)*mapDim_)+wpOffsetY;
@@ -331,6 +336,23 @@ void Player::FixedUpdate(float timeStep)
 }
 
 
+void Player::HandlePlayerCollision(StringHash eventType, VariantMap & eventData)
+{
+    using namespace NodeCollision;
+
+    // decrease health if player player collides with boids
+    Node* collidedNode = static_cast<Node*>(eventData[P_OTHERNODE].GetPtr());
+
+    URHO3D_LOGDEBUGF("Player::HandlePlayerCollision() -> collidedNode: [%s]", collidedNode->GetName().CString());
+
+    if (collidedNode->GetName() == "boid")
+    {
+        // engine_->Exit();
+        printf("Player collided with Boid!! \n");
+
+    }
+}
+
 void Player::Fire() {
     Fire(toTarget_);
 }
@@ -339,6 +361,7 @@ void Player::Fire(Vector3 target)
 {
     node_ = GetNode();
 	Scene* scene = GetScene();
+
 
     URHO3D_LOGDEBUG("Player::Fire()");
 
@@ -366,24 +389,41 @@ void Player::Fire(Vector3 target)
             return;
         }*/
 
+/*
+        VariantMap& eventData = GetNode()->GetEventDataMap();
+        eventData[P_DATA] = GetNode()->GetWorldPosition();
+        SendEvent(StringHash("Blast"), eventData);
+
+        GetNode()->Remove();
+*/
 
         SharedPtr<Node> n;
         Node* bullet0 = scene->CreateChild("bullet", REPLICATED);
         Missile* newM = bullet0->CreateComponent<Missile>(LOCAL);
+        newM->SetProducer(vehicle_->GetNode()->GetID());
+
+
+        // Store local missile list
+        //missileList_.Push(vehicle_->GetNode()->GetID());
+
+//        VariantMap& eventData = GetNode()->GetEventDataMap();
+//        eventData["owner"] = SharedPtr<Player>(this);
+
+//        eventData["missileOwner"] = this->GetID();
+  //       vehicle_->SendEvent(E_NODECOLLISION, eventData);
+
+
+
+        // Set the ownership of the bullet to the Player
+//        bullet0->GetComponent<Missile>()->SetProducer(SharedPtr<Node>(vehicle_->GetNode()));
+
         Node* tgt = scene->CreateChild("missileTarget", LOCAL);
         //tgt->>SetPosition(0f,0f,0f);
         tgt->SetPosition(target);
         newM->AddTarget(SharedPtr<Node>(tgt));
         // Assign the producer node
-//        n = node_;
-        // Set the ownership of the bullet to the Player
-        bullet0->GetComponent<Missile>()->SetProducer(SharedPtr<Node>(vehicle_->GetNode()));
-        newM->SnapToProducer();
-        // Set the position and rotation of the bullet
-//        bullet0->SetWorldPosition(node_->GetPosition() + towards_.Normalized()*0.2f);
- //       bullet0->SetWorldRotation(Quaternion(Vector3::UP, towards_));
-//		bullet0->GetComponent<RigidBody2D>()->SetLinearVelocity(Vector2(towards_.x_, towards_.y_).Normalized() * 10.0f);
-        URHO3D_LOGDEBUGF("Player::Fire() -> %d, [%f,%f,%f]", testcnt_, newM->GetNode()->GetPosition().x_,
+        newM->AssignProducer(vehicle_->GetNode()->GetID(), vehicle_->GetNode()->GetPosition()+Vector3(0.0f, 2.0f, 0.0f));
+        URHO3D_LOGDEBUGF("Player::Fire() [%d] -> %d, [%f,%f,%f]", vehicle_->GetNode()->GetID(), testcnt_, newM->GetNode()->GetPosition().x_,
                          newM->GetNode()->GetPosition().y_,
                          newM->GetNode()->GetPosition().z_);
 
@@ -485,7 +525,7 @@ void Player::ComputeSteerForce() {
     Vector3 toTarget;
     if (!waypoints_->Empty()) {
 
-        URHO3D_LOGDEBUGF("Player::ComputeSteerForce() waypoints -> [%d] -> set to  %d", waypoints_->Size(), wpActiveIndex_);
+//        URHO3D_LOGDEBUGF("Player::ComputeSteerForce() waypoints -> [%d] -> set to  %d", waypoints_->Size(), wpActiveIndex_);
 
         // Calculate distance to waypoint
         toTarget = pRigidBody_->GetPosition() - waypoints_->At(wpActiveIndex_);
