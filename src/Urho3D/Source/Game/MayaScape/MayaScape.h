@@ -55,6 +55,9 @@
 #include "Vehicle.h"
 #include "Player.h"
 
+#define APP_VERSION "MayaSpace v0.1 beta"
+#define STUDIO_VERSION "Maya Monkey Studios 2020"
+
 #define MAX_AGENTS 1024 // Set max limit for agents (used for storage)
 
 namespace Urho3D {
@@ -128,6 +131,7 @@ private:
     void HandleStartServer(StringHash eventType, VariantMap& eventData);
     void HandleConnectionStatus(StringHash eventType, VariantMap& eventData);
     void HandleClientObjectID(StringHash eventType, VariantMap& eventData);
+    void HandleExit(StringHash eventType, VariantMap& eventData);
 
     /// Construct the scene content.
     void CreateScene();
@@ -162,7 +166,10 @@ private:
     void SetParticleEmitter(int hitId, float contactX, float contactY, int type, float timeStep);
     void HandleUpdateParticlePool(float timeStep);
 
-    // Init Genetic Algorithm sprite generator
+    // Update menu state (change visibility of buttons)
+    void UpdateUIState(bool state);
+
+        // Init Genetic Algorithm sprite generator
     void InitEvolutionSpriteGenerator();
 
     // Display Genetic Algorithm Evolution Manager statistics
@@ -200,6 +207,22 @@ private:
 
     /// Sample2D utility object.
     SharedPtr<Sample2D> sample2D_;
+
+    SharedPtr<Text> versionText_;
+    SharedPtr<Text> studioText_;
+
+    SharedPtr<Text> healthText_;
+    SharedPtr<Text> powerBarText_;
+    SharedPtr<Text> rpmBarText_;
+    SharedPtr<Text> velBarText_;
+
+    // Menu background sprite.
+    SharedPtr<Sprite> bkgSprite_;
+    float bkgAngle_;
+
+    /// Health sprite.
+    SharedPtr<Sprite> HealthSprite_;
+
     /// Powerbar P1 sprite.
     SharedPtr<Sprite> powerBarP1Sprite_;
     /// Powerbar Bkg P1 sprite.
@@ -259,6 +282,8 @@ private:
     SharedPtr<Button> connectButton_;
     SharedPtr<Button> disconnectButton_;
     SharedPtr<Button> startServerButton_;
+    SharedPtr<Button> exitButton_;
+
     SharedPtr<Text> instructionsText_;
     unsigned clientObjectID_;
     bool isServer_;

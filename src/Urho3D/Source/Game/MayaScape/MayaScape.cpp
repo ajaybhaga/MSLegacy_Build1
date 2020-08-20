@@ -108,6 +108,47 @@
 #include <Urho3D/UI/UI.h>
 #include <Urho3D/UI/UIEvents.h>
 
+
+#include <Urho3D/Graphics/AnimatedModel.h>
+#include <Urho3D/Graphics/Animation.h>
+#include <Urho3D/Graphics/AnimationState.h>
+#include <Urho3D/Urho2D/AnimatedSprite2D.h>
+#include <Urho3D/Urho2D/AnimationSet2D.h>
+#include <Urho3D/UI/BorderImage.h>
+#include <Urho3D/UI/Button.h>
+#include <Urho3D/Graphics/Camera.h>
+#include <Urho3D/Urho2D/CollisionBox2D.h>
+#include <Urho3D/Urho2D/CollisionChain2D.h>
+#include <Urho3D/Urho2D/CollisionCircle2D.h>
+#include <Urho3D/Urho2D/CollisionPolygon2D.h>
+#include <Urho3D/Core/Context.h>
+#include <Urho3D/Core/CoreEvents.h>
+#include <Urho3D/Engine/Engine.h>
+#include <Urho3D/IO/File.h>
+#include <Urho3D/IO/FileSystem.h>
+#include <Urho3D/UI/Font.h>
+#include <Urho3D/Input/Input.h>
+#include <Urho3D/Urho2D/ParticleEffect2D.h>
+#include <Urho3D/Urho2D/ParticleEmitter2D.h>
+#include <Urho3D/Resource/ResourceCache.h>
+#include <Urho3D/Urho2D/RigidBody2D.h>
+#include <Urho3D/Scene/Scene.h>
+#include <Urho3D/Audio/Sound.h>
+#include <Urho3D/Audio/SoundSource.h>
+#include <Urho3D/Core/StringUtils.h>
+#include <Urho3D/UI/Text.h>
+#include <Urho3D/Input/Input.h>
+#include <Urho3D/IO/Log.h>
+#include <Urho3D/Graphics/Texture2D.h>
+#include <Urho3D/Urho2D/TileMap2D.h>
+#include <Urho3D/Urho2D/TileMapLayer2D.h>
+#include <Urho3D/Urho2D/TileMap3D.h>
+#include <Urho3D/Urho2D/TileMapLayer3D.h>
+#include <Urho3D/Urho2D/TmxFile2D.h>
+#include <Urho3D/UI/UI.h>
+#include <Urho3D/UI/UIEvents.h>
+#include <Urho3D/Scene/ValueAnimation.h>
+
 #include "network/Server.h"
 #include "network/ClientObj.h"
 #include "network/NetworkActor.h"
@@ -396,6 +437,8 @@ void MayaScape::Start() {
     // Create P1 player
     CreatePlayer();
 
+    UpdateUIState(false);
+
     ResourceCache* cache = GetSubsystem<ResourceCache>();
     // Create boids
     for (int i = 0; i < numOfBoidsets; i++)
@@ -644,680 +687,389 @@ void MayaScape::CreateScene() {
     DebugRenderer *dbgRenderer = scene_->CreateComponent<DebugRenderer>(LOCAL);
     physicsWorld->SetDebugRenderer(dbgRenderer);
 
-    // Create camera and define viewport. We will be doing load / save, so it's convenient to create the camera outside the scene,
-    // so that it won't be destroyed and recreated, and we don't have to redefine the viewport on load
-    cameraNode_ = scene_->CreateChild("Camera", LOCAL);
+    // On client
+    if (!isServer_) {
+
+        // Create camera and define viewport. We will be doing load / save, so it's convenient to create the camera outside the scene,
+        // so that it won't be destroyed and recreated, and we don't have to redefine the viewport on load
+        cameraNode_ = scene_->CreateChild("Camera", LOCAL);
 //    cameraNode_ = new Node(context_);
-    auto* camera = cameraNode_->CreateComponent<Camera>();
-    camera->SetFarClip(500.0f);
-    cameraNode_->SetPosition(Vector3(0.0f, 5.0f, 0.0f));
-    GetSubsystem<Renderer>()->SetViewport(0, new Viewport(context_, scene_, camera));
-
-
-    // Enable for 3D sounds to work (attach to camera node)
-    SoundListener* listener = cameraNode_->CreateComponent<SoundListener>();
-    GetSubsystem<Audio>()->SetListener(listener);
-
-    // you can set master volumes for the different kinds if sounds, here 30% for music
-    GetSubsystem<Audio>()->SetMasterGain(SOUND_MUSIC, 1.2);
-
-    // Create a directional light with shadows
-    Node* lightNode = scene_->CreateChild("DirectionalLight", LOCAL);
-    lightNode->SetDirection(Vector3(0.3f, -0.5f, 0.425f));
-    Light* light = lightNode->CreateComponent<Light>();
-    light->SetLightType(LIGHT_DIRECTIONAL);
-    light->SetCastShadows(true);
-    light->SetShadowBias(BiasParameters(0.00025f, 0.5f));
-    light->SetShadowCascade(CascadeParameters(10.0f, 50.0f, 200.0f, 0.0f, 0.8f));
-    light->SetSpecularIntensity(0.5f);
-
-    // All static scene content and the camera are also created as local,
-    // so that they are unaffected by scene replication and are
-    // not removed from the client upon connection.
-    // Create a Zone component first for ambient lighting & fog control.
-
-    // Create static scene content. First create a zone for ambient lighting and fog control
-    Node* zoneNode = scene_->CreateChild("Zone", LOCAL);
-    Zone* zone = zoneNode->CreateComponent<Zone>();
-    zone->SetAmbientColor(Color(0.15f, 0.15f, 0.15f));
-    zone->SetFogColor(Color(0.5f, 0.5f, 0.7f));
-    zone->SetFogStart(700.0f);
-    zone->SetFogEnd(900.0f);
-    zone->SetBoundingBox(BoundingBox(-2000.0f, 2000.0f));
-
-    /*
-    // Create a directional light with cascaded shadow mapping
-    Node* lightNode = scene_->CreateChild("DirectionalLight");
-    lightNode->SetDirection(Vector3(0.3f, -0.5f, 0.425f));
-    Light* light = lightNode->CreateComponent<Light>();
-    light->SetLightType(LIGHT_DIRECTIONAL);
-    light->SetCastShadows(true);
-    light->SetShadowBias(BiasParameters(0.00025f, 0.5f));
-    light->SetShadowCascade(CascadeParameters(10.0f, 50.0f, 200.0f, 0.0f, 0.8f));
-    light->SetSpecularIntensity(0.5f);
-*/
-    sample2D_->scene_ = scene_;
-///
-
-    // Create heightmap terrain with collision
-    Node* terrainNode = scene_->CreateChild("Terrain", LOCAL);
-    terrainNode->SetPosition(Vector3::ZERO);
-    terrain_ = terrainNode->CreateComponent<Terrain>();
-    terrain_->SetPatchSize(64);
-    terrain_->SetSpacing(Vector3(2.8f, 2.2f, 2.8f));
-//    terrain->SetSpacing(Vector3(3.0f, 0.1f, 3.0f)); // Spacing between vertices and vertical resolution of the height map
-
-    //    terrain->SetHeightMap(cache->GetResource<Image>("Offroad/Terrain/HeightMapRace-257.png"));
-//    terrain->SetMaterial(cache->GetResource<Material>("Offroad/Terrain/TerrainRace-256.xml"));
-    terrain_->SetMarkerMap(cache->GetResource<Image>("Textures/MarkerMap.png"));
-    terrain_->SetHeightMap(cache->GetResource<Image>("Textures/HeightMap.png"));
-    terrain_->SetMaterial(cache->GetResource<Material>("Materials/Terrain.xml"));
-
-    terrain_->SetOccluder(true);
-
-    // TRACK MARKER
-    // HSL -> 0.500000059604645,1,0.643137276172638
-
-    // Search for track marker
-    int trackX = 0;
-    int trackY = 0;
-    for (int k = 0; k < terrain_->GetMarkerMap()->GetHeight(); k++) {
-        for (int j = 0; j < terrain_->GetMarkerMap()->GetWidth(); j++) {
-            Vector3 hsl_ = terrain_->GetMarkerMap()->GetPixel(k, j).ToHSL();
-            //URHO3D_LOGINFOF("terrain marker map[x,y]=[%f,%f,%f]", j, k, hsl_.x_, hsl_.y_, hsl_.z_);
-
-
-            if (hsl_ == bkgMarkerToken)
-                continue;
-
-            if (hsl_ == treeMarkerToken) {
-                trees_.Push(Vector3((float)j, 0.0f, (float)k));
-            } else if (hsl_ == trackMarkerToken) {
-                trackX = j;
-                trackY = k;
-            } else if (hsl_ == waypointToken) {
-                waypoints_.Push((Vector3((float)j, 0.0f, (float)k)));
-            } else {
-                // Store track marker
-                URHO3D_LOGINFOF("***** UNKNOWN terrain marker map[%d,%d]=[%f,%f,%f]", j, k, hsl_.x_, hsl_.y_, hsl_.z_);
-            }
-
-        }
-    }
-
-    int reduceFactor = ((float)trees_.Size()*1.99f);
-    // Drop trees to reduce saturation of trees
-    int reduceSize = Min(trees_.Size(), reduceFactor);
-
-    for (int j = 0; j < reduceSize; j++) {
-        trees_.Erase(Random(0, trees_.Size()), 1);
-    }
-
-    URHO3D_LOGINFOF("***** TREE COUNT: [%d]", trees_.Size());
-    URHO3D_LOGINFOF("***** WAYPOINT COUNT: [%d]", waypoints_.Size());
-
-    RigidBody* body = terrainNode->CreateComponent<RigidBody>();
-    body->SetCollisionLayer(2); // Use layer bitmask 2 for static geometry
-    CollisionShape* shape = terrainNode->CreateComponent<CollisionShape>();
-
-    // Assigns terrain collision map (calculated based on heightmap)
-    shape->SetTerrain();
-
-    // Load race track at track marker
-
-    // Convert marker position to world position for track
-    int w = terrain_->GetMarkerMap()->GetWidth();
-    int h = terrain_->GetMarkerMap()->GetHeight();
-
-
-    float trackOffsetX = -mapSize/2;
-    float trackOffsetY = -mapSize/2;
-    float trackPosX = (((float)trackX / (float)w)*mapSize)+trackOffsetX;
-    float trackPosZ = (((float)trackY / (float)h)*mapSize)+trackOffsetY;
-
-    // Convert from mini map to world position
-//    Vector3 shiftedRange = Vector3(trackPosX, 0, trackPosZ) - Vector3(mapSize/2, mapSize/2, mapSize/2);
-
-    URHO3D_LOGINFOF("-----> SET RACE TRACK TO location in world space [%f,%f,%f]", trackPosX, 0.0f, trackPosZ);
-
-    /*
-    // 1600+1600
-    float xRange = (shiftedRange.x_*mapSize) / miniMapWidth;
-    float zRange = (shiftedRange.z_*mapSize) / miniMapHeight;
-*/
-
-        raceTrack_ = scene_->CreateChild("RaceTrack", LOCAL);
-        Vector3 position(trackPosX, 0.0f, trackPosZ);
-        position.y_ = terrain_->GetHeight(position) + 20.0f;
-        raceTrack_->SetPosition(position);
-        // Create a rotation quaternion from up vector to terrain normal
-        //raceTrack_->SetRotation(Quaternion(Vector3::UP, terrain_->GetNormal(position)));
-        Node* adjNode = raceTrack_->CreateChild("AdjNode", LOCAL);
-        adjNode->SetRotation(Quaternion(0.0, 0.0, 0.0f));
-
-        raceTrack_->SetScale(30.0f);
-
-        auto* object = adjNode->CreateComponent<StaticModel>();
-        std::string mdlPath = "Models/Tracks/Models/trackA.mdl";
-        std::string matPath = "Models/Tracks/Models/trackA.txt";
-        auto* model = cache->GetResource<Model>(mdlPath.c_str());
-        object->SetModel(model);
-        object->ApplyMaterialList(matPath.c_str());
-        object->SetCastShadows(true);
-
-        body = adjNode->CreateComponent<RigidBody>();
-        body->SetCollisionLayer(2);
-        trackColShape_ = adjNode->CreateComponent<CollisionShape>();
-        trackColShape_->SetTriangleMesh(object->GetModel(), 0);
-//        trackColShape_->SetConvexHull(model);
-
-
-    // Place trees based on markers
-
-
-
-    // Convert from mini map to world position
-//    Vector3 shiftedRange = Vector3(trackPosX, 0, trackPosZ) - Vector3(mapSize/2, mapSize/2, mapSize/2);
-
-    URHO3D_LOGINFOF("-----> SET RACE TRACK TO location in world space [%f,%f,%f]", trackPosX, 0.0f, trackPosZ);
-
-    // Place trees
-    for (unsigned i = 0; i < trees_.Size(); ++i)
-    {
-        float treeOffsetX = -mapSize/2;
-        float treeOffsetY = -mapSize/2;
-        // Convert marker position to world position for track
-        float treePosX = (((float)trees_[i].x_ / (float)terrain_->GetMarkerMap()->GetWidth())*mapSize)+treeOffsetX;
-        float treePosZ = (((float)trees_[i].z_ / (float)terrain_->GetMarkerMap()->GetHeight())*mapSize)+treeOffsetY;
-
-        Node* objectNode = scene_->CreateChild("Tree", LOCAL);
-        Vector3 position(treePosX, 0.0f, treePosZ);
-        position.y_ = terrain_->GetHeight(position) - 0.1f;
-        objectNode->SetPosition(position);
-
-        // Store tree position as focus
-        focusObjects_.Push(position);
-
-        // Create a rotation quaternion from up vector to terrain normal
-        objectNode->SetRotation(Quaternion(Vector3::UP, terrain_->GetNormal(position)));
-        Node* adjNode = objectNode->CreateChild("AdjNode", LOCAL);
-        adjNode->SetRotation(Quaternion(0.0, 0.0, -90.0f));
-
-        objectNode->SetScale(20.0f);
-
-        auto* object = adjNode->CreateComponent<StaticModel>();
-
-        // Random
-        int r = std::round(Random(0.0f, 5.0f));
-        switch (r) {
-            case 0:
-                object->SetModel(cache->GetResource<Model>("Models/AssetPack/tree-baobab_orange.mdl"));
-                break;
-            case 1:
-                object->SetModel(cache->GetResource<Model>("Models/AssetPack/tree-birch02.mdl"));
-                break;
-            case 2:
-                object->SetModel(cache->GetResource<Model>("Models/AssetPack/tree-elipse.mdl"));
-                break;
-            case 3:
-                object->SetModel(cache->GetResource<Model>("Models/AssetPack/tree-fir.mdl"));
-                break;
-            case 4:
-                object->SetModel(cache->GetResource<Model>("Models/AssetPack/tree-oak.mdl"));
-                break;
-            case 5:
-                object->SetModel(cache->GetResource<Model>("Models/AssetPack/tree-lime.mdl"));
-                break;
-        }
-
-        //       object->SetMaterial(cache->GetResource<Material>("Materials/LOWPOLY_COLORS.xml")
-        object->SetMaterial(cache->GetResource<Material>("Materials/LOWPOLY-COLORS.xml"));
-        object->SetCastShadows(true);
-
-        auto* body = adjNode->CreateComponent<RigidBody>();
-        body->SetCollisionLayer(2);
-        auto* shape = objectNode->CreateComponent<CollisionShape>();
-        shape->SetTriangleMesh(object->GetModel(), 0);
-    }
-
-    // Place waypoints
-
-    // Store focusObjects index for waypoint reference
-    wpStartIndex_ = focusObjects_.Size()+1;
-    for (unsigned i = 0; i < waypoints_.Size(); ++i)
-    {
-        float wpOffsetX = -mapSize/2;
-        float wpOffsetY = -mapSize/2;
-        // Convert marker position to world position for track
-        float wpPosX = (((float)waypoints_[i].x_ / (float)terrain_->GetMarkerMap()->GetWidth())*mapSize)+wpOffsetX;
-        float wpPosZ = (((float)waypoints_[i].z_ / (float)terrain_->GetMarkerMap()->GetHeight())*mapSize)+wpOffsetY;
-//terrain_->GetHeight(Vector3(wpPosX, 0.0f, wpPosZ))
-        waypointsWorld_.Push(Vector3(wpPosX, 0, wpPosZ));
-
-        Node* objectNode = scene_->CreateChild("Waypoint", LOCAL);
-        Vector3 position(wpPosX, 0.0f, wpPosZ);
-        position.y_ = terrain_->GetHeight(position) - 0.1f;
-        objectNode->SetPosition(position);
-
-        // Store tree position as focus
-        focusObjects_.Push(position);
-
-        // Create a rotation quaternion from up vector to terrain normal
-        objectNode->SetRotation(Quaternion(Vector3::UP, terrain_->GetNormal(position)));
-        Node* adjNode = objectNode->CreateChild("AdjNode", LOCAL);
-        adjNode->SetRotation(Quaternion(0.0, 0.0, -90.0f));
-
-        objectNode->SetScale(20.0f);
-
-        auto* object = adjNode->CreateComponent<StaticModel>();
-         object->SetModel(cache->GetResource<Model>("Models/AssetPack/castle-flag.mdl"));
-
-        //       object->SetMaterial(cache->GetResource<Material>("Materials/LOWPOLY_COLORS.xml")
-        object->SetMaterial(cache->GetResource<Material>("Materials/LOWPOLY-COLORS.xml"));
-        object->SetCastShadows(true);
-
-        auto* body = adjNode->CreateComponent<RigidBody>();
-        body->SetCollisionLayer(2);
-        auto* shape = objectNode->CreateComponent<CollisionShape>();
-        shape->SetTriangleMesh(object->GetModel(), 0);
-    }
-
-    //
-/*
-    // Create 1000 mushrooms in the terrain. Always face outward along the terrain normal
-    const unsigned NUM_MUSHROOMS = 1000;
-    for (unsigned i = 0; i < NUM_MUSHROOMS; ++i)
-    {
-        Node* objectNode = scene_->CreateChild("Mushroom");
-        Vector3 position(Random(2000.0f) - 1000.0f, 0.0f, Random(2000.0f) - 1000.0f);
-        position.y_ = terrain_->GetHeight(position) - 0.1f;
-        objectNode->SetPosition(position);
-        // Create a rotation quaternion from up vector to terrain normal
-        objectNode->SetRotation(Quaternion(Vector3::UP, terrain_->GetNormal(position)));
-        Node* adjNode = objectNode->CreateChild("AdjNode");
-        adjNode->SetRotation(Quaternion(0.0, 0.0, -90.0f));
-
-        objectNode->SetScale(3.5f);
-
-        auto* object = adjNode->CreateComponent<StaticModel>();
-
-        // Random
-        int r = std::round(Random(0.0f, 5.0f));
-        switch (r) {
-            case 0:
-                object->SetModel(cache->GetResource<Model>("Models/AssetPack/tree-baobab_orange.mdl"));
-                break;
-            case 1:
-                object->SetModel(cache->GetResource<Model>("Models/AssetPack/tree-birch02.mdl"));
-                break;
-            case 2:
-                object->SetModel(cache->GetResource<Model>("Models/AssetPack/tree-elipse.mdl"));
-                break;
-            case 3:
-                object->SetModel(cache->GetResource<Model>("Models/AssetPack/tree-fir.mdl"));
-                break;
-            case 4:
-                object->SetModel(cache->GetResource<Model>("Models/AssetPack/tree-oak.mdl"));
-                break;
-            case 5:
-                object->SetModel(cache->GetResource<Model>("Models/AssetPack/tree-lime.mdl"));
-                break;
-        }
-
- //       object->SetMaterial(cache->GetResource<Material>("Materials/LOWPOLY_COLORS.xml")
-        object->SetMaterial(cache->GetResource<Material>("Materials/LOWPOLY-COLORS.xml"));
-        object->SetCastShadows(true);
-
-        auto* body = adjNode->CreateComponent<RigidBody>();
-        body->SetCollisionLayer(2);
-        auto* shape = objectNode->CreateComponent<CollisionShape>();
-        shape->SetTriangleMesh(object->GetModel(), 0);
-    }*/
-
-
-    auto *graphics = GetSubsystem<Graphics>();
-
-    //camera->SetOrthographic(true);
-    //camera->SetOrthoSize((float)graphics->GetHeight() * PIXEL_SIZE);
-    camera->SetZoom(0.1f * Min((float) graphics->GetWidth() / 1080.0f, (float) graphics->GetHeight() /
-                                                                       768.0f)); // Set zoom according to user's resolution to ensure full visibility (initial zoom (2.0) is set for full visibility at 1280x800 resolution)
-    camera->SetFarClip(1000.0f);
-
-    UI *ui = GetSubsystem<UI>();
-
-    // Set the default UI style and font
-    //ui->GetRoot()->SetDefaultStyle(cache->GetResource<XMLFile>("UI/DefaultStyle.xml"));
-    auto *font = cache->GetResource<Font>("Fonts/SinsGold.ttf");
-
-    // Get powerbar texture
-    Texture2D *powerBarTexture = cache->GetResource<Texture2D>("Textures/powerbar.png");
-    if (!powerBarTexture)
-        return;
-
-    // Get powerbar background texture
-    Texture2D *powerBarBkgTexture = cache->GetResource<Texture2D>("Textures/powerbar-bk.png");
-    if (!powerBarBkgTexture)
-        return;
-
-    // Get RPM bar texture
-    Texture2D *rpmBarTexture = cache->GetResource<Texture2D>("Textures/rpm.png");
-    if (!rpmBarTexture)
-        return;
-
-    // Get RPM bar background texture
-    Texture2D *rpmBarBkgTexture = cache->GetResource<Texture2D>("Textures/powerbar-bk.png");
-    if (!rpmBarBkgTexture)
-        return;
-
-    // Get velocity bar texture
-    Texture2D *velBarTexture = cache->GetResource<Texture2D>("Textures/velocity.png");
-    if (!rpmBarTexture)
-        return;
-
-    // Get velocity bar background texture
-    Texture2D *velBarBkgTexture = cache->GetResource<Texture2D>("Textures/powerbar-bk.png");
-    if (!rpmBarBkgTexture)
-        return;
-
-    // Get mini map p1 texture
-    Texture2D *miniMapP1Texture = cache->GetResource<Texture2D>("Textures/minimap-p1.png");
-    if (!miniMapP1Texture)
-        return;
-
-    // Get mini map waypoint texture
-    Texture2D *miniMapWPTexture = cache->GetResource<Texture2D>("Textures/minimap-wp.png");
-    if (!miniMapWPTexture)
-        return;
-
-    // Get mini map background texture
-    Texture2D *miniMapBkgTexture = cache->GetResource<Texture2D>("Textures/minimap-bk.png");
-    if (!miniMapBkgTexture)
-        return;
-
-    // Get marker map background texture
-    Texture2D *markerMapBkgTexture = cache->GetResource<Texture2D>("Textures/MarkerMap.png");
-    if (!markerMapBkgTexture)
-        return;
-
-    // Get genotype texture
-    Texture2D *genotypeTexture = cache->GetResource<Texture2D>("Textures/genotype.png");
-    if (!genotypeTexture)
-        return;
-
-    // Get genotype background texture
-    Texture2D *genotypeBkgTexture = cache->GetResource<Texture2D>("Textures/genotype-bk.png");
-    if (!genotypeBkgTexture)
-        return;
-
-    // Get steering wheel texture
-    Texture2D *steerWheelTexture = cache->GetResource<Texture2D>("Textures/steer-wheel.png");
-    if (!steerWheelTexture)
-        return;
-
-    // Create sprite and add to the UI layout
-    powerBarP1Sprite_ = ui->GetRoot()->CreateChild<Sprite>();
-    powerBarBkgP1Sprite_ = ui->GetRoot()->CreateChild<Sprite>();
-    rpmBarP1Sprite_ = ui->GetRoot()->CreateChild<Sprite>();
-    rpmBarBkgP1Sprite_ = ui->GetRoot()->CreateChild<Sprite>();
-    velBarP1Sprite_ = ui->GetRoot()->CreateChild<Sprite>();
-    velBarBkgP1Sprite_ = ui->GetRoot()->CreateChild<Sprite>();
-    miniMapP1Sprite_ = ui->GetRoot()->CreateChild<Sprite>();
-    miniMapWPSprite_ = ui->GetRoot()->CreateChild<Sprite>();
-    miniMapBkgSprite_ = ui->GetRoot()->CreateChild<Sprite>();
-    markerMapBkgSprite_ = ui->GetRoot()->CreateChild<Sprite>();
-    steerWheelSprite_ = ui->GetRoot()->CreateChild<Sprite>();
-
-    // Set sprite texture
-    powerBarP1Sprite_->SetTexture(powerBarTexture);
-    powerBarBkgP1Sprite_->SetTexture(powerBarBkgTexture);
-    rpmBarP1Sprite_->SetTexture(rpmBarTexture);
-    rpmBarBkgP1Sprite_->SetTexture(rpmBarBkgTexture);
-    velBarP1Sprite_->SetTexture(velBarTexture);
-    velBarBkgP1Sprite_->SetTexture(rpmBarBkgTexture);
-    miniMapP1Sprite_->SetTexture(miniMapP1Texture);
-    miniMapWPSprite_->SetTexture(miniMapWPTexture);
-    miniMapBkgSprite_->SetTexture(miniMapBkgTexture);
-    markerMapBkgSprite_->SetTexture(markerMapBkgTexture);
-    steerWheelSprite_->SetTexture(steerWheelTexture);
-
-    float textOverlap = 245.0f;
-
-    auto *powerBarText = ui->GetRoot()->CreateChild<Text>("powerBarText");
-    powerBarText->SetAlignment(HA_LEFT, VA_TOP);
-    powerBarText->SetPosition(300.0f-textOverlap, 20.0);
-    powerBarText->SetFont(font, 15);
-    powerBarText->SetTextEffect(TE_SHADOW);
-    powerBarText->SetText(String("HEALTH"));
-    powerBarText ->SetVisible(true);
-
-    int textureWidth;
-    int textureHeight;
-
-    textureWidth = powerBarTexture->GetWidth();
-    textureHeight = powerBarTexture->GetHeight();
-
-    powerBarP1Sprite_->SetScale(256.0f / textureWidth);
-    powerBarP1Sprite_->SetSize(textureWidth, textureHeight);
-    powerBarP1Sprite_->SetHotSpot(textureWidth, textureHeight);
-    powerBarP1Sprite_->SetAlignment(HA_LEFT, VA_TOP);
-    powerBarP1Sprite_->SetPosition(Vector2(300.0f, 50.0f));
-    powerBarP1Sprite_->SetOpacity(1.0f);
-    // Set a low priority so that other UI elements can be drawn on top
-    powerBarP1Sprite_->SetPriority(-100);
-
-    powerBarBkgP1Sprite_->SetScale(256.0f / textureWidth);
-    powerBarBkgP1Sprite_->SetSize(textureWidth, textureHeight);
-    powerBarBkgP1Sprite_->SetHotSpot(textureWidth, textureHeight);
-    powerBarBkgP1Sprite_->SetAlignment(HA_LEFT, VA_TOP);
-    powerBarBkgP1Sprite_->SetPosition(Vector2(300.0f, 50.0f));
-    powerBarBkgP1Sprite_->SetOpacity(0.2f);
-    // Set a low priority so that other UI elements can be drawn on top
-    powerBarBkgP1Sprite_->SetPriority(-100);
-
-    powerBarP1Sprite_->SetVisible(true);
-    powerBarBkgP1Sprite_->SetVisible(true);
-
-
-    auto *rpmBarText = ui->GetRoot()->CreateChild<Text>("rpmBarText");
-    rpmBarText->SetAlignment(HA_LEFT, VA_TOP);
-    rpmBarText->SetPosition(300.0f-textOverlap, 170.0);
-    rpmBarText->SetFont(font, 15);
-    rpmBarText->SetTextEffect(TE_SHADOW);
-    rpmBarText->SetText(String("RPM"));
-    rpmBarText ->SetVisible(true);
-
-
-    textureWidth = rpmBarTexture->GetWidth();
-    textureHeight = rpmBarTexture->GetHeight();
-
-    rpmBarP1Sprite_->SetScale(256.0f / textureWidth);
-    rpmBarP1Sprite_->SetSize(textureWidth, textureHeight);
-    rpmBarP1Sprite_->SetHotSpot(textureWidth, textureHeight);
-    rpmBarP1Sprite_->SetAlignment(HA_LEFT, VA_TOP);
-    rpmBarP1Sprite_->SetPosition(Vector2(300.0f, 200.0f));
-    rpmBarP1Sprite_->SetOpacity(1.0f);
-    // Set a low priority so that other UI elements can be drawn on top
-    rpmBarP1Sprite_->SetPriority(-100);
-
-    rpmBarBkgP1Sprite_->SetScale(256.0f / textureWidth);
-    rpmBarBkgP1Sprite_->SetSize(textureWidth, textureHeight);
-    rpmBarBkgP1Sprite_->SetHotSpot(textureWidth, textureHeight);
-    rpmBarBkgP1Sprite_->SetAlignment(HA_LEFT, VA_TOP);
-    rpmBarBkgP1Sprite_->SetPosition(Vector2(300.0f, 200.0f));
-    rpmBarBkgP1Sprite_->SetOpacity(0.2f);
-    // Set a low priority so that other UI elements can be drawn on top
-    rpmBarBkgP1Sprite_->SetPriority(-100);
-
-    rpmBarP1Sprite_->SetVisible(true);
-    rpmBarBkgP1Sprite_->SetVisible(true);
-
-    auto *velBarText = ui->GetRoot()->CreateChild<Text>("velBarText");
-    velBarText->SetAlignment(HA_LEFT, VA_TOP);
-    velBarText->SetPosition(300.0f-textOverlap, 90.0);
-    velBarText->SetFont(font, 15);
-    velBarText->SetTextEffect(TE_SHADOW);
-    velBarText->SetText(String("SPEED"));
-    velBarText ->SetVisible(true);
-
-
-    textureWidth = rpmBarTexture->GetWidth();
-    textureHeight = rpmBarTexture->GetHeight();
-
-    velBarP1Sprite_->SetScale(256.0f / textureWidth);
-    velBarP1Sprite_->SetSize(textureWidth, textureHeight);
-    velBarP1Sprite_->SetHotSpot(textureWidth, textureHeight);
-    velBarP1Sprite_->SetAlignment(HA_LEFT, VA_TOP);
-    velBarP1Sprite_->SetPosition(Vector2(300.0f, 120.0f));
-    velBarP1Sprite_->SetOpacity(1.0f);
-    // Set a low priority so that other UI elements can be drawn on top
-    velBarP1Sprite_->SetPriority(-100);
-
-    velBarBkgP1Sprite_->SetScale(256.0f / textureWidth);
-    velBarBkgP1Sprite_->SetSize(textureWidth, textureHeight);
-    velBarBkgP1Sprite_->SetHotSpot(textureWidth, textureHeight);
-    velBarBkgP1Sprite_->SetAlignment(HA_LEFT, VA_TOP);
-    velBarBkgP1Sprite_->SetPosition(Vector2(300.0f, 120.0f));
-    velBarBkgP1Sprite_->SetOpacity(0.2f);
-    // Set a low priority so that other UI elements can be drawn on top
-    velBarBkgP1Sprite_->SetPriority(-100);
-
-    velBarP1Sprite_->SetVisible(true);
-    velBarBkgP1Sprite_->SetVisible(true);
-
-
-    textureWidth = miniMapP1Texture->GetWidth();
-    textureHeight = miniMapP1Texture->GetHeight();
-
- //   float miniMapP1X = 776.0f+45.0f;
- //   float miniMapP1Y = 300.0f-15.0f;
-
-    miniMapP1Sprite_->SetScale(0.4);//256.0f / textureWidth);
-    miniMapP1Sprite_->SetSize(textureWidth, textureHeight);
-    miniMapP1Sprite_->SetHotSpot(textureWidth/2, textureHeight/2);
-    miniMapP1Sprite_->SetAlignment(HA_LEFT, VA_TOP);
+        auto *camera = cameraNode_->CreateComponent<Camera>();
+        camera->SetFarClip(500.0f);
+        cameraNode_->SetPosition(Vector3(0.0f, 5.0f, 0.0f));
+
+        // Enable for 3D sounds to work (attach to camera node)
+        SoundListener *listener = cameraNode_->CreateComponent<SoundListener>();
+        GetSubsystem<Audio>()->SetListener(listener);
+
+        // you can set master volumes for the different kinds if sounds, here 30% for music
+        GetSubsystem<Audio>()->SetMasterGain(SOUND_MUSIC, 1.2);
+
+        // Create a directional light with shadows
+        Node *lightNode = scene_->CreateChild("DirectionalLight", LOCAL);
+        lightNode->SetDirection(Vector3(0.3f, -0.5f, 0.425f));
+        Light *light = lightNode->CreateComponent<Light>();
+        light->SetLightType(LIGHT_DIRECTIONAL);
+        light->SetCastShadows(true);
+        light->SetShadowBias(BiasParameters(0.00025f, 0.5f));
+        light->SetShadowCascade(CascadeParameters(10.0f, 50.0f, 200.0f, 0.0f, 0.8f));
+        light->SetSpecularIntensity(0.5f);
+
+        // All static scene content and the camera are also created as local,
+        // so that they are unaffected by scene replication and are
+        // not removed from the client upon connection.
+        // Create a Zone component first for ambient lighting & fog control.
+
+        // Create static scene content. First create a zone for ambient lighting and fog control
+        Node *zoneNode = scene_->CreateChild("Zone", LOCAL);
+        Zone *zone = zoneNode->CreateComponent<Zone>();
+        zone->SetAmbientColor(Color(0.15f, 0.15f, 0.15f));
+        zone->SetFogColor(Color(0.5f, 0.5f, 0.7f));
+        zone->SetFogStart(700.0f);
+        zone->SetFogEnd(900.0f);
+        zone->SetBoundingBox(BoundingBox(-2000.0f, 2000.0f));
+
+
+        auto *graphics = GetSubsystem<Graphics>();
+
+        //camera->SetOrthographic(true);
+        //camera->SetOrthoSize((float)graphics->GetHeight() * PIXEL_SIZE);
+        camera->SetZoom(0.1f * Min((float) graphics->GetWidth() / 1080.0f, (float) graphics->GetHeight() /
+                                                                           768.0f)); // Set zoom according to user's resolution to ensure full visibility (initial zoom (2.0) is set for full visibility at 1280x800 resolution)
+        camera->SetFarClip(1000.0f);
+
+        UI *ui = GetSubsystem<UI>();
+
+        // Set the default UI style and font
+        //ui->GetRoot()->SetDefaultStyle(cache->GetResource<XMLFile>("UI/DefaultStyle.xml"));
+        auto *font = cache->GetResource<Font>("Fonts/SinsGold.ttf");
+
+        // Get powerbar texture
+        Texture2D *powerBarTexture = cache->GetResource<Texture2D>("Textures/powerbar.png");
+        if (!powerBarTexture)
+            return;
+
+        // Get powerbar background texture
+        Texture2D *powerBarBkgTexture = cache->GetResource<Texture2D>("Textures/powerbar-bk.png");
+        if (!powerBarBkgTexture)
+            return;
+
+        // Get RPM bar texture
+        Texture2D *rpmBarTexture = cache->GetResource<Texture2D>("Textures/rpm.png");
+        if (!rpmBarTexture)
+            return;
+
+        // Get RPM bar background texture
+        Texture2D *rpmBarBkgTexture = cache->GetResource<Texture2D>("Textures/powerbar-bk.png");
+        if (!rpmBarBkgTexture)
+            return;
+
+        // Get velocity bar texture
+        Texture2D *velBarTexture = cache->GetResource<Texture2D>("Textures/velocity.png");
+        if (!rpmBarTexture)
+            return;
+
+        // Get velocity bar background texture
+        Texture2D *velBarBkgTexture = cache->GetResource<Texture2D>("Textures/powerbar-bk.png");
+        if (!rpmBarBkgTexture)
+            return;
+
+        // Get mini map p1 texture
+        Texture2D *miniMapP1Texture = cache->GetResource<Texture2D>("Textures/minimap-p1.png");
+        if (!miniMapP1Texture)
+            return;
+
+        // Get mini map waypoint texture
+        Texture2D *miniMapWPTexture = cache->GetResource<Texture2D>("Textures/minimap-wp.png");
+        if (!miniMapWPTexture)
+            return;
+
+        // Get mini map background texture
+        Texture2D *miniMapBkgTexture = cache->GetResource<Texture2D>("Textures/minimap-bk.png");
+        if (!miniMapBkgTexture)
+            return;
+
+        // Get marker map background texture
+        Texture2D *markerMapBkgTexture = cache->GetResource<Texture2D>("Textures/MarkerMap.png");
+        if (!markerMapBkgTexture)
+            return;
+
+        // Get genotype texture
+        Texture2D *genotypeTexture = cache->GetResource<Texture2D>("Textures/genotype.png");
+        if (!genotypeTexture)
+            return;
+
+        // Get genotype background texture
+        Texture2D *genotypeBkgTexture = cache->GetResource<Texture2D>("Textures/genotype-bk.png");
+        if (!genotypeBkgTexture)
+            return;
+
+        // Get steering wheel texture
+        Texture2D *steerWheelTexture = cache->GetResource<Texture2D>("Textures/steer-wheel.png");
+        if (!steerWheelTexture)
+            return;
+
+        // Create sprite and add to the UI layout
+        powerBarP1Sprite_ = ui->GetRoot()->CreateChild<Sprite>();
+        powerBarBkgP1Sprite_ = ui->GetRoot()->CreateChild<Sprite>();
+        rpmBarP1Sprite_ = ui->GetRoot()->CreateChild<Sprite>();
+        rpmBarBkgP1Sprite_ = ui->GetRoot()->CreateChild<Sprite>();
+        velBarP1Sprite_ = ui->GetRoot()->CreateChild<Sprite>();
+        velBarBkgP1Sprite_ = ui->GetRoot()->CreateChild<Sprite>();
+        miniMapP1Sprite_ = ui->GetRoot()->CreateChild<Sprite>();
+        miniMapWPSprite_ = ui->GetRoot()->CreateChild<Sprite>();
+        miniMapBkgSprite_ = ui->GetRoot()->CreateChild<Sprite>();
+        markerMapBkgSprite_ = ui->GetRoot()->CreateChild<Sprite>();
+        steerWheelSprite_ = ui->GetRoot()->CreateChild<Sprite>();
+
+        // Set sprite texture
+        powerBarP1Sprite_->SetTexture(powerBarTexture);
+        powerBarBkgP1Sprite_->SetTexture(powerBarBkgTexture);
+        rpmBarP1Sprite_->SetTexture(rpmBarTexture);
+        rpmBarBkgP1Sprite_->SetTexture(rpmBarBkgTexture);
+        velBarP1Sprite_->SetTexture(velBarTexture);
+        velBarBkgP1Sprite_->SetTexture(rpmBarBkgTexture);
+        miniMapP1Sprite_->SetTexture(miniMapP1Texture);
+        miniMapWPSprite_->SetTexture(miniMapWPTexture);
+        miniMapBkgSprite_->SetTexture(miniMapBkgTexture);
+        markerMapBkgSprite_->SetTexture(markerMapBkgTexture);
+        steerWheelSprite_->SetTexture(steerWheelTexture);
+
+        float textOverlap = 245.0f;
+
+        powerBarText_ = ui->GetRoot()->CreateChild<Text>("powerBarText");
+        powerBarText_->SetAlignment(HA_LEFT, VA_TOP);
+        powerBarText_->SetPosition(300.0f-textOverlap, 20.0);
+        powerBarText_->SetFont(font, 15);
+        powerBarText_->SetTextEffect(TE_SHADOW);
+        powerBarText_->SetText(String("HEALTH"));
+        powerBarText_ ->SetVisible(false);
+
+        int textureWidth;
+        int textureHeight;
+
+        textureWidth = powerBarTexture->GetWidth();
+        textureHeight = powerBarTexture->GetHeight();
+
+        powerBarP1Sprite_->SetScale(256.0f / textureWidth);
+        powerBarP1Sprite_->SetSize(textureWidth, textureHeight);
+        powerBarP1Sprite_->SetHotSpot(textureWidth, textureHeight);
+        powerBarP1Sprite_->SetAlignment(HA_LEFT, VA_TOP);
+        powerBarP1Sprite_->SetPosition(Vector2(300.0f, 50.0f));
+        powerBarP1Sprite_->SetOpacity(1.0f);
+        // Set a low priority so that other UI elements can be drawn on top
+        powerBarP1Sprite_->SetPriority(-100);
+
+        powerBarBkgP1Sprite_->SetScale(256.0f / textureWidth);
+        powerBarBkgP1Sprite_->SetSize(textureWidth, textureHeight);
+        powerBarBkgP1Sprite_->SetHotSpot(textureWidth, textureHeight);
+        powerBarBkgP1Sprite_->SetAlignment(HA_LEFT, VA_TOP);
+        powerBarBkgP1Sprite_->SetPosition(Vector2(300.0f, 50.0f));
+        powerBarBkgP1Sprite_->SetOpacity(0.2f);
+        // Set a low priority so that other UI elements can be drawn on top
+        powerBarBkgP1Sprite_->SetPriority(-100);
+
+        powerBarP1Sprite_->SetVisible(true);
+        powerBarBkgP1Sprite_->SetVisible(true);
+
+        rpmBarText_ = ui->GetRoot()->CreateChild<Text>("rpmBarText");
+        rpmBarText_->SetAlignment(HA_LEFT, VA_TOP);
+        rpmBarText_->SetPosition(300.0f-textOverlap, 170.0);
+        rpmBarText_->SetFont(font, 15);
+        rpmBarText_->SetTextEffect(TE_SHADOW);
+        rpmBarText_->SetText(String("RPM"));
+        rpmBarText_ ->SetVisible(false);
+
+
+        textureWidth = rpmBarTexture->GetWidth();
+        textureHeight = rpmBarTexture->GetHeight();
+
+        rpmBarP1Sprite_->SetScale(256.0f / textureWidth);
+        rpmBarP1Sprite_->SetSize(textureWidth, textureHeight);
+        rpmBarP1Sprite_->SetHotSpot(textureWidth, textureHeight);
+        rpmBarP1Sprite_->SetAlignment(HA_LEFT, VA_TOP);
+        rpmBarP1Sprite_->SetPosition(Vector2(300.0f, 200.0f));
+        rpmBarP1Sprite_->SetOpacity(1.0f);
+        // Set a low priority so that other UI elements can be drawn on top
+        rpmBarP1Sprite_->SetPriority(-100);
+
+        rpmBarBkgP1Sprite_->SetScale(256.0f / textureWidth);
+        rpmBarBkgP1Sprite_->SetSize(textureWidth, textureHeight);
+        rpmBarBkgP1Sprite_->SetHotSpot(textureWidth, textureHeight);
+        rpmBarBkgP1Sprite_->SetAlignment(HA_LEFT, VA_TOP);
+        rpmBarBkgP1Sprite_->SetPosition(Vector2(300.0f, 200.0f));
+        rpmBarBkgP1Sprite_->SetOpacity(0.2f);
+        // Set a low priority so that other UI elements can be drawn on top
+        rpmBarBkgP1Sprite_->SetPriority(-100);
+
+        rpmBarP1Sprite_->SetVisible(true);
+        rpmBarBkgP1Sprite_->SetVisible(true);
+
+        velBarText_ = ui->GetRoot()->CreateChild<Text>("velBarText");
+        velBarText_->SetAlignment(HA_LEFT, VA_TOP);
+        velBarText_->SetPosition(300.0f-textOverlap, 90.0);
+        velBarText_->SetFont(font, 15);
+        velBarText_->SetTextEffect(TE_SHADOW);
+        velBarText_->SetText(String("SPEED"));
+        velBarText_ ->SetVisible(false);
+
+        textureWidth = rpmBarTexture->GetWidth();
+        textureHeight = rpmBarTexture->GetHeight();
+
+        velBarP1Sprite_->SetScale(256.0f / textureWidth);
+        velBarP1Sprite_->SetSize(textureWidth, textureHeight);
+        velBarP1Sprite_->SetHotSpot(textureWidth, textureHeight);
+        velBarP1Sprite_->SetAlignment(HA_LEFT, VA_TOP);
+        velBarP1Sprite_->SetPosition(Vector2(300.0f, 120.0f));
+        velBarP1Sprite_->SetOpacity(1.0f);
+        // Set a low priority so that other UI elements can be drawn on top
+        velBarP1Sprite_->SetPriority(-100);
+
+        velBarBkgP1Sprite_->SetScale(256.0f / textureWidth);
+        velBarBkgP1Sprite_->SetSize(textureWidth, textureHeight);
+        velBarBkgP1Sprite_->SetHotSpot(textureWidth, textureHeight);
+        velBarBkgP1Sprite_->SetAlignment(HA_LEFT, VA_TOP);
+        velBarBkgP1Sprite_->SetPosition(Vector2(300.0f, 120.0f));
+        velBarBkgP1Sprite_->SetOpacity(0.2f);
+        // Set a low priority so that other UI elements can be drawn on top
+        velBarBkgP1Sprite_->SetPriority(-100);
+
+        velBarP1Sprite_->SetVisible(true);
+        velBarBkgP1Sprite_->SetVisible(true);
+
+
+        textureWidth = miniMapP1Texture->GetWidth();
+        textureHeight = miniMapP1Texture->GetHeight();
+
+        //   float miniMapP1X = 776.0f+45.0f;
+        //   float miniMapP1Y = 300.0f-15.0f;
+
+        miniMapP1Sprite_->SetScale(0.4);//256.0f / textureWidth);
+        miniMapP1Sprite_->SetSize(textureWidth, textureHeight);
+        miniMapP1Sprite_->SetHotSpot(textureWidth/2, textureHeight/2);
+        miniMapP1Sprite_->SetAlignment(HA_LEFT, VA_TOP);
 //    miniMapP1Sprite_->SetPosition(Vector2(miniMapP1X-16.0f, miniMapP1Y));
 //    miniMapP1Sprite_->SetPosition(Vector2(miniMapP1X+256.0f-16.0f, miniMapP1Y));
 
-    miniMapP1Sprite_->SetOpacity(0.9f);
-    // Set a low priority so that other UI elements can be drawn on top
-    miniMapP1Sprite_->SetPriority(-100);
+        miniMapP1Sprite_->SetOpacity(0.9f);
+        // Set a low priority so that other UI elements can be drawn on top
+        miniMapP1Sprite_->SetPriority(-100);
 
 
-    textureWidth = miniMapWPTexture->GetWidth();
-    textureHeight = miniMapWPTexture->GetHeight();
+        textureWidth = miniMapWPTexture->GetWidth();
+        textureHeight = miniMapWPTexture->GetHeight();
 
-    //   float miniMapP1X = 776.0f+45.0f;
-    //   float miniMapP1Y = 300.0f-15.0f;
+        //   float miniMapP1X = 776.0f+45.0f;
+        //   float miniMapP1Y = 300.0f-15.0f;
 
-    miniMapWPSprite_->SetScale(0.4);//256.0f / textureWidth);
-    miniMapWPSprite_->SetSize(textureWidth, textureHeight);
-    miniMapWPSprite_->SetHotSpot(textureWidth/2, textureHeight/2);
-    miniMapWPSprite_->SetAlignment(HA_LEFT, VA_TOP);
+        miniMapWPSprite_->SetScale(0.4);//256.0f / textureWidth);
+        miniMapWPSprite_->SetSize(textureWidth, textureHeight);
+        miniMapWPSprite_->SetHotSpot(textureWidth/2, textureHeight/2);
+        miniMapWPSprite_->SetAlignment(HA_LEFT, VA_TOP);
 //    miniMapP1Sprite_->SetPosition(Vector2(miniMapP1X-16.0f, miniMapP1Y));
 //    miniMapP1Sprite_->SetPosition(Vector2(miniMapP1X+256.0f-16.0f, miniMapP1Y));
 
-    miniMapWPSprite_->SetOpacity(0.9f);
-    // Set a low priority so that other UI elements can be drawn on top
-    miniMapWPSprite_->SetPriority(-100);
+        miniMapWPSprite_->SetOpacity(0.9f);
+        // Set a low priority so that other UI elements can be drawn on top
+        miniMapWPSprite_->SetPriority(-100);
 
 
-    textureWidth = miniMapBkgTexture->GetWidth();
-    textureHeight = miniMapBkgTexture->GetHeight();
+        textureWidth = miniMapBkgTexture->GetWidth();
+        textureHeight = miniMapBkgTexture->GetHeight();
 
-    float miniMapX = 1000.0f+45.0f;
-    float miniMapY = 300.0f-15.0f;
+        float miniMapX = 1000.0f+45.0f;
+        float miniMapY = 300.0f-15.0f;
 
-    miniMapBkgSprite_->SetScale(256.0f / textureWidth);
-    miniMapBkgSprite_->SetSize(textureWidth, textureHeight);
-    miniMapBkgSprite_->SetHotSpot(textureWidth, textureHeight);
-    miniMapBkgSprite_->SetAlignment(HA_LEFT, VA_TOP);
-    miniMapBkgSprite_->SetPosition(Vector2(miniMapX,  miniMapY));
-    miniMapBkgSprite_->SetOpacity(0.2f);
-    // Set a low priority so that other UI elements can be drawn on top
-    miniMapBkgSprite_->SetPriority(-100);
+        miniMapBkgSprite_->SetScale(256.0f / textureWidth);
+        miniMapBkgSprite_->SetSize(textureWidth, textureHeight);
+        miniMapBkgSprite_->SetHotSpot(textureWidth, textureHeight);
+        miniMapBkgSprite_->SetAlignment(HA_LEFT, VA_TOP);
+        miniMapBkgSprite_->SetPosition(Vector2(miniMapX,  miniMapY));
+        miniMapBkgSprite_->SetOpacity(0.2f);
+        // Set a low priority so that other UI elements can be drawn on top
+        miniMapBkgSprite_->SetPriority(-100);
 
-    miniMapP1Sprite_->SetVisible(true);
-    miniMapWPSprite_->SetVisible(true);
-    miniMapBkgSprite_->SetVisible(true);
-
-
-    textureWidth = markerMapBkgTexture->GetWidth();
-    textureHeight = markerMapBkgTexture->GetHeight();
-
-    markerMapBkgSprite_->SetScale(256.0f / textureWidth);
-    markerMapBkgSprite_->SetSize(textureWidth, textureHeight);
-    markerMapBkgSprite_->SetHotSpot(textureWidth, textureHeight);
-    markerMapBkgSprite_->SetAlignment(HA_LEFT, VA_TOP);
-    markerMapBkgSprite_->SetPosition(Vector2(miniMapX,  miniMapY));
-    markerMapBkgSprite_->SetOpacity(0.5f);
-    // Set a low priority so that other UI elements can be drawn on top
-    miniMapBkgSprite_->SetPriority(-100);
-    markerMapBkgSprite_->SetVisible(true);
+        miniMapP1Sprite_->SetVisible(true);
+        miniMapWPSprite_->SetVisible(true);
+        miniMapBkgSprite_->SetVisible(true);
 
 
-    textureWidth = steerWheelTexture->GetWidth();
-    textureHeight = steerWheelTexture->GetHeight();
+        textureWidth = markerMapBkgTexture->GetWidth();
+        textureHeight = markerMapBkgTexture->GetHeight();
 
-    float steerWheelX = 900.0f;
-    float steerWheelY = 600.0f-15.0f;
+        markerMapBkgSprite_->SetScale(256.0f / textureWidth);
+        markerMapBkgSprite_->SetSize(textureWidth, textureHeight);
+        markerMapBkgSprite_->SetHotSpot(textureWidth, textureHeight);
+        markerMapBkgSprite_->SetAlignment(HA_LEFT, VA_TOP);
+        markerMapBkgSprite_->SetPosition(Vector2(miniMapX,  miniMapY));
+        markerMapBkgSprite_->SetOpacity(0.5f);
+        // Set a low priority so that other UI elements can be drawn on top
+        miniMapBkgSprite_->SetPriority(-100);
+        markerMapBkgSprite_->SetVisible(true);
 
-    steerWheelSprite_->SetScale(256.0f / textureWidth);
-    steerWheelSprite_->SetSize(textureWidth, textureHeight);
-    steerWheelSprite_->SetHotSpot(textureWidth/2, textureHeight/2);
-    steerWheelSprite_->SetAlignment(HA_LEFT, VA_TOP);
-    steerWheelSprite_->SetPosition(Vector2(steerWheelX,  steerWheelY));
-    steerWheelSprite_->SetOpacity(0.5f);
-    // Set a low priority so that other UI elements can be drawn on top
-    steerWheelSprite_->SetPriority(-100);
-   // steerWheelSprite_->SetHotSpot(steerWheelX, steerWheelY);]
+
+        textureWidth = steerWheelTexture->GetWidth();
+        textureHeight = steerWheelTexture->GetHeight();
+
+        float steerWheelX = 900.0f;
+        float steerWheelY = 600.0f-15.0f;
+
+        steerWheelSprite_->SetScale(256.0f / textureWidth);
+        steerWheelSprite_->SetSize(textureWidth, textureHeight);
+        steerWheelSprite_->SetHotSpot(textureWidth/2, textureHeight/2);
+        steerWheelSprite_->SetAlignment(HA_LEFT, VA_TOP);
+        steerWheelSprite_->SetPosition(Vector2(steerWheelX,  steerWheelY));
+        steerWheelSprite_->SetOpacity(0.5f);
+        // Set a low priority so that other UI elements can be drawn on top
+        steerWheelSprite_->SetPriority(-100);
+        // steerWheelSprite_->SetHotSpot(steerWheelX, steerWheelY);]
 
 //   steerWheelSprite_->SetPivot(-10,-10);
 //    steerWheelSprite_->SetHotSpot(-5.0f,-5.0f);
 
-    steerWheelSprite_->SetVisible(true);
+        steerWheelSprite_->SetVisible(true);
 
+/*
+        // Create the UI for displaying the remaining lifes
+        auto *lifeUI = ui->GetRoot()->CreateChild<BorderImage>("Life2");
+        lifeUI->SetTexture(cache->GetResource<Texture2D>("Textures/jiva2d.png"));
+        lifeUI->SetSize(60, 60);
+        lifeUI->SetAlignment(HA_LEFT, VA_TOP);
+        lifeUI->SetPosition(-5, 15);
+        lifeUI->SetVisible(false);
 
-    // Create the UI for displaying the remaining lifes
-    auto *lifeUI = ui->GetRoot()->CreateChild<BorderImage>("Life2");
-    lifeUI->SetTexture(cache->GetResource<Texture2D>("Textures/jiva2d.png"));
-    lifeUI->SetSize(60, 60);
-    lifeUI->SetAlignment(HA_LEFT, VA_TOP);
-    lifeUI->SetPosition(-5, 15);
-    lifeUI->SetVisible(true);
-
-    auto *lifeText = lifeUI->CreateChild<Text>("LifeText2");
-    lifeText->SetAlignment(HA_CENTER, VA_CENTER);
-    lifeText->SetPosition(2.0f, -30.0);
-    lifeText->SetFont(font, 12);
-    lifeText->SetTextEffect(TE_SHADOW);
-    lifeText->SetText(String("Jiva"));
-    lifeText->SetVisible(true);
-
-    // Debug text
-
-    for (int i = 0; i < NUM_DEBUG_FIELDS; i++) {
-        debugText_[i] = lifeUI->CreateChild<Text>("DebugText1");
-        debugText_[i]->SetAlignment(HA_LEFT, VA_CENTER);
-        debugText_[i]->SetPosition(10.0f, 500.0 + (i * 20));
-        debugText_[i]->SetFont(font, 14);
-        debugText_[i]->SetTextEffect(TE_SHADOW);
-        debugText_[i]->SetVisible(true);
-        std::string debugData1;
-        debugData1.append("-");
-        debugText_[i]->SetText(debugData1.c_str());
-    }
-
-
-    /*
-    auto* lifeText = ui->GetRoot()->CreateChild<Text>("LifeText2");
-    lifeText->SetAlignment(HA_CENTER, VA_CENTER);
-    lifeText->SetFont(font, 24);
-    lifeText->SetTextEffect(TE_SHADOW);
-    lifeText->SetText(String(3));
-    lifeText->SetVisible(false);
-
+        auto *lifeText = lifeUI->CreateChild<Text>("LifeText2");
+        lifeText->SetAlignment(HA_CENTER, VA_CENTER);
+        lifeText->SetPosition(2.0f, -30.0);
+        lifeText->SetFont(font, 12);
+        lifeText->SetTextEffect(TE_SHADOW);
+        lifeText->SetText(String("Jiva"));
+        lifeText->SetVisible(false);
 */
-    using namespace std;
+        // Debug text
+        for (int i = 0; i < NUM_DEBUG_FIELDS; i++) {
+            debugText_[i] = ui->GetRoot()->CreateChild<Text>("DebugText");
+            debugText_[i]->SetAlignment(HA_LEFT, VA_CENTER);
+            debugText_[i]->SetPosition(10.0f, 500.0 + (i * 20));
+            debugText_[i]->SetFont(font, 14);
+            debugText_[i]->SetTextEffect(TE_SHADOW);
+            debugText_[i]->SetVisible(false);
+            std::string debugData1;
+            debugData1.append("-");
+            debugText_[i]->SetText(debugData1.c_str());
+        }
+
+
+        /*
+        auto* lifeText = ui->GetRoot()->CreateChild<Text>("LifeText2");
+        lifeText->SetAlignment(HA_CENTER, VA_CENTER);
+        lifeText->SetFont(font, 24);
+        lifeText->SetTextEffect(TE_SHADOW);
+        lifeText->SetText(String(3));
+        lifeText->SetVisible(false);
+
+    */
+        using namespace std;
 
 
 /*
@@ -1326,30 +1078,30 @@ void MayaScape::CreateScene() {
     zone->SetFogColor(Color(0.2f, 0.2f, 0.2f));
 */
 
-    // Load default track
+        // Load default track
 
-    /*
-    // Create tile map for track from tmx file
-    SharedPtr<Node> tileMapNode(scene_->CreateChild("TileMap"));
-//    tileMapNode->SetPosition(Vector3(vehicle_->GetNode()->GetPosition().x_, 0.0f, vehicle_->GetNode()->GetPosition().z_));
-    tileMapNode->SetRotation(Quaternion(-90.0f, 0.0f, 0.0f));
-    tileMapNode->SetPosition(Vector3(-1200.0f, 0.2f,  800.0f));
-    tileMapNode->SetScale(1.0f);
+        /*
+        // Create tile map for track from tmx file
+        SharedPtr<Node> tileMapNode(scene_->CreateChild("TileMap"));
+    //    tileMapNode->SetPosition(Vector3(vehicle_->GetNode()->GetPosition().x_, 0.0f, vehicle_->GetNode()->GetPosition().z_));
+        tileMapNode->SetRotation(Quaternion(-90.0f, 0.0f, 0.0f));
+        tileMapNode->SetPosition(Vector3(-1200.0f, 0.2f,  800.0f));
+        tileMapNode->SetScale(1.0f);
 
 
-//    auto* tileMap3d = tileMapNode->CreateComponent<TileMap3D>();
-//    tileMap3d->SetTmxFile(cache->GetResource<TmxFile2D>("Urho2D/Tilesets/Ortho.tmx"
+    //    auto* tileMap3d = tileMapNode->CreateComponent<TileMap3D>();
+    //    tileMap3d->SetTmxFile(cache->GetResource<TmxFile2D>("Urho2D/Tilesets/Ortho.tmx"
 
-    tileMap_ = tileMapNode->CreateComponent<TileMap3D>();
+        tileMap_ = tileMapNode->CreateComponent<TileMap3D>();
 
-//
-//    auto *tmxFile = cache->GetResource<TmxFile2D>("Urho2D/Tilesets/Ortho.tmx");
+    //
+    //    auto *tmxFile = cache->GetResource<TmxFile2D>("Urho2D/Tilesets/Ortho.tmx");
 
-    auto *tmxFile = cache->GetResource<TmxFile2D>("Tracks/Track1.tmx");
-    tileMap_->SetTmxFile(tmxFile);
-    const TileMapInfo2D &info = tileMap_->GetInfo();
-    URHO3D_LOGINFOF("tileMap=%f x %f", info.GetMapWidth(), info.GetMapHeight());
-*/
+        auto *tmxFile = cache->GetResource<TmxFile2D>("Tracks/Track1.tmx");
+        tileMap_->SetTmxFile(tmxFile);
+        const TileMapInfo2D &info = tileMap_->GetInfo();
+        URHO3D_LOGINFOF("tileMap=%f x %f", info.GetMapWidth(), info.GetMapHeight());
+    */
 //    tileMap->Set
 /*
     // Create balloon object
@@ -1486,7 +1238,7 @@ void MayaScape::CreateScene() {
 
 //            bb->uv_ = Rect(left,top,right,bottom);
             bb->uv_ = Rect(0.0,0.5,1.0,1.0);
-            
+
             // After modifying the billboards, they need to be "committed" so that the BillboardSet updates its internals
             billboardObject->Commit();
         }
@@ -1576,41 +1328,374 @@ void MayaScape::CreateScene() {
     if (tileMapLayer)
         sample2D_->CreateCollisionShapesFromTMXObjects(tileMapNode, tileMapLayer, info);
 */
-    // Create a directional
-    //
-    //
-    // to the world so that we can see something. The light scene node's orientation controls the
-    // light direction; we will use the SetDirection() function which calculates the orientation from a forward direction vector.
-    // The light will use default settings (white light, no shadows)
+        // Create a directional
+        //
+        //
+        // to the world so that we can see something. The light scene node's orientation controls the
+        // light direction; we will use the SetDirection() function which calculates the orientation from a forward direction vector.
+        // The light will use default settings (white light, no shadows)
 /*    Node *lightNode = scene_->CreateChild("DirectionalLight");
     lightNode->SetPosition(Vector3(1.0f, 8.0f, 0.0f));
     lightNode->SetDirection(Vector3(0.6f, -1.0f, 0.8f)); // The direction vector does not need to be normalized
     auto *light = lightNode->CreateComponent<Light>();
     light->SetLightType(LIGHT_DIRECTIONAL);*/
-    // Set an initial position for the camera scene node above the plane
-    //   mushroomNode->SetRotation(Quaternion(0.0f, Random(360.0f), 0.0f));
-    // mushroomNode->SetScale(0.5f + Random(2.0f));
-    // Instantiate enemies and moving platforms at each placeholder of "MovingEntities" layer (placeholders are Poly Line objects defining a path from points)
-    //sample2D_->PopulateMovingEntities(tileMap->GetLayer(tileMap->GetNumLayers() - 2));
+        // Set an initial position for the camera scene node above the plane
+        //   mushroomNode->SetRotation(Quaternion(0.0f, Random(360.0f), 0.0f));
+        // mushroomNode->SetScale(0.5f + Random(2.0f));
+        // Instantiate enemies and moving platforms at each placeholder of "MovingEntities" layer (placeholders are Poly Line objects defining a path from points)
+        //sample2D_->PopulateMovingEntities(tileMap->GetLayer(tileMap->GetNumLayers() - 2));
 
-    // Instantiate coins to pick at each placeholder of "Coins" layer (placeholders for coins are Rectangle objects)
-    //TileMapLayer3D* coinsLayer = tileMap->GetLayer(tileMap->GetNumLayers() - 3);
-    //sample2D_->PopulateCoins(coinsLayer);
+        // Instantiate coins to pick at each placeholder of "Coins" layer (placeholders for coins are Rectangle objects)
+        //TileMapLayer3D* coinsLayer = tileMap->GetLayer(tileMap->GetNumLayers() - 3);
+        //sample2D_->PopulateCoins(coinsLayer);
 
-    // Init coins counters
-    //player_->remainingCoins_ = coinsLayer->GetNumObjects();
-    //player_->maxCoins_ = coinsLayer->GetNumObjects();
+        // Init coins counters
+        //player_->remainingCoins_ = coinsLayer->GetNumObjects();
+        //player_->maxCoins_ = coinsLayer->GetNumObjects();
 
-    //Instantiate triggers (for ropes, ladders, lava, slopes...) at each placeholder of "Triggers" layer (placeholders for triggers are Rectangle objects)
-    //sample2D_->PopulateTriggers(tileMap->GetLayer(tileMap->GetNumLayers() - 4));
+        //Instantiate triggers (for ropes, ladders, lava, slopes...) at each placeholder of "Triggers" layer (placeholders for triggers are Rectangle objects)
+        //sample2D_->PopulateTriggers(tileMap->GetLayer(tileMap->GetNumLayers() - 4));
 
-    // Create background
+        // Create background
 //    sample2D_->CreateBackgroundSprite(info, 6.0, "Textures/HeightMap.png", true);
+
+
+
+
+    }
+    /*
+    // Create a directional light with cascaded shadow mapping
+    Node* lightNode = scene_->CreateChild("DirectionalLight");
+    lightNode->SetDirection(Vector3(0.3f, -0.5f, 0.425f));
+    Light* light = lightNode->CreateComponent<Light>();
+    light->SetLightType(LIGHT_DIRECTIONAL);
+    light->SetCastShadows(true);
+    light->SetShadowBias(BiasParameters(0.00025f, 0.5f));
+    light->SetShadowCascade(CascadeParameters(10.0f, 50.0f, 200.0f, 0.0f, 0.8f));
+    light->SetSpecularIntensity(0.5f);
+*/
+    sample2D_->scene_ = scene_;
+///
+
+    // Create heightmap terrain with collision
+    Node* terrainNode = scene_->CreateChild("Terrain", LOCAL);
+    terrainNode->SetPosition(Vector3::ZERO);
+    terrain_ = terrainNode->CreateComponent<Terrain>();
+    terrain_->SetPatchSize(64);
+    terrain_->SetSpacing(Vector3(2.8f, 2.2f, 2.8f));
+//    terrain->SetSpacing(Vector3(3.0f, 0.1f, 3.0f)); // Spacing between vertices and vertical resolution of the height map
+
+    //    terrain->SetHeightMap(cache->GetResource<Image>("Offroad/Terrain/HeightMapRace-257.png"));
+//    terrain->SetMaterial(cache->GetResource<Material>("Offroad/Terrain/TerrainRace-256.xml"));
+    terrain_->SetMarkerMap(cache->GetResource<Image>("Textures/MarkerMap.png"));
+    terrain_->SetHeightMap(cache->GetResource<Image>("Textures/HeightMap.png"));
+    terrain_->SetMaterial(cache->GetResource<Material>("Materials/Terrain.xml"));
+
+    terrain_->SetOccluder(true);
+    terrain_->SetEnabled(false);
+
+    // TRACK MARKER
+    // HSL -> 0.500000059604645,1,0.643137276172638
+
+    // Search for track marker
+    int trackX = 0;
+    int trackY = 0;
+    for (int k = 0; k < terrain_->GetMarkerMap()->GetHeight(); k++) {
+        for (int j = 0; j < terrain_->GetMarkerMap()->GetWidth(); j++) {
+            Vector3 hsl_ = terrain_->GetMarkerMap()->GetPixel(k, j).ToHSL();
+            //URHO3D_LOGINFOF("terrain marker map[x,y]=[%f,%f,%f]", j, k, hsl_.x_, hsl_.y_, hsl_.z_);
+
+
+            if (hsl_ == bkgMarkerToken)
+                continue;
+
+            if (hsl_ == treeMarkerToken) {
+                trees_.Push(Vector3((float)j, 0.0f, (float)k));
+            } else if (hsl_ == trackMarkerToken) {
+                trackX = j;
+                trackY = k;
+            } else if (hsl_ == waypointToken) {
+                waypoints_.Push((Vector3((float)j, 0.0f, (float)k)));
+            } else {
+                // Store track marker
+                URHO3D_LOGINFOF("***** UNKNOWN terrain marker map[%d,%d]=[%f,%f,%f]", j, k, hsl_.x_, hsl_.y_, hsl_.z_);
+            }
+
+        }
+    }
+
+    int reduceFactor = ((float)trees_.Size()*1.99f);
+    // Drop trees to reduce saturation of trees
+    int reduceSize = Min(trees_.Size(), reduceFactor);
+
+    for (int j = 0; j < reduceSize; j++) {
+        trees_.Erase(Random(0, trees_.Size()), 1);
+    }
+
+    URHO3D_LOGINFOF("***** TREE COUNT: [%d]", trees_.Size());
+    URHO3D_LOGINFOF("***** WAYPOINT COUNT: [%d]", waypoints_.Size());
+
+    RigidBody* body = terrainNode->CreateComponent<RigidBody>();
+    body->SetCollisionLayer(2); // Use layer bitmask 2 for static geometry
+    CollisionShape* shape = terrainNode->CreateComponent<CollisionShape>();
+
+    // Assigns terrain collision map (calculated based on heightmap)
+    shape->SetTerrain();
+
+    // Load race track at track marker
+
+    // Convert marker position to world position for track
+    int w = terrain_->GetMarkerMap()->GetWidth();
+    int h = terrain_->GetMarkerMap()->GetHeight();
+
+
+    float trackOffsetX = -mapSize/2;
+    float trackOffsetY = -mapSize/2;
+    float trackPosX = (((float)trackX / (float)w)*mapSize)+trackOffsetX;
+    float trackPosZ = (((float)trackY / (float)h)*mapSize)+trackOffsetY;
+
+    // Convert from mini map to world position
+//    Vector3 shiftedRange = Vector3(trackPosX, 0, trackPosZ) - Vector3(mapSize/2, mapSize/2, mapSize/2);
+
+    URHO3D_LOGINFOF("-----> SET RACE TRACK TO location in world space [%f,%f,%f]", trackPosX, 0.0f, trackPosZ);
+
+    /*
+    // 1600+1600
+    float xRange = (shiftedRange.x_*mapSize) / miniMapWidth;
+    float zRange = (shiftedRange.z_*mapSize) / miniMapHeight;
+*/
+
+        raceTrack_ = scene_->CreateChild("RaceTrack", LOCAL);
+        Vector3 position(trackPosX, 0.0f, trackPosZ);
+        position.y_ = terrain_->GetHeight(position) + 20.0f;
+        raceTrack_->SetPosition(position);
+        // Create a rotation quaternion from up vector to terrain normal
+        //raceTrack_->SetRotation(Quaternion(Vector3::UP, terrain_->GetNormal(position)));
+        Node* adjNode = raceTrack_->CreateChild("AdjNode", LOCAL);
+        adjNode->SetRotation(Quaternion(0.0, 0.0, 0.0f));
+
+        raceTrack_->SetScale(30.0f);
+
+        auto* object = adjNode->CreateComponent<StaticModel>();
+        std::string mdlPath = "Models/Tracks/Models/trackA.mdl";
+        std::string matPath = "Models/Tracks/Models/trackA.txt";
+        auto* model = cache->GetResource<Model>(mdlPath.c_str());
+        object->SetModel(model);
+        object->ApplyMaterialList(matPath.c_str());
+        object->SetCastShadows(true);
+        object->SetEnabled(false);
+
+        body = adjNode->CreateComponent<RigidBody>();
+        body->SetCollisionLayer(2);
+        trackColShape_ = adjNode->CreateComponent<CollisionShape>();
+        trackColShape_->SetTriangleMesh(object->GetModel(), 0);
+//        trackColShape_->SetConvexHull(model);
+
+
+    // Place trees based on markers
+
+
+
+    // Convert from mini map to world position
+//    Vector3 shiftedRange = Vector3(trackPosX, 0, trackPosZ) - Vector3(mapSize/2, mapSize/2, mapSize/2);
+
+    URHO3D_LOGINFOF("-----> SET RACE TRACK TO location in world space [%f,%f,%f]", trackPosX, 0.0f, trackPosZ);
+
+    // Place trees
+    for (unsigned i = 0; i < trees_.Size(); ++i)
+    {
+        float treeOffsetX = -mapSize/2;
+        float treeOffsetY = -mapSize/2;
+        // Convert marker position to world position for track
+        float treePosX = (((float)trees_[i].x_ / (float)terrain_->GetMarkerMap()->GetWidth())*mapSize)+treeOffsetX;
+        float treePosZ = (((float)trees_[i].z_ / (float)terrain_->GetMarkerMap()->GetHeight())*mapSize)+treeOffsetY;
+
+        Node* objectNode = scene_->CreateChild("Tree", LOCAL);
+        Vector3 position(treePosX, 0.0f, treePosZ);
+        position.y_ = terrain_->GetHeight(position) - 0.1f;
+        objectNode->SetPosition(position);
+        objectNode->SetEnabled(false);
+
+        // Store tree position as focus
+        focusObjects_.Push(position);
+
+        // Create a rotation quaternion from up vector to terrain normal
+        objectNode->SetRotation(Quaternion(Vector3::UP, terrain_->GetNormal(position)));
+        Node* adjNode = objectNode->CreateChild("AdjNode", LOCAL);
+        adjNode->SetRotation(Quaternion(0.0, 0.0, -90.0f));
+
+        objectNode->SetScale(20.0f);
+
+        auto* object = adjNode->CreateComponent<StaticModel>();
+
+        // Random
+        int r = std::round(Random(0.0f, 5.0f));
+        switch (r) {
+            case 0:
+                object->SetModel(cache->GetResource<Model>("Models/AssetPack/tree-baobab_orange.mdl"));
+                break;
+            case 1:
+                object->SetModel(cache->GetResource<Model>("Models/AssetPack/tree-birch02.mdl"));
+                break;
+            case 2:
+                object->SetModel(cache->GetResource<Model>("Models/AssetPack/tree-elipse.mdl"));
+                break;
+            case 3:
+                object->SetModel(cache->GetResource<Model>("Models/AssetPack/tree-fir.mdl"));
+                break;
+            case 4:
+                object->SetModel(cache->GetResource<Model>("Models/AssetPack/tree-oak.mdl"));
+                break;
+            case 5:
+                object->SetModel(cache->GetResource<Model>("Models/AssetPack/tree-lime.mdl"));
+                break;
+        }
+
+        //       object->SetMaterial(cache->GetResource<Material>("Materials/LOWPOLY_COLORS.xml")
+        object->SetMaterial(cache->GetResource<Material>("Materials/LOWPOLY-COLORS.xml"));
+        object->SetCastShadows(true);
+
+        auto* body = adjNode->CreateComponent<RigidBody>();
+        body->SetCollisionLayer(2);
+        auto* shape = objectNode->CreateComponent<CollisionShape>();
+        shape->SetTriangleMesh(object->GetModel(), 0);
+    }
+
+    // Place waypoints
+
+    // Store focusObjects index for waypoint reference
+    wpStartIndex_ = focusObjects_.Size()+1;
+    for (unsigned i = 0; i < waypoints_.Size(); ++i)
+    {
+        float wpOffsetX = -mapSize/2;
+        float wpOffsetY = -mapSize/2;
+        // Convert marker position to world position for track
+        float wpPosX = (((float)waypoints_[i].x_ / (float)terrain_->GetMarkerMap()->GetWidth())*mapSize)+wpOffsetX;
+        float wpPosZ = (((float)waypoints_[i].z_ / (float)terrain_->GetMarkerMap()->GetHeight())*mapSize)+wpOffsetY;
+//terrain_->GetHeight(Vector3(wpPosX, 0.0f, wpPosZ))
+        waypointsWorld_.Push(Vector3(wpPosX, 0, wpPosZ));
+
+        Node* objectNode = scene_->CreateChild("Waypoint", LOCAL);
+        Vector3 position(wpPosX, 0.0f, wpPosZ);
+        position.y_ = terrain_->GetHeight(position) - 0.1f;
+        objectNode->SetPosition(position);
+
+        // Store tree position as focus
+        focusObjects_.Push(position);
+
+        // Create a rotation quaternion from up vector to terrain normal
+        objectNode->SetRotation(Quaternion(Vector3::UP, terrain_->GetNormal(position)));
+        Node* adjNode = objectNode->CreateChild("AdjNode", LOCAL);
+        adjNode->SetRotation(Quaternion(0.0, 0.0, -90.0f));
+
+        objectNode->SetScale(20.0f);
+
+        auto* object = adjNode->CreateComponent<StaticModel>();
+         object->SetModel(cache->GetResource<Model>("Models/AssetPack/castle-flag.mdl"));
+
+        //       object->SetMaterial(cache->GetResource<Material>("Materials/LOWPOLY_COLORS.xml")
+        object->SetMaterial(cache->GetResource<Material>("Materials/LOWPOLY-COLORS.xml"));
+        object->SetCastShadows(true);
+        object->SetEnabled(false);
+
+        auto* body = adjNode->CreateComponent<RigidBody>();
+        body->SetCollisionLayer(2);
+        auto* shape = objectNode->CreateComponent<CollisionShape>();
+        shape->SetTriangleMesh(object->GetModel(), 0);
+    }
+
+
+
+
+    //
+/*
+    // Create 1000 mushrooms in the terrain. Always face outward along the terrain normal
+    const unsigned NUM_MUSHROOMS = 1000;
+    for (unsigned i = 0; i < NUM_MUSHROOMS; ++i)
+    {
+        Node* objectNode = scene_->CreateChild("Mushroom");
+        Vector3 position(Random(2000.0f) - 1000.0f, 0.0f, Random(2000.0f) - 1000.0f);
+        position.y_ = terrain_->GetHeight(position) - 0.1f;
+        objectNode->SetPosition(position);
+        // Create a rotation quaternion from up vector to terrain normal
+        objectNode->SetRotation(Quaternion(Vector3::UP, terrain_->GetNormal(position)));
+        Node* adjNode = objectNode->CreateChild("AdjNode");
+        adjNode->SetRotation(Quaternion(0.0, 0.0, -90.0f));
+
+        objectNode->SetScale(3.5f);
+
+        auto* object = adjNode->CreateComponent<StaticModel>();
+
+        // Random
+        int r = std::round(Random(0.0f, 5.0f));
+        switch (r) {
+            case 0:
+                object->SetModel(cache->GetResource<Model>("Models/AssetPack/tree-baobab_orange.mdl"));
+                break;
+            case 1:
+                object->SetModel(cache->GetResource<Model>("Models/AssetPack/tree-birch02.mdl"));
+                break;
+            case 2:
+                object->SetModel(cache->GetResource<Model>("Models/AssetPack/tree-elipse.mdl"));
+                break;
+            case 3:
+                object->SetModel(cache->GetResource<Model>("Models/AssetPack/tree-fir.mdl"));
+                break;
+            case 4:
+                object->SetModel(cache->GetResource<Model>("Models/AssetPack/tree-oak.mdl"));
+                break;
+            case 5:
+                object->SetModel(cache->GetResource<Model>("Models/AssetPack/tree-lime.mdl"));
+                break;
+        }
+
+ //       object->SetMaterial(cache->GetResource<Material>("Materials/LOWPOLY_COLORS.xml")
+        object->SetMaterial(cache->GetResource<Material>("Materials/LOWPOLY-COLORS.xml"));
+        object->SetCastShadows(true);
+
+        auto* body = adjNode->CreateComponent<RigidBody>();
+        body->SetCollisionLayer(2);
+        auto* shape = objectNode->CreateComponent<CollisionShape>();
+        shape->SetTriangleMesh(object->GetModel(), 0);
+    }*/
 
 
 
     // Check when scene is rendered
     SubscribeToEvent(E_ENDRENDERING, URHO3D_HANDLER(MayaScape, HandleSceneRendered));
+}
+
+void MayaScape::UpdateUIState(bool state) {
+    // Create sprite and add to the UI layout
+    powerBarP1Sprite_->SetVisible(state);
+    powerBarBkgP1Sprite_->SetVisible(state);
+    rpmBarP1Sprite_->SetVisible(state);
+    rpmBarBkgP1Sprite_->SetVisible(state);
+    velBarP1Sprite_->SetVisible(state);
+    velBarBkgP1Sprite_->SetVisible(state);
+    miniMapP1Sprite_->SetVisible(state);
+    miniMapWPSprite_->SetVisible(state);
+    miniMapBkgSprite_->SetVisible(state);
+    markerMapBkgSprite_->SetVisible(state);
+    steerWheelSprite_->SetVisible(state);
+
+
+
+    // Create the UI for displaying the remaining lifes
+//    lifeUI->SetVisible(false);
+//    auto *lifeText = lifeUI->CreateChild<Text>("LifeText2");
+
+    powerBarText_->SetVisible(state);
+    rpmBarText_->SetVisible(state);
+    velBarText_->SetVisible(state);
+
+    // Debug text
+    for (int i = 0; i < NUM_DEBUG_FIELDS; i++) {
+        debugText_[i]->SetVisible(state);
+    }
+
+
+    // TODO: Enable 3d objects
 }
 
 void MayaScape::HandleSceneRendered(StringHash eventType, VariantMap &eventData) {
@@ -1631,6 +1716,7 @@ void MayaScape::SubscribeToEvents() {
     SubscribeToEvent(connectButton_, E_RELEASED, URHO3D_HANDLER(MayaScape, HandleConnect));
     SubscribeToEvent(disconnectButton_, E_RELEASED, URHO3D_HANDLER(MayaScape, HandleDisconnect));
     SubscribeToEvent(startServerButton_, E_RELEASED, URHO3D_HANDLER(MayaScape, HandleStartServer));
+    SubscribeToEvent(exitButton_, E_RELEASED, URHO3D_HANDLER(MayaScape, HandleExit));
 
     // Subscribe to server events
     SubscribeToEvent(E_SERVERSTATUS, URHO3D_HANDLER(MayaScape, HandleConnectionStatus));
@@ -2590,6 +2676,14 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
     float timeStep = eventData[P_TIMESTEP].GetFloat();
     HandleUpdateParticlePool(timeStep);
 
+    bkgAngle_ += timeStep * 2.0f;
+
+    if (bkgAngle_ > 360.0f) {
+        bkgAngle_ = 0.0f;
+    }
+    // Update menu background
+    bkgSprite_->SetRotation(bkgAngle_);
+
     float deltaSum;
 
     if (player_) {
@@ -3124,9 +3218,14 @@ void MayaScape::HandlePostUpdate(StringHash eventType, VariantMap &eventData) {
         cameraNode_->SetPosition(cameraTargetPos);
         cameraNode_->SetRotation(dir);
 
+        // On client
+        if (!isServer_) {
 
-        // Always show waypoints
-        player_->DebugDraw(Color::MAGENTA);
+            if (started_) {
+                // Always show waypoints
+                player_->DebugDraw(Color::MAGENTA);
+            }
+        }
 
         if (drawDebug_) {
   //          scene_->GetComponent<PhysicsWorld>()->DrawDebugGeometry(true);
@@ -3337,6 +3436,67 @@ void MayaScape::CreateUI()
  //   Button *playButton = static_cast<Button *>(ui->GetRoot()->GetChild("PlayButton", true));
 //    SubscribeToEvent(playButton, E_RELEASED, URHO3D_HANDLER(MayaScape, HandlePlayButton));
 
+    int textureWidth;
+    int textureHeight;
+
+    // Get logo texture
+    Texture2D* bkgTexture = cache->GetResource<Texture2D>("Textures/menu-bkg.png");
+    if (!bkgTexture)
+        return;
+
+    // Create bkg sprite and add to the UI layout
+    bkgSprite_ = ui->GetRoot()->CreateChild<Sprite>();
+    bkgAngle_ = 0.0f;
+
+    // Set logo sprite texture
+    bkgSprite_->SetTexture(bkgTexture);
+
+    textureWidth = bkgTexture->GetWidth();
+    textureHeight = bkgTexture->GetHeight();
+
+    // Set logo sprite scale
+    bkgSprite_->SetScale((256.0f / textureWidth)*5.8f);
+
+    // Set logo sprite size
+    bkgSprite_->SetSize(textureWidth, textureHeight);
+
+    // Set logo sprite hot spot
+    bkgSprite_->SetHotSpot(textureWidth/2, textureHeight/2);
+
+    // Set logo sprite alignment
+    bkgSprite_->SetAlignment(HA_CENTER, VA_CENTER);
+    bkgSprite_->SetPosition(0,0);
+
+    // Make logo not fully opaque to show the scene underneath
+    bkgSprite_->SetOpacity(0.9f);
+
+    // Set a low priority for the logo so that other UI elements can be drawn on top
+    bkgSprite_->SetPriority(-100);
+
+
+    // Construct the instructions text element
+    versionText_ = ui->GetRoot()->CreateChild<Text>();
+    versionText_->SetText(APP_VERSION);
+    versionText_->SetFont(cache->GetResource<Font>("Fonts/CompassGold.ttf"), 40);
+    versionText_->SetColor(Color::WHITE);
+    // Position the text relative to the screen center
+    versionText_->SetHorizontalAlignment(HA_CENTER);
+    versionText_->SetPosition(0, 20);
+    // Hide once connected
+    versionText_->SetVisible(true);
+
+    studioText_ = ui->GetRoot()->CreateChild<Text>();
+    studioText_->SetText(STUDIO_VERSION);
+    studioText_->SetFont(cache->GetResource<Font>("Fonts/CompassGold.ttf"), 26);
+    studioText_->SetColor(Color::BLACK);
+    // Position the text relative to the screen center
+    studioText_->SetHorizontalAlignment(HA_CENTER);
+    studioText_->SetPosition(0, 90);
+    // Hide once connected
+    studioText_->SetVisible(true);
+
+
+
     // Construct the instructions text element
     instructionsText_ = ui->GetRoot()->CreateChild<Text>();
     instructionsText_->SetText(
@@ -3351,19 +3511,20 @@ void MayaScape::CreateUI()
     instructionsText_->SetVisible(false);
 
     buttonContainer_ = root->CreateChild<UIElement>();
-    buttonContainer_->SetFixedSize(600, 120);
-    buttonContainer_->SetPosition(220, 300);
+    buttonContainer_->SetFixedSize(600, 240);
+    buttonContainer_->SetPosition(170, 300);
     buttonContainer_->SetHorizontalAlignment((HA_CENTER));
     buttonContainer_->SetLayoutMode(LM_VERTICAL);
+    buttonContainer_->SetLayoutSpacing(10.0);
 
 //    textEdit_ = buttonContainer_->CreateChild<LineEdit>();
 //    textEdit_->SetStyleAuto();
 
-    playButton_ = CreateButton("Play", 90);
-    connectButton_ = CreateButton("Connect", 90);
-    disconnectButton_ = CreateButton("Disconnect", 130);
-    startServerButton_ = CreateButton("Start Server", 110);
-
+    playButton_ = CreateButton("Play", 240);
+    connectButton_ = CreateButton("Connect", 240);
+    disconnectButton_ = CreateButton("Disconnect", 240);
+    startServerButton_ = CreateButton("Start Server", 240);
+    exitButton_ = CreateButton("Exit", 240);
 
     // Get logo texture
     Texture2D* logoTexture = cache->GetResource<Texture2D>("Textures/logo.png");
@@ -3376,8 +3537,8 @@ void MayaScape::CreateUI()
     // Set logo sprite texture
     //logoSprite_->SetTexture(logoTexture);
 
-    int textureWidth = logoTexture->GetWidth();
-    int textureHeight = logoTexture->GetHeight();
+    textureWidth = logoTexture->GetWidth();
+    textureHeight = logoTexture->GetHeight();
 
     // Set logo sprite scale
     logoSprite_->SetScale(256.0f / textureWidth);
@@ -3390,7 +3551,7 @@ void MayaScape::CreateUI()
 
     // Set logo sprite alignment
     logoSprite_->SetAlignment(HA_CENTER, VA_BOTTOM);
-    logoSprite_->SetPosition(100,-500);
+    logoSprite_->SetPosition(130,-500);
 
     // Make logo not fully opaque to show the scene underneath
     logoSprite_->SetOpacity(0.9f);
@@ -3405,6 +3566,8 @@ void MayaScape::CreateUI()
 void MayaScape::SetupViewport()
 {
     Renderer* renderer = GetSubsystem<Renderer>();
+
+//    GetSubsystem<Renderer>()->SetViewport(0, new Viewport(context_, scene_, camera));
 
     // Set up a viewport to the Renderer subsystem so that the 3D scene can be seen
     SharedPtr<Viewport> viewport(new Viewport(context_, scene_, cameraNode_->GetComponent<Camera>()));
@@ -3445,7 +3608,7 @@ Button* MayaScape::CreateButton(const String& text, int width)
 
     Text* buttonText = button->CreateChild<Text>();
     buttonText->SetName("text");
-    buttonText->SetFont(font, 14);
+    buttonText->SetFont(font, 18);
     buttonText->SetAlignment(HA_CENTER, VA_CENTER);
     buttonText->SetText(text);
 
@@ -3473,6 +3636,7 @@ void MayaScape::UpdateButtons()
         discText->SetText("Server Disconnect");
     }
     startServerButton_->SetVisible(!serverConnection && !serverRunning);
+    exitButton_->SetVisible(!serverConnection && !serverRunning);
   //  textEdit_->SetVisible(!serverConnection && !serverRunning);
 }
 /*
@@ -3642,4 +3806,14 @@ void MayaScape::HandleConnectionStatus(StringHash eventType, VariantMap& eventDa
 void MayaScape::HandleClientObjectID(StringHash eventType, VariantMap& eventData)
 {
     clientObjectID_ = eventData[ClientObjectID::P_ID].GetUInt();
+}
+
+
+
+void MayaScape::HandleExit(StringHash eventType, VariantMap& eventData)
+{
+    // Call stop
+    Stop();
+
+    // TODO: Proper shutdown of window
 }

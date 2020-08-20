@@ -335,6 +335,9 @@ void Vehicle::Init()
             pWheel->SetMaterial(cache->GetResource<Material>("Offroad/Models/Materials/Tire.xml"));
             pWheel->SetCastShadows(true);
 
+            pWheel->SetEnabled(false);
+
+
             // track
             Node *trackNode = GetScene()->CreateChild();
             wheelTrackList_[i] = trackNode->CreateComponent<WheelTrackModel>();
