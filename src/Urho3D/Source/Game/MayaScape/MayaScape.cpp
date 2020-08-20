@@ -1641,9 +1641,7 @@ void MayaScape::SubscribeToEvents() {
     SubscribeToEvent(E_SERVERSTATUS, URHO3D_HANDLER(MayaScape, HandleConnectionStatus));
     SubscribeToEvent(E_CLIENTOBJECTID, URHO3D_HANDLER(MayaScape, HandleClientObjectID));
 
-    //
-
-    // Subscribe Materials/LOWPOLY-COLORS.xml function for processing update events
+    // Subscribe function for processing update events
     SubscribeToEvent(E_UPDATE, URHO3D_HANDLER(MayaScape, HandleUpdate));
 
     // Subscribe HandlePostUpdate() function for processing post update events
@@ -2353,6 +2351,9 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
     //
     // Position
     //Vector3 position((float)x * spacing_.x_, GetRawHeight(xPos, zPos), (float)z * spacing_.z_);
+
+
+    //    if (isServer_) {
 
 
 //    float maxX = terrain_->GetHeightMap()->GetWidth()*terrain_->GetPatchSize();
@@ -3091,7 +3092,7 @@ void MayaScape::CreateUI()
 
     buttonContainer_ = root->CreateChild<UIElement>();
     buttonContainer_->SetFixedSize(500, 20);
-    buttonContainer_->SetPosition(20, 20);
+    buttonContainer_->SetPosition(20, 500);
     buttonContainer_->SetLayoutMode(LM_HORIZONTAL);
 
     textEdit_ = buttonContainer_->CreateChild<LineEdit>();
