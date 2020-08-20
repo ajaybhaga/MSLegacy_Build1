@@ -358,6 +358,9 @@ void MayaScape::Start() {
         particlePool_[i].usedBy = -1;
     }
 
+    // Don't start until past menu
+    started_ = false;
+
     // Execute base class startup
     Game::Start();
 
@@ -400,26 +403,17 @@ void MayaScape::Start() {
         boids[i].Initialise(cache, scene_, Vector3(0.0f, 20.0f, 0.0f));
     }
 
-
     // targetCameraPos_ = Vector3(0.0f, 40.0f, CAMERA_DISTANCE);
-
     fpsTimer_.Reset();
     framesCount_ = 0;
     
-    UI *ui = GetSubsystem<UI>();
-
-    // Create the UI content
-    sample2D_->CreateUIContent("MayaScape v0.1");
-//    auto* ui = GetSubsystem<UI>();
-    Button *playButton = static_cast<Button *>(ui->GetRoot()->GetChild("PlayButton", true));
-    SubscribeToEvent(playButton, E_RELEASED, URHO3D_HANDLER(MayaScape, HandlePlayButton));
 
     // Hook up to the frame update events
     SubscribeToEvents();
 
     ChangeDebugHudText();
 
-   // Game::InitMouseMode(MM_RELATIVE);
+   Game::InitMouseMode(MM_FREE);
 }
 
 
@@ -993,7 +987,7 @@ void MayaScape::CreateScene() {
 
     // Set the default UI style and font
     //ui->GetRoot()->SetDefaultStyle(cache->GetResource<XMLFile>("UI/DefaultStyle.xml"));
-    auto *font = cache->GetResource<Font>("Fonts/Anonymous Pro.ttf");
+    auto *font = cache->GetResource<Font>("Fonts/SinsGold.ttf");
 
     // Get powerbar texture
     Texture2D *powerBarTexture = cache->GetResource<Texture2D>("Textures/powerbar.png");
@@ -1305,7 +1299,7 @@ void MayaScape::CreateScene() {
         debugText_[i] = lifeUI->CreateChild<Text>("DebugText1");
         debugText_[i]->SetAlignment(HA_LEFT, VA_CENTER);
         debugText_[i]->SetPosition(10.0f, 500.0 + (i * 20));
-        debugText_[i]->SetFont(font, 8);
+        debugText_[i]->SetFont(font, 14);
         debugText_[i]->SetTextEffect(TE_SHADOW);
         debugText_[i]->SetVisible(true);
         std::string debugData1;
@@ -1633,6 +1627,7 @@ void MayaScape::SubscribeToEvents() {
     SubscribeToEvent(E_POSTUPDATE, URHO3D_HANDLER(MayaScape, HandlePostUpdate));
 
     // Subscribe to button actions
+    SubscribeToEvent(playButton_, E_RELEASED, URHO3D_HANDLER(MayaScape, HandlePlayButton));
     SubscribeToEvent(connectButton_, E_RELEASED, URHO3D_HANDLER(MayaScape, HandleConnect));
     SubscribeToEvent(disconnectButton_, E_RELEASED, URHO3D_HANDLER(MayaScape, HandleDisconnect));
     SubscribeToEvent(startServerButton_, E_RELEASED, URHO3D_HANDLER(MayaScape, HandleStartServer));
@@ -2028,7 +2023,7 @@ void MayaScape::HandleCollisionEnd(StringHash eventType, VariantMap &eventData) 
     }*/
 }
 
-void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
+void MayaScape::HandleRenderUpdate(StringHash eventType, VariantMap &eventData) {
     using namespace Update;
     auto *input = GetSubsystem<Input>();
 
@@ -2039,6 +2034,563 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
     float zoom_ = cameraNode_->GetComponent<Camera>()->GetZoom();
     float deltaSum;
 
+
+    if (player_) {
+
+//        Vector3 targetAgent = agents_[player_->targetAgentIndex_]->GetVehicle()->GetNode()->GetPosition();
+
+
+        /*
+            // Determine zoom by getting average distance from all players
+            for (int i = 0; i < EvolutionManager::getInstance()->getAgents().size(); i++) {
+
+                // Update player location for AI
+                agents_[i]->playerPos_ = player_->GetNode()->GetPosition();
+
+                Vector3 p1 = player_->GetNode()->GetPosition();
+                p1.z_ = 0;
+                Vector3 p2 = agents_[i]->GetNode()->GetPosition();
+                p2.z_ = 0;
+                float delta = p1.DistanceToPoint(p2);
+                deltaSum += delta;
+            }
+
+            float avgDelta = ((float) deltaSum) / ((float) EvolutionManager::getInstance()->getAgents().size());
+            float factor;
+
+            if (avgDelta > 5.0f) {
+                factor = 1.0f - avgDelta * 0.02f;
+            } else {
+                factor = 1.0f + avgDelta * 0.02f;
+            }
+
+            factor = 1.0f;
+
+            zoom_ = Clamp(zoom_ * factor, CAMERA_MIN_DIST, CAMERA_MAX_DIST);
+            cameraNode_->GetComponent<Camera>()->SetZoom(zoom_);
+
+       */
+    }
+
+    //    URHO3D_LOGINFOF("delta=%f", delta);
+    //    URHO3D_LOGINFOF("factor=%f", factor);
+
+
+    // Zoom in/out
+    if (cameraNode_)
+        sample2D_->Zoom(cameraNode_->GetComponent<Camera>());
+
+    // Clamp focus index
+    focusIndex_ = focusIndex_ % focusObjects_.Size();
+
+    if (player_) {
+
+        // **note** the buttons controls are handled in the character class update fn.
+/*
+        // right stick - camera
+        Variant rStick = player_->controls_->extraData_[VAR_AXIS_1];
+
+        if (!rStick.IsEmpty()) {
+            Vector2 axisInput = rStick.GetVector2();
+            player_->controls_->yaw_ += axisInput.x_ * YAW_SENSITIVITY;
+            player_->controls_->pitch_ += axisInput.y_ * YAW_SENSITIVITY;
+        }
+*/
+        // Limit pitch
+        // player_->controls_.pitch_ = Clamp(player_->controls_.pitch_, -80.0f, 80.0f);
+        // Set rotation already here so that it's updated every rendering frame instead of every physics frame
+        //   player_->GetNode()->SetRotation(Quaternion(player_->controls_.yaw_, Vector3::UP));
+        //  player_->GetNode()->SetRotation(Quaternion(0.0f, -180.0f-player_->heading_, 0.0f));
+/*
+        player_->GetNode()->SetRotation(Quaternion(0.0f, player_->heading_, 0.0));
+        auto *model_ = player_->GetNode()->GetComponent<AnimatedModel>(true);
+/*
+//        model_->GetNode()->SetRotation(Quaternion(0, 90, 0));
+        Skeleton &skeleton = model_->GetSkeleton();
+        Bone *rootBone = skeleton.GetRootBone();
+        Bone *startBone = rootBone;
+*/
+
+
+        /*
+        // Clamp player life
+        if (player_->life_ > 100) {
+            player_->life_ = 100;
+        }
+        if (player_->life_ < 0) {
+            player_->life_ = 0;
+        }
+
+
+        // Set animal scale
+      //  player_->GetNode()->GetChildren()[0]->SetScale(20.0f);
+
+        // AI
+        if (agents_) {
+            for (int i = 0; i < EvolutionManager::getInstance()->getAgents().size(); i++) {
+                // Set rotation already here so that it's updated every rendering frame instead of every physics frame
+                agents_[i]->GetNode()->SetRotation(Quaternion(agents_[i]->controls_.yaw_, Vector3::UP));
+                //ai_[i]->GetNode()->SetRotation(Quaternion(0.0f, -180.0f-ai_[i]->heading_, 0.0f));
+                //ai_[i]->GetNode()->SetRotation(Quaternion(-90.0f, ai_[i]->heading_+180.0f, 0.0f));
+                agents_[i]->GetNode()->SetRotation(Quaternion(0.0f, agents_[i]->heading_, 0.0));
+
+    /*
+            static int _sndCnt = 0;
+            float r = Random(-0.0f,5.0f);
+            if (r > 2.5f) {
+                _sndCnt++;
+            }
+
+            if (_sndCnt > 5) {
+                sample2D_->PlaySoundEffect("enemy01-laugh.wav");
+            }
+
+
+                // Update billboards (genotype, powerbar)
+
+                const float BILLBOARD_ROTATION_SPEED = 50.0f;
+
+                // Genotype
+
+                // Rotate the individual billboards within the billboard sets, then recommit to make the changes visible
+                for (unsigned j = 0; j < agents_[i]->genotypeBBSet_->GetNumBillboards(); ++j) {
+                    Billboard *bb = agents_[i]->genotypeBBSet_->GetBillboard(j);
+                    //  bb->rotation_ += BILLBOARD_ROTATION_SPEED * timeStep;
+                    if (agents_[i]) {
+                        Vector3 aiPos = agents_[i]->GetNode()->GetPosition();
+                        bb->position_ = Vector3(aiPos.x_ + (j * 0.02), aiPos.y_, 0.0f);
+
+                        // Already set size in initialization (based on parameter)
+                        //bb->size_ = Vector2((1.0f) * 0.05f, (0.1f) * 0.05f);
+
+
+                        //       bb->position_ = Vector3(player_->GetNode()->GetPosition().x_, player_->GetNode()->GetPosition().y_, -5.0f);
+                    }
+
+                }
+
+                agents_[i]->genotypeBBSet_->Commit();
+
+
+                // Powerbar
+
+                // Rotate the individual billboards within the billboard sets, then recommit to make the changes visible
+                for (unsigned j = 0; j < agents_[i]->powerbarBBSet_->GetNumBillboards(); ++j) {
+                    Billboard *bb = agents_[i]->powerbarBBSet_->GetBillboard(j);
+                    //  bb->rotation_ += BILLBOARD_ROTATION_SPEED * timeStep;
+                    if (agents_[i]) {
+                        Vector3 aiPos = agents_[i]->GetNode()->GetPosition();
+                        bb->position_ = Vector3(aiPos.x_ + (j * 0.02), aiPos.y_+0.2f, 0.0f);
+
+                        bb->size_ = Vector2((0.4f) * 0.05f, (4.0f) * 0.05f);
+
+                        //       bb->position_ = Vector3(player_->GetNode()->GetPosition().x_, player_->GetNode()->GetPosition().y_, -5.0f);
+                    }
+
+                }
+
+                agents_[i]->powerbarBBSet_->Commit();
+
+            }
+        }
+
+        player_->life_ = 50;
+         */
+
+    }
+
+
+    int life = 100;
+    if (player_) {
+        life = player_->GetLife();
+    }
+    // Update player powerbar
+    IntVector2 v = powerBarBkgP1Sprite_->GetSize();
+    int power = int(((life) / 100.0f) * (float) v.x_);
+    powerBarP1Sprite_->SetSize(power, v.y_);
+
+    float maxRPM = 8000.0f;
+    float clampedRPM = player_->GetVehicle()->GetCurrentRPM();
+    if (clampedRPM > maxRPM) {
+        clampedRPM = maxRPM;
+    }
+
+    v = rpmBarBkgP1Sprite_->GetSize();
+    int rpm = ((clampedRPM/maxRPM)* v.x_);
+    rpmBarP1Sprite_->SetSize(rpm, v.y_);
+
+
+    float maxSpeed = 220.0f;
+    float clampedSpeed = player_->GetVehicle()->GetSpeedKmH();
+    if (clampedSpeed > maxSpeed) {
+        clampedSpeed = maxSpeed;
+    }
+
+    // Cap speed at 220 KmH
+    v = velBarBkgP1Sprite_->GetSize();
+    int velocity = ((clampedSpeed/maxSpeed) * v.x_);
+    velBarP1Sprite_->SetSize(velocity, v.y_);
+
+//    float maxX = terrain_->GetPatchSize()*terrain_->GetNumPatches().x_;
+//    float maxY = terrain_->GetPatchSize()*terrain_->GetNumPatches().y_;
+    //
+    // Position
+    //Vector3 position((float)x * spacing_.x_, GetRawHeight(xPos, zPos), (float)z * spacing_.z_);
+
+
+    //    if (isServer_) {
+
+
+//    float maxX = terrain_->GetHeightMap()->GetWidth()*terrain_->GetPatchSize();
+//    float maxY = terrain_->GetHeightMap()->GetHeight()*terrain_->GetPatchSize();
+
+    // Calculate mini map position
+    Vector3 shiftedRange = player_->GetVehicle()->GetNode()->GetPosition() + Vector3(mapSize/2, mapSize/2, mapSize/2);
+
+    // 1600+1600
+    float xRange = (shiftedRange.x_/mapSize) * miniMapWidth;
+    float zRange = (shiftedRange.z_/mapSize) * miniMapHeight;
+
+    float miniMapP1X = miniMapBkgSprite_->GetPosition().x_;
+    float miniMapP1Y = miniMapBkgSprite_->GetPosition().y_;
+
+    // Update mini map for P1 position
+//    miniMapP1Sprite_->SetPosition(Vector2(776.0f-16.0f, 300.0f));
+    float startRotOffset = 180.0f;
+    miniMapP1Sprite_->SetPosition(Vector2(miniMapP1X-xRange+0.0f, miniMapP1Y-zRange+0.0f));
+    miniMapP1Sprite_->SetRotation(vehicleRot_.YawAngle()+startRotOffset);
+
+    float wpOffsetX = -mapSize/2;
+    float wpOffsetY = -mapSize/2;
+
+    int index = player_->wpActiveIndex_;
+
+    if (index < 0) index = 0;
+    // Convert marker position to world position for waypoint
+    float wpPosX = (((float)waypoints_[index].x_ / (float)terrain_->GetMarkerMap()->GetWidth())*mapSize)+wpOffsetX;
+    float wpPosZ = (((float)waypoints_[index].z_ / (float)terrain_->GetMarkerMap()->GetHeight())*mapSize)+wpOffsetY;
+
+    // Calculate mini map position for waypoint
+    shiftedRange = Vector3(wpPosX, 0.0f, wpPosZ) + Vector3(mapSize/2, mapSize/2, mapSize/2);
+
+    // 1600+1600
+    xRange = (shiftedRange.x_/mapSize) * miniMapWidth;
+    zRange = (shiftedRange.z_/mapSize) * miniMapHeight;
+
+    float miniMapWPX = miniMapBkgSprite_->GetPosition().x_;
+    float miniMapWPY = miniMapBkgSprite_->GetPosition().y_;
+
+
+    // Update mini map for WP position
+//    miniMapP1Sprite_->SetPosition(Vector2(776.0f-16.0f, 300.0f));
+    miniMapWPSprite_->SetPosition(Vector2(miniMapWPX-xRange, miniMapWPY-zRange));
+//    miniMapWPSprite_->SetRotation(vehicleRot_.YawAngle());
+
+    float steering = player_->GetVehicle()->GetSteering();
+//    Quaternion vRot = vehicle_->GetNode()->GetRotation();
+
+    steerWheelSprite_->SetRotation(360.0f*steering);
+    player_->GetVehicleHeadLamp()->SetPosition(Vector3(player_->GetVehicle()->GetNode()->GetPosition().x_, player_->GetVehicle()->GetNode()->GetPosition().y_+5.0f, player_->GetVehicle()->GetNode()->GetPosition().z_));
+    player_->GetVehicleHeadLamp()->SetDirection(Vector3(player_->GetVehicle()->GetNode()->GetRotation().x_, 1.0f, player_->GetVehicle()->GetNode()->GetRotation().z_));
+
+    // Update vehicle head lamp lighting
+    Light* light = player_->GetVehicleHeadLamp()->GetComponent<Light>();
+    // Light* light = vehicleHeadLamp_->CreateComponent<Light>();
+    //light->SetLightType(LIGHT_SPOT)
+    light->SetLightType(LIGHT_POINT);
+    light->SetRange(30.0f);
+
+    float rpmLightFactor = 40.0f;
+    float rpmLight = rpm/4500.0f;
+    if (rpmLight > 0.8f) rpmLight = 0.8f;
+    light->SetBrightness(0.2f+(rpmLight*rpmLightFactor));
+    light->SetCastShadows(true);
+    //   light->SetShadowBias(BiasParameters(0.00025f, 0.5f));
+
+    // Update focus objects
+    focusObjects_[0] = player_->GetVehicle()->GetNode()->GetPosition(); // Vehicle
+
+
+    int i = 0;
+
+    /*
+    if (player_) {
+        std::string playerInfo;
+        char str[40];
+
+        Vector3 pos = player_->GetNode()->GetPosition();
+        sprintf(str, "%f,%f,%f", pos.x_, pos.y_, pos.z_);
+        playerInfo.clear();
+        playerInfo.append("Player position (x,y,z) -> ").append(str);
+        debugText_[i]->SetText(playerInfo.c_str());
+
+        i++;
+        Vector3 vel = player_->currState_.moveDir;
+        sprintf(str, "%f,%f,%f", vel.x_, vel.y_, vel.z_);
+
+        playerInfo.clear();
+        playerInfo.append("Player velocity (x,y,z) -> ").append(str);
+        debugText_[i]->SetText(playerInfo.c_str());
+
+        i++;
+//    Vector3 vel = player_
+        sprintf(str, "%d,%d,%d", player_->currState_.onGround, player_->currState_.jump, player_->currState_.kick);
+
+        playerInfo.clear();
+        playerInfo.append("Player state (onGround,jump,kick) -> ").append(str);
+        debugText_[i]->SetText(playerInfo.c_str());
+
+
+        i++;
+        playerInfo.clear();
+        sprintf(str, "%d", EvolutionManager::getInstance()->getGenerationCount());
+        playerInfo.append("Evolution Manager: Generation -> ").append(str);
+        debugText_[i]->SetText(playerInfo.c_str());
+
+
+        i++;
+        playerInfo.clear();
+        sprintf(str, "%d", EvolutionManager::getInstance()->populationSize);
+        playerInfo.append("Evolution Manager: populationSize -> ").append(str);
+        debugText_[i]->SetText(playerInfo.c_str());
+
+        i++;
+        playerInfo.clear();
+        sprintf(str, "%f", EvolutionManager::getInstance()->getAgents()[0]->genotype->evaluation);
+        playerInfo.append("Evolution Manager: agent[0]->genotype->evaluation -> ").append(str);
+        debugText_[i]->SetText(playerInfo.c_str());
+
+    }*/
+
+    //URHO3D_LOGINFOF("player_ position x=%f, y=%f, z=%f", player_->GetNode()->GetPosition().x_, player_->GetNode()->GetPosition().y_, player_->GetNode()->GetPosition().z_);
+
+    //
+
+    using namespace Update;
+
+    if (player_->GetVehicle())
+    {
+
+        std::string playerInfo;
+        char str[40];
+
+        Vector3 pos = player_->GetVehicle()->GetNode()->GetPosition();
+        sprintf(str, "%f,%f,%f", pos.x_, pos.y_, pos.z_);
+        playerInfo.clear();
+        playerInfo.append("Vehicle position (x,y,z) -> ").append(str);
+        debugText_[i]->SetText(playerInfo.c_str());
+
+        i++;
+
+        sprintf(str, "%f,%f", xRange, zRange);
+        playerInfo.clear();
+        playerInfo.append("Vehicle minmap pos (x,z) -> ").append(str);
+        debugText_[i]->SetText(playerInfo.c_str());
+
+        i++;
+
+        sprintf(str, "focusObjects[%d]=[%f,%f,%f]", focusIndex_, focusObjects_[focusIndex_].x_, focusObjects_[focusIndex_].y_, focusObjects_[focusIndex_].z_);
+        playerInfo.clear();
+        playerInfo.append("focusObject information pos (x,y,z) -> ").append(str);
+        debugText_[i]->SetText(playerInfo.c_str());
+
+        i++;
+
+
+        if (terrain_->GetMarkerMap()) {
+            //float vx = xRange; // vehicle pos
+            //float vz = zRange;
+            // 1600+1600
+            int vx = (shiftedRange.x_ / mapSize) * terrain_->GetMarkerMap()->GetWidth();
+            int vz = (shiftedRange.z_ / mapSize) * terrain_->GetMarkerMap()->GetHeight();
+
+            Vector3 hsl_ = terrain_->GetMarkerMap()->GetPixel(vx, vz).ToHSL();
+
+            sprintf(str, "pixel [%d,%d] -> (%f, %f, %f)", vx, vz, hsl_.x_, hsl_.y_, hsl_.z_);
+            playerInfo.clear();
+            playerInfo.append("Vehicle (x,z) -> ").append(str);
+            debugText_[i]->SetText(playerInfo.c_str());
+            i++;
+            sprintf(str, "height [%d,%d] -> %d", vx, vz, terrain_->GetHeightMap()->GetPixel(vx, vz).ToUInt());
+            playerInfo.clear();
+            playerInfo.append("Vehicle (x,z) -> ").append(str);
+            debugText_[i]->SetText(playerInfo.c_str());
+            i++;
+
+        }
+
+        /*
+        i++;
+        playerInfo.clear();
+        sprintf(str, "vehicle pos (%f, %f, %f, %f, gauge = %f)", vehicle_->GetNode()->GetPosition().x_, vehicle_->GetNode()->GetPosition().y_, vehicle_->GetNode()->GetPosition().z_, (vehicle_->GetCurrentRPM()), (vehicle_->GetCurrentRPM()/7000.0f)*100.0f);
+        playerInfo.append("-> ").append(str);
+        debugText_[i]->SetText(playerInfo.c_str());
+        i++;
+        playerInfo.clear();
+*/
+
+        // speed
+        char buff[20];
+
+        if (1)
+        {
+            float spd = player_->GetVehicle()->GetSpeedKmH();
+            if (spd<0.0f) spd = 0.0f;
+            sprintf(buff, "%.0f KmH", spd);
+        }
+        else
+        {
+            float spd = player_->GetVehicle()->GetSpeedMPH();
+            if (spd<0.0f) spd = 0.0f;
+            sprintf(buff, "%.0f MPH", spd);
+        }
+        String data(buff);
+        int gear = player_->GetVehicle()->GetCurrentGear() + 1;
+        data += String("\ngear: ") + String(gear);
+        float rpm = player_->GetVehicle()->GetCurrentRPM();
+        sprintf(buff, ", %.0f RPM", rpm);
+        data += String(buff);
+
+        float acc = player_->GetVehicle()->GetAcceleration();
+        sprintf(buff, ", %.0f Acc", acc);
+        data += String(buff);
+
+        float angvel = player_->GetVehicle()->GetAngularVelocity();
+        sprintf(buff, ", %.0f Angular Velocity", angvel);
+        data += String(buff);
+
+        // vehicle_->DebugDraw(Color(1.0, 0.0, 1.0));
+
+        // sprintf(buff, ", %.0f RPM", rpm);
+        // data += String(buff);
+
+        //        textKmH_->SetText( data );
+
+/*
+        sprintf(str, "%.2f -> Gauge %.2f", vehicle_->GetCurrentRPM(), vehicle_->GetCurrentRPM()/7000.0f);
+        playerInfo.append("Vehicle [engine rpm] -> ").append(str);
+        debugText_[i]->SetText(data);
+*/
+        /*
+        i++;
+        playerInfo.clear();
+        sprintf(str, "%d", EvolutionManager::getInstance()->agentsAliveCount);
+        playerInfo.append("Evolution Manager: agentsAliveCount -> ").append(str);
+        debugText_[i]->SetText(playerInfo.c_str());
+
+        */
+    }
+
+
+    // stat
+#ifdef SHOW_STATS
+    framesCount_++;
+    if ( fpsTimer_.GetMSec(false) >= ONE_SEC_DURATION )
+    {
+        Renderer *renderer = GetSubsystem<Renderer>();
+        String stat;
+
+        stat.AppendWithFormat( "tris: %d fps: %d",
+                               renderer->GetNumPrimitives(),
+                               framesCount_);
+
+        #ifdef SHOW_CAM_POS
+        String x, y, z;
+        char buff[20];
+        sprintf(buff, ", cam: %.1f, ", cameraNode_->GetPosition().x_);
+        x = String(buff);
+        sprintf(buff, "%.1f, ", cameraNode_->GetPosition().y_);
+        y = String(buff);
+        sprintf(buff, "%.1f", cameraNode_->GetPosition().z_);
+        z = String(buff);
+        stat += x + y + z;
+        #endif
+
+        textStatus_->SetText(stat);
+        framesCount_ = 0;
+        fpsTimer_.Reset();
+    }
+#endif
+
+/*
+    if (player_->vehicle_)
+        {
+
+        auto* ui = GetSubsystem<UI>();
+        // Get movement controls and assign them to the vehicle component. If UI has a focused element, clear controls
+        if (!ui->GetFocusElement())
+        {
+            player_->vehicle_->controls_.Set(CTRL_FORWARD, input->GetKeyDown(KEY_W));
+            player_->vehicle_->controls_.Set(CTRL_BACK, input->GetKeyDown(KEY_S));
+            player_->vehicle_->controls_.Set(CTRL_LEFT, input->GetKeyDown(KEY_A));
+            player_->vehicle_->controls_.Set(CTRL_RIGHT, input->GetKeyDown(KEY_D));
+            player_->vehicle_->controls_.Set(CTRL_BRAKE, input->GetKeyDown(KEY_F));
+            // Add yaw & pitch from the mouse motion or touch input. Used only for the camera, does not affect motion
+            if (touchEnabled_)
+            {
+                for (unsigned i = 0; i < input->GetNumTouches(); ++i)
+                {
+                    TouchState* state = input->GetTouch(i);
+                    if (!state->touchedElement_) // Touch on empty space
+                    {
+                        auto* camera = cameraNode_->GetComponent<Camera>();
+                        if (!camera)
+                        {
+                            return;
+                        }
+                        auto* graphics = GetSubsystem<Graphics>();
+                        player_->vehicle_->controls_.yaw_ += TOUCH_SENSITIVITY * camera->GetFov() / graphics->GetHeight() * state->delta_.x_;
+                        player_->vehicle_->controls_.pitch_ += TOUCH_SENSITIVITY * camera->GetFov() / graphics->GetHeight() * state->delta_.y_;
+                    }
+                }
+            }
+            else
+            {
+                player_->vehicle_->controls_.yaw_ += (float)input->GetMouseMoveX() * YAW_SENSITIVITY;
+                player_->vehicle_->controls_.pitch_ += (float)input->GetMouseMoveY() * YAW_SENSITIVITY;
+            }
+            // Limit pitch
+            player_->vehicle_->controls_.pitch_ = Clamp(player_->vehicle_->controls_.pitch_, 0.0f, 80.0f);
+            // Check for loading / saving the scene
+            if (input->GetKeyPress(KEY_F5))
+            {
+                File saveFile(context_, GetSubsystem<FileSystem>()->GetProgramDir() + "Data/Scenes/RaycastVehicleDemo.xml",
+                              FILE_WRITE);
+                scene_->SaveXML(saveFile);
+            }
+            if (input->GetKeyPress(KEY_F7))
+            {
+                File loadFile(context_, GetSubsystem<FileSystem>()->GetProgramDir() + "Data/Scenes/RaycastVehicleDemo.xml",
+                              FILE_READ);
+                scene_->LoadXML(loadFile);
+                // After loading we have to reacquire the weak pointer to the Vehicle component, as it has been recreated
+                // Simply find the vehicle's scene node by name as there's only one of them
+                Node* vehicleNode = scene_->GetChild("Vehicle", true);
+                if (vehicleNode)
+                {
+                    player_->vehicle_ = vehicleNode->GetComponent<Vehicle>();
+                }
+            }
+        }
+        else
+        {
+            player_->vehicle_->controls_.Set(CTRL_FORWARD | CTRL_BACK | CTRL_LEFT | CTRL_RIGHT | CTRL_BRAKE, false);
+        }
+
+        player_->GetNode()->SetRotation(Quaternion(0.0, player_->vehicle_->GetSteering()*180.0, 0.0));
+
+    }*/
+}
+
+void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
+    using namespace Update;
+    auto *input = GetSubsystem<Input>();
+
+    // Take the frame time step, which is stored as a float
+    float timeStep = eventData[P_TIMESTEP].GetFloat();
+    HandleUpdateParticlePool(timeStep);
+
+    float deltaSum;
 
     if (player_) {
 
@@ -2092,10 +2644,6 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
     //    URHO3D_LOGINFOF("factor=%f", factor);
 
 
-    // Zoom in/out
-    if (cameraNode_)
-        sample2D_->Zoom(cameraNode_->GetComponent<Camera>());
-
     // Toggle debug geometry with 'Z' key
     if (input->GetKeyPress(KEY_Z))
         drawDebug_ = !drawDebug_;
@@ -2113,9 +2661,6 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
     if (input->GetKeyPress(KEY_U)) {
         player_->autoSteering_ = !player_->autoSteering_;
     }
-
-
-//        doSpecial_ = !doSpecial_;
 
     if (input->GetKeyPress(KEY_R)) {
         // Place on track
@@ -2162,7 +2707,6 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 
     }
 
-
     if (input->GetKeyPress(KEY_R)) {
         player_->wpActiveIndex_ = 0;
     }
@@ -2174,7 +2718,6 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
         // Place on track origin
 //        vehicle_->GetNode()->SetPosition(Vector3(raceTrack_->GetPosition().x_, 500.0f, raceTrack_->GetPosition().z_));
     }
-
 
     // Toggle through focus objects
     if (input->GetKeyPress(KEY_T)) {
@@ -2319,233 +2862,6 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
     if (player_) {
         life = player_->GetLife();
     }
-    // Update player powerbar
-    IntVector2 v = powerBarBkgP1Sprite_->GetSize();
-    int power = int(((life) / 100.0f) * (float) v.x_);
-    powerBarP1Sprite_->SetSize(power, v.y_);
-
-    float maxRPM = 8000.0f;
-    float clampedRPM = player_->GetVehicle()->GetCurrentRPM();
-    if (clampedRPM > maxRPM) {
-        clampedRPM = maxRPM;
-    }
-
-    v = rpmBarBkgP1Sprite_->GetSize();
-    int rpm = ((clampedRPM/maxRPM)* v.x_);
-    rpmBarP1Sprite_->SetSize(rpm, v.y_);
-
-
-    float maxSpeed = 220.0f;
-    float clampedSpeed = player_->GetVehicle()->GetSpeedKmH();
-    if (clampedSpeed > maxSpeed) {
-        clampedSpeed = maxSpeed;
-    }
-
-    // Cap speed at 220 KmH
-    v = velBarBkgP1Sprite_->GetSize();
-    int velocity = ((clampedSpeed/maxSpeed) * v.x_);
-    velBarP1Sprite_->SetSize(velocity, v.y_);
-
-//    float maxX = terrain_->GetPatchSize()*terrain_->GetNumPatches().x_;
-//    float maxY = terrain_->GetPatchSize()*terrain_->GetNumPatches().y_;
-    //
-    // Position
-    //Vector3 position((float)x * spacing_.x_, GetRawHeight(xPos, zPos), (float)z * spacing_.z_);
-
-
-    //    if (isServer_) {
-
-
-//    float maxX = terrain_->GetHeightMap()->GetWidth()*terrain_->GetPatchSize();
-//    float maxY = terrain_->GetHeightMap()->GetHeight()*terrain_->GetPatchSize();
-
-    // Calculate mini map position
-    Vector3 shiftedRange = player_->GetVehicle()->GetNode()->GetPosition() + Vector3(mapSize/2, mapSize/2, mapSize/2);
-
-    // 1600+1600
-    float xRange = (shiftedRange.x_/mapSize) * miniMapWidth;
-    float zRange = (shiftedRange.z_/mapSize) * miniMapHeight;
-
-    float miniMapP1X = miniMapBkgSprite_->GetPosition().x_;
-    float miniMapP1Y = miniMapBkgSprite_->GetPosition().y_;
-
-    // Update mini map for P1 position
-//    miniMapP1Sprite_->SetPosition(Vector2(776.0f-16.0f, 300.0f));
-    float startRotOffset = 180.0f;
-    miniMapP1Sprite_->SetPosition(Vector2(miniMapP1X-xRange+0.0f, miniMapP1Y-zRange+0.0f));
-    miniMapP1Sprite_->SetRotation(vehicleRot_.YawAngle()+startRotOffset);
-
-    float wpOffsetX = -mapSize/2;
-    float wpOffsetY = -mapSize/2;
-
-    int index = player_->wpActiveIndex_;
-
-    if (index < 0) index = 0;
-    // Convert marker position to world position for waypoint
-    float wpPosX = (((float)waypoints_[index].x_ / (float)terrain_->GetMarkerMap()->GetWidth())*mapSize)+wpOffsetX;
-    float wpPosZ = (((float)waypoints_[index].z_ / (float)terrain_->GetMarkerMap()->GetHeight())*mapSize)+wpOffsetY;
-
-    // Calculate mini map position for waypoint
-    shiftedRange = Vector3(wpPosX, 0.0f, wpPosZ) + Vector3(mapSize/2, mapSize/2, mapSize/2);
-
-    // 1600+1600
-    xRange = (shiftedRange.x_/mapSize) * miniMapWidth;
-    zRange = (shiftedRange.z_/mapSize) * miniMapHeight;
-
-    float miniMapWPX = miniMapBkgSprite_->GetPosition().x_;
-    float miniMapWPY = miniMapBkgSprite_->GetPosition().y_;
-
-
-    // Update mini map for WP position
-//    miniMapP1Sprite_->SetPosition(Vector2(776.0f-16.0f, 300.0f));
-    miniMapWPSprite_->SetPosition(Vector2(miniMapWPX-xRange, miniMapWPY-zRange));
-//    miniMapWPSprite_->SetRotation(vehicleRot_.YawAngle());
-
-
-
-
-    float steering = player_->GetVehicle()->GetSteering();
-//    Quaternion vRot = vehicle_->GetNode()->GetRotation();
-
-    steerWheelSprite_->SetRotation(360.0f*steering);
-    player_->GetVehicleHeadLamp()->SetPosition(Vector3(player_->GetVehicle()->GetNode()->GetPosition().x_, player_->GetVehicle()->GetNode()->GetPosition().y_+5.0f, player_->GetVehicle()->GetNode()->GetPosition().z_));
-    player_->GetVehicleHeadLamp()->SetDirection(Vector3(player_->GetVehicle()->GetNode()->GetRotation().x_, 1.0f, player_->GetVehicle()->GetNode()->GetRotation().z_));
-
-    // Update vehicle head lamp lighting
-    Light* light = player_->GetVehicleHeadLamp()->GetComponent<Light>();
-   // Light* light = vehicleHeadLamp_->CreateComponent<Light>();
-    //light->SetLightType(LIGHT_SPOT)
-    light->SetLightType(LIGHT_POINT);
-    light->SetRange(30.0f);
-
-    float rpmLightFactor = 40.0f;
-    float rpmLight = rpm/4500.0f;
-    if (rpmLight > 0.8f) rpmLight = 0.8f;
-    light->SetBrightness(0.2f+(rpmLight*rpmLightFactor));
-    light->SetCastShadows(true);
-    //   light->SetShadowBias(BiasParameters(0.00025f, 0.5f));
-
-    // Update focus objects
-    focusObjects_[0] = player_->GetVehicle()->GetNode()->GetPosition(); // Vehicle
-
-
-    int i = 0;
-
-    /*
-    if (player_) {
-        std::string playerInfo;
-        char str[40];
-
-        Vector3 pos = player_->GetNode()->GetPosition();
-        sprintf(str, "%f,%f,%f", pos.x_, pos.y_, pos.z_);
-        playerInfo.clear();
-        playerInfo.append("Player position (x,y,z) -> ").append(str);
-        debugText_[i]->SetText(playerInfo.c_str());
-
-        i++;
-        Vector3 vel = player_->currState_.moveDir;
-        sprintf(str, "%f,%f,%f", vel.x_, vel.y_, vel.z_);
-
-        playerInfo.clear();
-        playerInfo.append("Player velocity (x,y,z) -> ").append(str);
-        debugText_[i]->SetText(playerInfo.c_str());
-
-        i++;
-//    Vector3 vel = player_
-        sprintf(str, "%d,%d,%d", player_->currState_.onGround, player_->currState_.jump, player_->currState_.kick);
-
-        playerInfo.clear();
-        playerInfo.append("Player state (onGround,jump,kick) -> ").append(str);
-        debugText_[i]->SetText(playerInfo.c_str());
-
-
-        i++;
-        playerInfo.clear();
-        sprintf(str, "%d", EvolutionManager::getInstance()->getGenerationCount());
-        playerInfo.append("Evolution Manager: Generation -> ").append(str);
-        debugText_[i]->SetText(playerInfo.c_str());
-
-
-        i++;
-        playerInfo.clear();
-        sprintf(str, "%d", EvolutionManager::getInstance()->populationSize);
-        playerInfo.append("Evolution Manager: populationSize -> ").append(str);
-        debugText_[i]->SetText(playerInfo.c_str());
-
-        i++;
-        playerInfo.clear();
-        sprintf(str, "%f", EvolutionManager::getInstance()->getAgents()[0]->genotype->evaluation);
-        playerInfo.append("Evolution Manager: agent[0]->genotype->evaluation -> ").append(str);
-        debugText_[i]->SetText(playerInfo.c_str());
-
-    }*/
-
-    //URHO3D_LOGINFOF("player_ position x=%f, y=%f, z=%f", player_->GetNode()->GetPosition().x_, player_->GetNode()->GetPosition().y_, player_->GetNode()->GetPosition().z_);
-
-    //
-
-    using namespace Update;
-
-    if (player_->GetVehicle())
-    {
-
-        std::string playerInfo;
-        char str[40];
-
-        Vector3 pos = player_->GetVehicle()->GetNode()->GetPosition();
-        sprintf(str, "%f,%f,%f", pos.x_, pos.y_, pos.z_);
-        playerInfo.clear();
-        playerInfo.append("Vehicle position (x,y,z) -> ").append(str);
-        debugText_[i]->SetText(playerInfo.c_str());
-
-        i++;
-
-        sprintf(str, "%f,%f", xRange, zRange);
-        playerInfo.clear();
-        playerInfo.append("Vehicle minmap pos (x,z) -> ").append(str);
-        debugText_[i]->SetText(playerInfo.c_str());
-
-        i++;
-
-        sprintf(str, "focusObjects[%d]=[%f,%f,%f]", focusIndex_, focusObjects_[focusIndex_].x_, focusObjects_[focusIndex_].y_, focusObjects_[focusIndex_].z_);
-        playerInfo.clear();
-        playerInfo.append("focusObject information pos (x,y,z) -> ").append(str);
-        debugText_[i]->SetText(playerInfo.c_str());
-
-        i++;
-
-
-        if (terrain_->GetMarkerMap()) {
-            //float vx = xRange; // vehicle pos
-            //float vz = zRange;
-            // 1600+1600
-            int vx = (shiftedRange.x_ / mapSize) * terrain_->GetMarkerMap()->GetWidth();
-            int vz = (shiftedRange.z_ / mapSize) * terrain_->GetMarkerMap()->GetHeight();
-
-            Vector3 hsl_ = terrain_->GetMarkerMap()->GetPixel(vx, vz).ToHSL();
-
-            sprintf(str, "pixel [%d,%d] -> (%f, %f, %f)", vx, vz, hsl_.x_, hsl_.y_, hsl_.z_);
-            playerInfo.clear();
-            playerInfo.append("Vehicle (x,z) -> ").append(str);
-            debugText_[i]->SetText(playerInfo.c_str());
-            i++;
-            sprintf(str, "height [%d,%d] -> %d", vx, vz, terrain_->GetHeightMap()->GetPixel(vx, vz).ToUInt());
-            playerInfo.clear();
-            playerInfo.append("Vehicle (x,z) -> ").append(str);
-            debugText_[i]->SetText(playerInfo.c_str());
-            i++;
-
-        }
-
-        /*
-        i++;
-        playerInfo.clear();
-        sprintf(str, "vehicle pos (%f, %f, %f, %f, gauge = %f)", vehicle_->GetNode()->GetPosition().x_, vehicle_->GetNode()->GetPosition().y_, vehicle_->GetNode()->GetPosition().z_, (vehicle_->GetCurrentRPM()), (vehicle_->GetCurrentRPM()/7000.0f)*100.0f);
-        playerInfo.append("-> ").append(str);
-        debugText_[i]->SetText(playerInfo.c_str());
-        i++;
-        playerInfo.clear();
-*/
 
         UI* ui = GetSubsystem<UI>();
 
@@ -2553,16 +2869,6 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
         if (!ui->GetFocusElement())
         {
             const int CTRL_SPACE = 16;
-
-
-     /*       vehicle_->controls_.Set(CTRL_FORWARD, input->GetKeyDown(KEY_W));
-            vehicle_->controls_.Set(CTRL_BACK, input->GetKeyDown(KEY_S));
-            vehicle_->controls_.Set(CTRL_LEFT, input->GetKeyDown(KEY_A));
-            vehicle_->controls_.Set(CTRL_RIGHT, input->GetKeyDown(KEY_D));
-            vehicle_->controls_.Set(CTRL_SPACE, input->GetKeyDown(KEY_SPACE));
-*/
-
-
             player_->GetVehicle()->controls_.Set(CTRL_FORWARD, input->GetKeyDown(KEY_W) | player_->GetVehicle()->controls_.IsDown(BUTTON_B));
             player_->GetVehicle()->controls_.Set(CTRL_BACK, input->GetKeyDown(KEY_S) | player_->GetVehicle()->controls_.IsDown(BUTTON_DPAD_DOWN));
             player_->GetVehicle()->controls_.Set(CTRL_LEFT, input->GetKeyDown(KEY_A) | player_->GetVehicle()->controls_.IsDown(BUTTON_DPAD_LEFT));
@@ -2574,7 +2880,7 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
             // Set player to vehicle control
             player_->SetControls(player_->GetVehicle()->controls_);
 
-
+/*
             // Add yaw & pitch from the mouse motion or touch input. Used only for the camera, does not affect motion
             if (touchEnabled_)
             {
@@ -2600,65 +2906,10 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
             }
             // Limit pitch
             player_->GetVehicle()->controls_.pitch_ = Clamp(player_->GetVehicle()->controls_.pitch_, 0.0f, 80.0f);
-
+*/
         }
         else
             player_->GetVehicle()->controls_.Set(CTRL_FORWARD | CTRL_BACK | CTRL_LEFT | CTRL_RIGHT | CTRL_SPACE, false);
-
-        // speed
-        char buff[20];
-
-        if (1)
-        {
-            float spd = player_->GetVehicle()->GetSpeedKmH();
-            if (spd<0.0f) spd = 0.0f;
-            sprintf(buff, "%.0f KmH", spd);
-        }
-        else
-        {
-            float spd = player_->GetVehicle()->GetSpeedMPH();
-            if (spd<0.0f) spd = 0.0f;
-            sprintf(buff, "%.0f MPH", spd);
-        }
-        String data(buff);
-        int gear = player_->GetVehicle()->GetCurrentGear() + 1;
-        data += String("\ngear: ") + String(gear);
-        float rpm = player_->GetVehicle()->GetCurrentRPM();
-        sprintf(buff, ", %.0f RPM", rpm);
-        data += String(buff);
-
-        float acc = player_->GetVehicle()->GetAcceleration();
-        sprintf(buff, ", %.0f Acc", acc);
-        data += String(buff);
-
-        float angvel = player_->GetVehicle()->GetAngularVelocity();
-        sprintf(buff, ", %.0f Angular Velocity", angvel);
-        data += String(buff);
-
-       // vehicle_->DebugDraw(Color(1.0, 0.0, 1.0));
-
-       // sprintf(buff, ", %.0f RPM", rpm);
-       // data += String(buff);
-
-        //        textKmH_->SetText( data );
-
-/*
-        sprintf(str, "%.2f -> Gauge %.2f", vehicle_->GetCurrentRPM(), vehicle_->GetCurrentRPM()/7000.0f);
-        playerInfo.append("Vehicle [engine rpm] -> ").append(str);
-        debugText_[i]->SetText(data);
-*/
-        /*
-        i++;
-        playerInfo.clear();
-        sprintf(str, "%d", EvolutionManager::getInstance()->agentsAliveCount);
-        playerInfo.append("Evolution Manager: agentsAliveCount -> ").append(str);
-        debugText_[i]->SetText(playerInfo.c_str());
-
-        */
-
-
-
-
 
         // up right
         if (input->GetKeyPress(KEY_BACKSPACE))
@@ -2682,8 +2933,6 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
                 player_->GetVehicle()->ResetForces();
             }
         }
-
-    }
 
     // Toggle physics debug geometry with space
     if ( input->GetKeyPress(KEY_F5))
@@ -2817,6 +3066,9 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
         player_->GetNode()->SetRotation(Quaternion(0.0, player_->vehicle_->GetSteering()*180.0, 0.0));
 
     }*/
+
+    // Call our render update
+    HandleRenderUpdate(eventType, eventData);
 }
 
 void MayaScape::HandlePostUpdate(StringHash eventType, VariantMap &eventData) {
@@ -3026,6 +3278,7 @@ void MayaScape::HandlePlayButton(StringHash eventType, VariantMap &eventData) {
         // Reload scene
         ReloadScene(true);
 
+    /*
     // Hide Instructions and Play/Exit buttons
     Text *instructionText = static_cast<Text *>(ui->GetRoot()->GetChild("Instructions", true));
     instructionText->SetText("");
@@ -3033,7 +3286,7 @@ void MayaScape::HandlePlayButton(StringHash eventType, VariantMap &eventData) {
     exitButton->SetVisible(false);
     Button *playButton = static_cast<Button *>(ui->GetRoot()->GetChild("PlayButton", true));
     playButton->SetVisible(false);
-
+*/
     // Hide mouse cursor
     auto *input = GetSubsystem<Input>();
     input->SetMouseVisible(false);
@@ -3077,12 +3330,19 @@ void MayaScape::CreateUI()
     Graphics* graphics = GetSubsystem<Graphics>();
     cursor->SetPosition(graphics->GetWidth() / 2, graphics->GetHeight() / 2);
 
+
+    // Create the UI content
+//    sample2D_->CreateUIContent("MayaScape v0.1");
+//    auto* ui = GetSubsystem<UI>();
+ //   Button *playButton = static_cast<Button *>(ui->GetRoot()->GetChild("PlayButton", true));
+//    SubscribeToEvent(playButton, E_RELEASED, URHO3D_HANDLER(MayaScape, HandlePlayButton));
+
     // Construct the instructions text element
     instructionsText_ = ui->GetRoot()->CreateChild<Text>();
     instructionsText_->SetText(
             "WASD to move, RMB to rotate view, T to swap mat"
     );
-    instructionsText_->SetFont(cache->GetResource<Font>("Fonts/Anonymous Pro.ttf"), 12);
+    instructionsText_->SetFont(cache->GetResource<Font>("Fonts/CompassGold.ttf"), 12);
     instructionsText_->SetColor(Color::CYAN);
     // Position the text relative to the screen center
     instructionsText_->SetHorizontalAlignment(HA_CENTER);
@@ -3091,16 +3351,53 @@ void MayaScape::CreateUI()
     instructionsText_->SetVisible(false);
 
     buttonContainer_ = root->CreateChild<UIElement>();
-    buttonContainer_->SetFixedSize(500, 20);
-    buttonContainer_->SetPosition(20, 500);
-    buttonContainer_->SetLayoutMode(LM_HORIZONTAL);
+    buttonContainer_->SetFixedSize(600, 120);
+    buttonContainer_->SetPosition(220, 300);
+    buttonContainer_->SetHorizontalAlignment((HA_CENTER));
+    buttonContainer_->SetLayoutMode(LM_VERTICAL);
 
-    textEdit_ = buttonContainer_->CreateChild<LineEdit>();
-    textEdit_->SetStyleAuto();
+//    textEdit_ = buttonContainer_->CreateChild<LineEdit>();
+//    textEdit_->SetStyleAuto();
 
+    playButton_ = CreateButton("Play", 90);
     connectButton_ = CreateButton("Connect", 90);
     disconnectButton_ = CreateButton("Disconnect", 130);
     startServerButton_ = CreateButton("Start Server", 110);
+
+
+    // Get logo texture
+    Texture2D* logoTexture = cache->GetResource<Texture2D>("Textures/logo.png");
+    if (!logoTexture)
+        return;
+
+    // Create logo sprite and add to the UI layout
+    //logoSprite_ = ui->GetRoot()->CreateChild<Sprite>();
+
+    // Set logo sprite texture
+    //logoSprite_->SetTexture(logoTexture);
+
+    int textureWidth = logoTexture->GetWidth();
+    int textureHeight = logoTexture->GetHeight();
+
+    // Set logo sprite scale
+    logoSprite_->SetScale(256.0f / textureWidth);
+
+    // Set logo sprite size
+    logoSprite_->SetSize(textureWidth, textureHeight);
+
+    // Set logo sprite hot spot
+    logoSprite_->SetHotSpot(textureWidth, textureHeight);
+
+    // Set logo sprite alignment
+    logoSprite_->SetAlignment(HA_CENTER, VA_BOTTOM);
+    logoSprite_->SetPosition(100,-500);
+
+    // Make logo not fully opaque to show the scene underneath
+    logoSprite_->SetOpacity(0.9f);
+
+    // Set a low priority for the logo so that other UI elements can be drawn on top
+    logoSprite_->SetPriority(-100);
+
 
     UpdateButtons();
 }
@@ -3140,7 +3437,7 @@ void MayaScape::ChangeDebugHudText()
 Button* MayaScape::CreateButton(const String& text, int width)
 {
     ResourceCache* cache = GetSubsystem<ResourceCache>();
-    Font* font = cache->GetResource<Font>("Fonts/Anonymous Pro.ttf");
+    Font* font = cache->GetResource<Font>("Fonts/CompassGold.ttf");
 
     Button* button = buttonContainer_->CreateChild<Button>();
     button->SetStyleAuto();
@@ -3148,7 +3445,7 @@ Button* MayaScape::CreateButton(const String& text, int width)
 
     Text* buttonText = button->CreateChild<Text>();
     buttonText->SetName("text");
-    buttonText->SetFont(font, 12);
+    buttonText->SetFont(font, 14);
     buttonText->SetAlignment(HA_CENTER, VA_CENTER);
     buttonText->SetText(text);
 
@@ -3161,72 +3458,76 @@ void MayaScape::UpdateButtons()
     Connection* serverConnection = network->GetServerConnection();
     bool serverRunning = network->IsServerRunning();
 
+
+    playButton_->SetVisible(!serverConnection && !serverRunning);
     // Show and hide buttons so that eg. Connect and Disconnect are never shown at the same time
     connectButton_->SetVisible(!serverConnection && !serverRunning);
     disconnectButton_->SetVisible(serverConnection || serverRunning);
     Text* discText = disconnectButton_->GetChildStaticCast<Text>(String("text"));
     if (serverConnection)
     {
-        discText->SetText("cli Disconnect");
+        discText->SetText("Client Disconnect");
     }
     else if (serverRunning)
     {
-        discText->SetText("svr Disconnect");
+        discText->SetText("Server Disconnect");
     }
     startServerButton_->SetVisible(!serverConnection && !serverRunning);
-    textEdit_->SetVisible(!serverConnection && !serverRunning);
+  //  textEdit_->SetVisible(!serverConnection && !serverRunning);
 }
-
-void MayaScape::MoveCamera()
-{
+/*
+void MayaScape::MoveCamera() {
     // Right mouse button controls mouse cursor visibility: hide when pressed
-    UI* ui = GetSubsystem<UI>();
-    Input* input = GetSubsystem<Input>();
+    UI *ui = GetSubsystem<UI>();
+    Input *input = GetSubsystem<Input>();
     ui->GetCursor()->SetVisible(!input->GetMouseButtonDown(MOUSEB_RIGHT));
 
     // Mouse sensitivity as degrees per pixel
     const float MOUSE_SENSITIVITY = 0.1f;
 
-    // Use this frame's mouse motion to adjust camera node yaw and pitch. Clamp the pitch and only move the camera
-    // when the cursor is hidden
-    if (!ui->GetCursor()->IsVisible())
-    {
-        IntVector2 mouseMove = input->GetMouseMove();
-        yaw_ += MOUSE_SENSITIVITY * mouseMove.x_;
-        pitch_ += MOUSE_SENSITIVITY * mouseMove.y_;
-        pitch_ = Clamp(pitch_, 1.0f, 90.0f);
-    }
-
-    // Construct new orientation for the camera scene node from yaw and pitch. Roll is fixed to zero
-    cameraNode_->SetRotation(Quaternion(pitch_, yaw_, 0.0f));
-
-    // Only move the camera / show instructions if we have a controllable object
-    bool showInstructions = false;
-    if (clientObjectID_)
-    {
-        Node* ballNode = scene_->GetNode(clientObjectID_);
-        if (ballNode)
-        {
-            const float CAMERA_DISTANCE = 5.0f;
-
-            Vector3 startPos = ballNode->GetPosition();
-            Vector3 destPos = ballNode->GetPosition() + cameraNode_->GetRotation() * Vector3::BACK * CAMERA_DISTANCE;
-            Vector3 seg = destPos - startPos;
-            Ray cameraRay(startPos, seg.Normalized());
-            float cameraRayLength = seg.Length();
-            PhysicsRaycastResult result;
-            scene_->GetComponent<PhysicsWorld>()->SphereCast(result, cameraRay, 0.2f, cameraRayLength, NETWORKACTOR_COL_LAYER);
-            if (result.body_)
-                destPos = startPos + cameraRay.direction_ * result.distance_;
-
-            // Move camera some distance away from the ball
-            cameraNode_->SetPosition(destPos);
-            showInstructions = true;
+    if (started_) {
+        // Use this frame's mouse motion to adjust camera node yaw and pitch. Clamp the pitch and only move the camera
+        // when the cursor is hidden
+        if (!ui->GetCursor()->IsVisible()) {
+            IntVector2 mouseMove = input->GetMouseMove();
+            yaw_ += MOUSE_SENSITIVITY * mouseMove.x_;
+            pitch_ += MOUSE_SENSITIVITY * mouseMove.y_;
+            pitch_ = Clamp(pitch_, 1.0f, 90.0f);
         }
-    }
 
-    instructionsText_->SetVisible(showInstructions);
-}
+        // Construct new orientation for the camera scene node from yaw and pitch. Roll is fixed to zero
+        cameraNode_->SetRotation(Quaternion(pitch_, yaw_, 0.0f));
+
+        // Only move the camera / show instructions if we have a controllable object
+        bool showInstructions = false;
+        if (clientObjectID_) {
+            Node *ballNode = scene_->GetNode(clientObjectID_);
+            if (ballNode) {
+                const float CAMERA_DISTANCE = 5.0f;
+
+                Vector3 startPos = ballNode->GetPosition();
+                Vector3 destPos =
+                        ballNode->GetPosition() + cameraNode_->GetRotation() * Vector3::BACK * CAMERA_DISTANCE;
+                Vector3 seg = destPos - startPos;
+                Ray cameraRay(startPos, seg.Normalized());
+                float cameraRayLength = seg.Length();
+                PhysicsRaycastResult result;
+                scene_->GetComponent<PhysicsWorld>()->SphereCast(result, cameraRay, 0.2f, cameraRayLength,
+                                                                 NETWORKACTOR_COL_LAYER);
+                if (result.body_)
+                    destPos = startPos + cameraRay.direction_ * result.distance_;
+
+                // Move camera some distance away from the ball
+                cameraNode_->SetPosition(destPos);
+                showInstructions = true;
+            }
+        }
+
+        instructionsText_->SetVisible(showInstructions);
+    }
+}*/
+
+
 
 void MayaScape::HandlePhysicsPreStep(StringHash eventType, VariantMap& eventData)
 {
@@ -3280,7 +3581,11 @@ void MayaScape::HandleConnect(StringHash eventType, VariantMap& eventData)
             };
 
     Server *server = GetSubsystem<Server>();
-    String address = textEdit_->GetText().Trimmed();
+
+    // Hard-coded game server address for now
+    String address = "www.monkeymaya.com";
+
+//    String address = textEdit_->GetText().Trimmed();
 
     // randomize (or customize) client info/data
     int idx = Random(MAX_ARRAY_SIZE - 1);

@@ -140,6 +140,8 @@ private:
     void SubscribeToEvents();
     /// Handle the logic update event.
     void HandleUpdate(StringHash eventType, VariantMap& eventData);
+    void HandleRenderUpdate(StringHash eventType, VariantMap &eventData);
+
     /// Handle the logic post update event.
     void HandlePostUpdate(StringHash eventType, VariantMap& eventData);
     /// Handle the post render update event.
@@ -171,6 +173,8 @@ private:
         /// The controllable character component.
 //    WeakPtr<Character2D> player_;
 //    WeakPtr<Character2D> agents_[MAX_AGENTS];
+
+    bool started_; // Is Game started?
 
     SharedPtr<Player> player_; // This player
     SharedPtr<Player> agents_[MAX_AGENTS]; // Agents
@@ -251,6 +255,7 @@ private:
     HashMap<Connection*, WeakPtr<Node> > serverObjects_;
     SharedPtr<UIElement> buttonContainer_;
     SharedPtr<LineEdit> textEdit_;
+    SharedPtr<Button> playButton_;
     SharedPtr<Button> connectButton_;
     SharedPtr<Button> disconnectButton_;
     SharedPtr<Button> startServerButton_;
