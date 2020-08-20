@@ -58,8 +58,9 @@
 #include <Urho3D/Scene/Scene.h>
 #include <Urho3D/UI/Font.h>
 #include <Urho3D/UI/Text.h>
-
-
+#include <Urho3D/Audio/SoundSource3D.h>
+#include <Urho3D/Audio/Sound.h>
+#include <Urho3D/Audio/SoundListener.h>
 #include <Urho3D/Core/CoreEvents.h>
 #include <Urho3D/Core/ProcessUtils.h>
 #include <Urho3D/Engine/Engine.h>
@@ -594,6 +595,13 @@ void MayaScape::CreateScene() {
     auto* camera = cameraNode_->CreateComponent<Camera>();
     camera->SetFarClip(500.0f);
     GetSubsystem<Renderer>()->SetViewport(0, new Viewport(context_, scene_, camera));
+
+    // Enable for 3D sounds to work (attach to camera node)
+    SoundListener* listener = cameraNode_->CreateComponent<SoundListener>();
+    GetSubsystem<Audio>()->SetListener(listener);
+
+    // you can set master volumes for the different kinds if sounds, here 30% for music
+    GetSubsystem<Audio>()->SetMasterGain(SOUND_MUSIC, 1.2);
 
     // Create static scene content. First create a zone for ambient lighting and fog control
     Node* zoneNode = scene_->CreateChild("Zone");
@@ -2870,9 +2878,49 @@ void MayaScape::ReloadScene(bool reInit) {
     scene_->LoadXML(loadFile);
 }
 
+void MayaScape::PlaySoundEffect(const String& soundName)
+{
+
+    /*
+     *
+    // loading the sound
+    sound_flag = cache->GetResource<Sound>("Music/Sad_0.wav");
+    sound_source_flag = modelNode->CreateComponent<SoundSource3D>();
+    sound_source_flag->SetNearDistance(1);  // distance up to where the volume is 100%
+    sound_source_flag->SetFarDistance(1550);  // distance from where the volume is at 0%
+    sound_source_flag->SetSoundType(SOUND_EFFECT);
+
+    sound_source_flag->Play(sound_flag);
+*/
+
+
+
+    auto* cache = GetSubsystem<ResourceCache>();
+//    auto* source = scene_->CreateComponent<SoundSource>();
+    auto* source = scene_->CreateComponent<SoundSource3D>();
+
+
+    // loading the sound
+//    sound_flag = cache->GetResource<Sound>("Music/test.wav");
+    //sound_source_flag = modelNode->CreateComponent<SoundSource3D>();
+
+    source->SetNearDistance(1);  // distance up to where the volume is 100%
+    source->SetFarDistance(6000);  // distance from where the volume is at 0%
+    source->SetSoundType(SOUND_MUSIC);
+
+    auto* sound = cache->GetResource<Sound>("Sounds/" + soundName);
+    if (sound != nullptr) {
+        source->SetAutoRemoveMode(REMOVE_COMPONENT);
+        source->Play(sound);
+    }
+}
+
+
 void MayaScape::HandlePlayButton(StringHash eventType, VariantMap &eventData) {
 //    sample2D_->PlaySoundEffect("enemy01-laugh.wav");
 //    sample2D_->PlaySoundEffect("BAY-r1.wav");
+
+    PlaySoundEffect("BAY-r1-mono.wav");
 
     // Remove fullscreen UI and unfreeze the scene
     auto *ui = GetSubsystem<UI>();

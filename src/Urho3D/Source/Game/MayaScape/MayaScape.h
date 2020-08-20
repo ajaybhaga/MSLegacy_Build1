@@ -104,6 +104,7 @@ private:
     void ReloadScene(bool reInit);
     /// Handle 'PLAY' button released event.
     void HandlePlayButton(StringHash eventType, VariantMap& eventData);
+    void PlaySoundEffect(const String& soundName);
 
     void SetParticleEmitter(int hitId, float contactX, float contactY, int type, float timeStep);
     void HandleUpdateParticlePool(float timeStep);

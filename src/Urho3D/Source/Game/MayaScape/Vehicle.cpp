@@ -358,32 +358,33 @@ void Vehicle::Init()
         }
     }
 
+
     // init sound
-    /*engineSoundSrc_ = node_->CreateComponent<SoundSource3D>();
+    engineSoundSrc_ = node_->CreateComponent<SoundSource3D>();
     engineSnd_ = cache->GetResource<Sound>("Offroad/Sounds/engine-prototype.ogg");
     engineSnd_->SetLooped(true);
 
-    engineSoundSrc_->SetDistanceAttenuation( 1.0f, 30.0f, 0.1f );
+    engineSoundSrc_->SetDistanceAttenuation( 1.0f, 3000.0f, 0.1f );
     engineSoundSrc_->SetSoundType(SOUND_EFFECT);
-    engineSoundSrc_->SetGain(0.7f);
+    engineSoundSrc_->SetGain(0.1f);
     engineSoundSrc_->Play(engineSnd_);
     engineSoundSrc_->SetFrequency(AUDIO_FIXED_FREQ_44K * 0.05f);
 
     skidSoundSrc_ = node_->CreateComponent<SoundSource3D>();
     skidSnd_ = cache->GetResource<Sound>("Offroad/Sounds/skid-gravel.ogg");
     skidSoundSrc_->SetSoundType(SOUND_EFFECT);
-    skidSoundSrc_->SetGain(0.4f);
-    skidSoundSrc_->SetDistanceAttenuation( 1.0f, 30.0f, 0.1f );
+    skidSoundSrc_->SetGain(0.1f);
+    skidSoundSrc_->SetDistanceAttenuation( 1.0f, 3000.0f, 0.1f );
     skidSoundSrc_->SetFrequency(AUDIO_FIXED_FREQ_44K * 1.4f );
 
     shockSoundSrc_ = node_->CreateComponent<SoundSource3D>();
     shockSnd_ = cache->GetResource<Sound>("Offroad/Sounds/shocks-impact.ogg");
     shockSoundSrc_->SetSoundType(SOUND_EFFECT);
-    shockSoundSrc_->SetGain(0.7f);
-    shockSoundSrc_->SetDistanceAttenuation( 1.0f, 30.0f, 0.1f );
-*/
+    shockSoundSrc_->SetGain(0.2f);
+    shockSoundSrc_->SetDistanceAttenuation( 1.0f, 3000.0f, 0.1f );
+
     // acceleration sound while in air - most probably want this on
-    playAccelerationSoundInAir_ = false;
+    playAccelerationSoundInAir_ = true;
 }
 
 //=============================================================================
@@ -865,34 +866,32 @@ void Vehicle::PostUpdateSound(float timeStep)
             prevWheelInContact_[i] = whInfo.m_raycastInfo.m_isInContact;
         }
 
-        // -ideally, you want the engine sound to sound like it's at 10k rpm w/o any pitch adjustment, and
-        // we nomralize x to be from 0.1f to 1.0f by dividing by 10k in SetFrequency(AUDIO_FIXED_FREQ_44K * x)
-        // -if shifting rmps sounds off then change the normalization value. for the engine prototype sound,
-        // the pitch sound is low, so it's normalized by diving by 8k instead of 10k
-        const float rpmNormalizedForEnginePrototype = 8000.0f;
-        /*engineSoundSrc_->SetFrequency(AUDIO_FIXED_FREQ_44K * curRPM_/rpmNormalizedForEnginePrototype);
 
-        // shock impact when transitioning from partially off ground (or air borne) to landing
-        if ( prevWheelContacts_ <= 2 && playShockImpactSound )
-        {
-            if ( !shockSoundSrc_->IsPlaying() )
-            {
-                shockSoundSrc_->Play(shockSnd_);
+        // Check if the sound sources are created
+        if (engineSoundSrc_) {
+            // -ideally, you want the engine sound to sound like it's at 10k rpm w/o any pitch adjustment, and
+            // we normalize x to be from 0.1f to 1.0f by dividing by 10k in SetFrequency(AUDIO_FIXED_FREQ_44K * x)
+            // -if shifting rmps sounds off then change the normalization value. for the engine prototype sound,
+            // the pitch sound is low, so it's normalized by diving by 8k instead of 10k
+            const float rpmNormalizedForEnginePrototype = 8000.0f;
+            engineSoundSrc_->SetFrequency(AUDIO_FIXED_FREQ_44K * curRPM_ / rpmNormalizedForEnginePrototype);
+
+            // shock impact when transitioning from partially off ground (or air borne) to landing
+            if (prevWheelContacts_ <= 2 && playShockImpactSound) {
+                if (!shockSoundSrc_->IsPlaying()) {
+                    shockSoundSrc_->Play(shockSnd_);
+                }
+            }
+
+            // skid sound
+            if (playSkidSound > 1) {
+                if (!skidSoundSrc_->IsPlaying()) {
+                    skidSoundSrc_->Play(skidSnd_);
+                }
+            } else {
+                skidSoundSrc_->Stop();
             }
         }
-
-        // skid sound
-        if ( playSkidSound > 1 )
-        {
-            if ( !skidSoundSrc_->IsPlaying() )
-            {
-                skidSoundSrc_->Play(skidSnd_);
-            }
-        }
-        else
-        {
-            skidSoundSrc_->Stop();
-        }*/
     }
 }
 
