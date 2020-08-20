@@ -108,7 +108,6 @@
 #include <Urho3D/UI/UI.h>
 #include <Urho3D/UI/UIEvents.h>
 
-#include "network/ClientApp.h"
 #include "network/Server.h"
 #include "network/ClientObj.h"
 #include "network/NetworkActor.h"
@@ -420,7 +419,7 @@ void MayaScape::Start() {
 
     ChangeDebugHudText();
 
-    Game::InitMouseMode(MM_RELATIVE);
+   // Game::InitMouseMode(MM_RELATIVE);
 }
 
 
@@ -636,22 +635,30 @@ void MayaScape::SetCameraTarget() {
 
 void MayaScape::CreateScene() {
 
-
     ResourceCache* cache = GetSubsystem<ResourceCache>();
-    scene_ = new Scene(context_);
     // Create scene subsystem components
-    scene_->CreateComponent<Octree>();
+    scene_ = new Scene(context_);
 
-    PhysicsWorld *pPhysicsWorld = scene_->CreateComponent<PhysicsWorld>();
-    DebugRenderer *dbgRenderer = scene_->CreateComponent<DebugRenderer>();
-    pPhysicsWorld->SetDebugRenderer(dbgRenderer);
+    // server requires client hash and scene info
+    Server *server = GetSubsystem<Server>();
+    server->RegisterClientHashAndScene(NetworkActor::GetTypeStatic(), scene_);
+
+    // Create octree and physics world with default settings
+    // Create them as local so that they are not needlessly replicated when a client connects
+    scene_->CreateComponent<Octree>(LOCAL);
+    PhysicsWorld *physicsWorld = scene_->CreateComponent<PhysicsWorld>(LOCAL);
+    DebugRenderer *dbgRenderer = scene_->CreateComponent<DebugRenderer>(LOCAL);
+    physicsWorld->SetDebugRenderer(dbgRenderer);
 
     // Create camera and define viewport. We will be doing load / save, so it's convenient to create the camera outside the scene,
     // so that it won't be destroyed and recreated, and we don't have to redefine the viewport on load
-    cameraNode_ = new Node(context_);
+    cameraNode_ = scene_->CreateChild("Camera", LOCAL);
+//    cameraNode_ = new Node(context_);
     auto* camera = cameraNode_->CreateComponent<Camera>();
     camera->SetFarClip(500.0f);
+    cameraNode_->SetPosition(Vector3(0.0f, 5.0f, 0.0f));
     GetSubsystem<Renderer>()->SetViewport(0, new Viewport(context_, scene_, camera));
+
 
     // Enable for 3D sounds to work (attach to camera node)
     SoundListener* listener = cameraNode_->CreateComponent<SoundListener>();
@@ -660,8 +667,23 @@ void MayaScape::CreateScene() {
     // you can set master volumes for the different kinds if sounds, here 30% for music
     GetSubsystem<Audio>()->SetMasterGain(SOUND_MUSIC, 1.2);
 
+    // Create a directional light with shadows
+    Node* lightNode = scene_->CreateChild("DirectionalLight", LOCAL);
+    lightNode->SetDirection(Vector3(0.3f, -0.5f, 0.425f));
+    Light* light = lightNode->CreateComponent<Light>();
+    light->SetLightType(LIGHT_DIRECTIONAL);
+    light->SetCastShadows(true);
+    light->SetShadowBias(BiasParameters(0.00025f, 0.5f));
+    light->SetShadowCascade(CascadeParameters(10.0f, 50.0f, 200.0f, 0.0f, 0.8f));
+    light->SetSpecularIntensity(0.5f);
+
+    // All static scene content and the camera are also created as local,
+    // so that they are unaffected by scene replication and are
+    // not removed from the client upon connection.
+    // Create a Zone component first for ambient lighting & fog control.
+
     // Create static scene content. First create a zone for ambient lighting and fog control
-    Node* zoneNode = scene_->CreateChild("Zone");
+    Node* zoneNode = scene_->CreateChild("Zone", LOCAL);
     Zone* zone = zoneNode->CreateComponent<Zone>();
     zone->SetAmbientColor(Color(0.15f, 0.15f, 0.15f));
     zone->SetFogColor(Color(0.5f, 0.5f, 0.7f));
@@ -684,7 +706,7 @@ void MayaScape::CreateScene() {
 ///
 
     // Create heightmap terrain with collision
-    Node* terrainNode = scene_->CreateChild("Terrain");
+    Node* terrainNode = scene_->CreateChild("Terrain", LOCAL);
     terrainNode->SetPosition(Vector3::ZERO);
     terrain_ = terrainNode->CreateComponent<Terrain>();
     terrain_->SetPatchSize(64);
@@ -770,13 +792,13 @@ void MayaScape::CreateScene() {
     float zRange = (shiftedRange.z_*mapSize) / miniMapHeight;
 */
 
-        raceTrack_ = scene_->CreateChild("RaceTrack");
+        raceTrack_ = scene_->CreateChild("RaceTrack", LOCAL);
         Vector3 position(trackPosX, 0.0f, trackPosZ);
         position.y_ = terrain_->GetHeight(position) + 20.0f;
         raceTrack_->SetPosition(position);
         // Create a rotation quaternion from up vector to terrain normal
         //raceTrack_->SetRotation(Quaternion(Vector3::UP, terrain_->GetNormal(position)));
-        Node* adjNode = raceTrack_->CreateChild("AdjNode");
+        Node* adjNode = raceTrack_->CreateChild("AdjNode", LOCAL);
         adjNode->SetRotation(Quaternion(0.0, 0.0, 0.0f));
 
         raceTrack_->SetScale(30.0f);
@@ -814,7 +836,7 @@ void MayaScape::CreateScene() {
         float treePosX = (((float)trees_[i].x_ / (float)terrain_->GetMarkerMap()->GetWidth())*mapSize)+treeOffsetX;
         float treePosZ = (((float)trees_[i].z_ / (float)terrain_->GetMarkerMap()->GetHeight())*mapSize)+treeOffsetY;
 
-        Node* objectNode = scene_->CreateChild("Tree");
+        Node* objectNode = scene_->CreateChild("Tree", LOCAL);
         Vector3 position(treePosX, 0.0f, treePosZ);
         position.y_ = terrain_->GetHeight(position) - 0.1f;
         objectNode->SetPosition(position);
@@ -824,7 +846,7 @@ void MayaScape::CreateScene() {
 
         // Create a rotation quaternion from up vector to terrain normal
         objectNode->SetRotation(Quaternion(Vector3::UP, terrain_->GetNormal(position)));
-        Node* adjNode = objectNode->CreateChild("AdjNode");
+        Node* adjNode = objectNode->CreateChild("AdjNode", LOCAL);
         adjNode->SetRotation(Quaternion(0.0, 0.0, -90.0f));
 
         objectNode->SetScale(20.0f);
@@ -878,7 +900,7 @@ void MayaScape::CreateScene() {
 //terrain_->GetHeight(Vector3(wpPosX, 0.0f, wpPosZ))
         waypointsWorld_.Push(Vector3(wpPosX, 0, wpPosZ));
 
-        Node* objectNode = scene_->CreateChild("Waypoint");
+        Node* objectNode = scene_->CreateChild("Waypoint", LOCAL);
         Vector3 position(wpPosX, 0.0f, wpPosZ);
         position.y_ = terrain_->GetHeight(position) - 0.1f;
         objectNode->SetPosition(position);
@@ -888,7 +910,7 @@ void MayaScape::CreateScene() {
 
         // Create a rotation quaternion from up vector to terrain normal
         objectNode->SetRotation(Quaternion(Vector3::UP, terrain_->GetNormal(position)));
-        Node* adjNode = objectNode->CreateChild("AdjNode");
+        Node* adjNode = objectNode->CreateChild("AdjNode", LOCAL);
         adjNode->SetRotation(Quaternion(0.0, 0.0, -90.0f));
 
         objectNode->SetScale(20.0f);
@@ -1606,6 +1628,21 @@ void MayaScape::HandleSceneRendered(StringHash eventType, VariantMap &eventData)
 }
 
 void MayaScape::SubscribeToEvents() {
+
+    SubscribeToEvent(E_PHYSICSPRESTEP, URHO3D_HANDLER(MayaScape, HandlePhysicsPreStep));
+    SubscribeToEvent(E_POSTUPDATE, URHO3D_HANDLER(MayaScape, HandlePostUpdate));
+
+    // Subscribe to button actions
+    SubscribeToEvent(connectButton_, E_RELEASED, URHO3D_HANDLER(MayaScape, HandleConnect));
+    SubscribeToEvent(disconnectButton_, E_RELEASED, URHO3D_HANDLER(MayaScape, HandleDisconnect));
+    SubscribeToEvent(startServerButton_, E_RELEASED, URHO3D_HANDLER(MayaScape, HandleStartServer));
+
+    // Subscribe to server events
+    SubscribeToEvent(E_SERVERSTATUS, URHO3D_HANDLER(MayaScape, HandleConnectionStatus));
+    SubscribeToEvent(E_CLIENTOBJECTID, URHO3D_HANDLER(MayaScape, HandleClientObjectID));
+
+    //
+
     // Subscribe Materials/LOWPOLY-COLORS.xml function for processing update events
     SubscribeToEvent(E_UPDATE, URHO3D_HANDLER(MayaScape, HandleUpdate));
 
@@ -3002,10 +3039,7 @@ void MayaScape::HandlePlayButton(StringHash eventType, VariantMap &eventData) {
 
 }
 
-//
-
-
-
+// Network functions
 void MayaScape::CreateServerSubsystem()
 {
     context_->RegisterSubsystem(new Server(context_));
@@ -3015,67 +3049,12 @@ void MayaScape::CreateServerSubsystem()
     NetworkActor::RegisterObject(context_);
 }
 
-void MayaScape::CreateScene()
-{
-    ResourceCache* cache = GetSubsystem<ResourceCache>();
-
-    scene_ = new Scene(context_);
-
-    // server requires client hash and scene info
-    Server *server = GetSubsystem<Server>();
-    server->RegisterClientHashAndScene(MayaScape::GetTypeStatic(), scene_);
-
-    // Create octree and physics world with default settings. Create them as local so that they are not needlessly replicated
-    // when a client connects
-    scene_->CreateComponent<Octree>(LOCAL);
-    PhysicsWorld *physicsWorld = scene_->CreateComponent<PhysicsWorld>(LOCAL);
-    DebugRenderer *dbgRenderer = scene_->CreateComponent<DebugRenderer>(LOCAL);
-    physicsWorld->SetDebugRenderer(dbgRenderer);
-
-    // All static scene content and the camera are also created as local, so that they are unaffected by scene replication and are
-    // not removed from the client upon connection. Create a Zone component first for ambient lighting & fog control.
-    Node* zoneNode = scene_->CreateChild("Zone", LOCAL);
-    Zone* zone = zoneNode->CreateComponent<Zone>();
-    zone->SetBoundingBox(BoundingBox(-1000.0f, 1000.0f));
-    zone->SetAmbientColor(Color(0.5f, 0.5f, 0.5f));
-    zone->SetFogColor(Color(0.3f, 0.3f, 0.5f));
-    zone->SetFogStart(100.0f);
-    zone->SetFogEnd(300.0f);
-
-    // Create a directional light with shadows
-    Node* lightNode = scene_->CreateChild("DirectionalLight", LOCAL);
-    lightNode->SetDirection(Vector3(0.3f, -0.5f, 0.425f));
-    Light* light = lightNode->CreateComponent<Light>();
-    light->SetLightType(LIGHT_DIRECTIONAL);
-    light->SetCastShadows(true);
-    light->SetShadowBias(BiasParameters(0.00025f, 0.5f));
-    light->SetShadowCascade(CascadeParameters(10.0f, 50.0f, 200.0f, 0.0f, 0.8f));
-    light->SetSpecularIntensity(0.5f);
-
-    // Create a "floor" consisting of several tiles. Make the tiles physical but leave small cracks between them
-    Node* floorNode = scene_->CreateChild("floor", LOCAL);
-    StaticModel* floor = floorNode->CreateComponent<StaticModel>();
-    Model *model = cache->GetResource<Model>("NetDemo/level1.mdl");
-    floor->SetModel(model);
-    floor->SetMaterial(cache->GetResource<Material>("NetDemo/groundMat.xml"));
-    floor->SetCastShadows(true);
-    floorNode->CreateComponent<RigidBody>();
-    CollisionShape* shape = floorNode->CreateComponent<CollisionShape>();
-    shape->SetTriangleMesh(model);
-
-    // cam
-    cameraNode_ = scene_->CreateChild("Camera", LOCAL);
-    Camera* camera = cameraNode_->CreateComponent<Camera>();
-    camera->SetFarClip(300.0f);
-    cameraNode_->SetPosition(Vector3(0.0f, 5.0f, 0.0f));
-}
-
 void MayaScape::CreateAdminPlayer()
 {
     Node* clientNode = scene_->CreateChild("Admin");
     clientNode->SetPosition(Vector3(Random(40.0f) - 20.0f, 5.0f, Random(40.0f) - 20.0f));
 
-    ClientObj *clientObj = (ClientObj*)clientNode->CreateComponent(MayaScape::GetTypeStatic());
+    ClientObj *clientObj = (ClientObj*)clientNode->CreateComponent(NetworkActor::GetTypeStatic());
 
     // set identity
     clientObj->SetClientInfo("ADMIN", 99);
@@ -3155,21 +3134,6 @@ void MayaScape::ChangeDebugHudText()
         dbgText->SetColor(Color::CYAN);
         dbgText->SetTextEffect(TE_NONE);
     }
-}
-
-void MayaScape::SubscribeToEvents()
-{
-    SubscribeToEvent(E_PHYSICSPRESTEP, URHO3D_HANDLER(MayaScape, HandlePhysicsPreStep));
-    SubscribeToEvent(E_POSTUPDATE, URHO3D_HANDLER(MayaScape, HandlePostUpdate));
-
-    // Subscribe to button actions
-    SubscribeToEvent(connectButton_, E_RELEASED, URHO3D_HANDLER(MayaScape, HandleConnect));
-    SubscribeToEvent(disconnectButton_, E_RELEASED, URHO3D_HANDLER(MayaScape, HandleDisconnect));
-    SubscribeToEvent(startServerButton_, E_RELEASED, URHO3D_HANDLER(MayaScape, HandleStartServer));
-
-    // Subscribe to server events
-    SubscribeToEvent(E_SERVERSTATUS, URHO3D_HANDLER(MayaScape, HandleConnectionStatus));
-    SubscribeToEvent(E_CLIENTOBJECTID, URHO3D_HANDLER(MayaScape, HandleClientObjectID));
 }
 
 Button* MayaScape::CreateButton(const String& text, int width)
@@ -3263,17 +3227,6 @@ void MayaScape::MoveCamera()
     instructionsText_->SetVisible(showInstructions);
 }
 
-void MayaScape::HandlePostUpdate(StringHash eventType, VariantMap& eventData)
-{
-    // We only rotate the camera according to mouse movement since last frame, so do not need the time step
-    MoveCamera();
-
-    if (drawDebug_)
-    {
-        scene_->GetComponent<PhysicsWorld>()->DrawDebugGeometry(true);
-    }
-}
-
 void MayaScape::HandlePhysicsPreStep(StringHash eventType, VariantMap& eventData)
 {
     Server *server = GetSubsystem<Server>();
@@ -3283,11 +3236,11 @@ void MayaScape::HandlePhysicsPreStep(StringHash eventType, VariantMap& eventData
     Controls controls;
     controls.yaw_ = yaw_;
 
-    controls.Set(CTRL_FORWARD, input->GetKeyDown(KEY_W));
-    controls.Set(CTRL_BACK, input->GetKeyDown(KEY_S));
-    controls.Set(CTRL_LEFT, input->GetKeyDown(KEY_A));
-    controls.Set(CTRL_RIGHT, input->GetKeyDown(KEY_D));
-    controls.Set(SWAP_MAT, input->GetKeyDown(KEY_T));
+    controls.Set(NTWK_CTRL_FORWARD, input->GetKeyDown(KEY_W));
+    controls.Set(NTWK_CTRL_BACK, input->GetKeyDown(KEY_S));
+    controls.Set(NTWK_CTRL_LEFT, input->GetKeyDown(KEY_A));
+    controls.Set(NTWK_CTRL_RIGHT, input->GetKeyDown(KEY_D));
+    controls.Set(NTWK_SWAP_MAT, input->GetKeyDown(KEY_T));
 
     server->UpdatePhysicsPreStep(controls);
 
