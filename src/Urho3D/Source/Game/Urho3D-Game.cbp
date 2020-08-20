@@ -459,6 +459,30 @@
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/movedef.h">
 			<Option target="MayaScape"/>
 		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/network/ClientApp.cpp">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/network/ClientApp.h">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/network/ClientObj.cpp">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/network/ClientObj.h">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/network/NetworkActor.cpp">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/network/NetworkActor.h">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/network/Server.cpp">
+			<Option target="MayaScape"/>
+		</Unit>
+		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/network/Server.h">
+			<Option target="MayaScape"/>
+		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/objectdef.h">
 			<Option target="MayaScape"/>
 		</Unit>

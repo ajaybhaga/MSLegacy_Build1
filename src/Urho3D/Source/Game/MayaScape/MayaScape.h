@@ -22,26 +22,60 @@
 
 #pragma once
 
+
+#include <Urho3D/Core/CoreEvents.h>
+#include <Urho3D/Engine/Engine.h>
+#include <Urho3D/Graphics/Camera.h>
+#include <Urho3D/Graphics/Graphics.h>
+#include <Urho3D/Graphics/Octree.h>
+#include <Urho3D/Graphics/Renderer.h>
+#include <Urho3D/Graphics/Zone.h>
+#include <Urho3D/Graphics/Material.h>
+#include <Urho3D/Graphics/Model.h>
+#include <Urho3D/Graphics/StaticModel.h>
+#include <Urho3D/Input/Controls.h>
+#include <Urho3D/Input/Input.h>
+#include <Urho3D/IO/Log.h>
+#include <Urho3D/Network/Network.h>
+#include <Urho3D/Network/Connection.h>
+#include <Urho3D/UI/Button.h>
+#include <Urho3D/UI/Font.h>
+#include <Urho3D/UI/LineEdit.h>
+#include <Urho3D/UI/Text.h>
+#include <Urho3D/UI/Text3D.h>
+#include <Urho3D/UI/UI.h>
+#include <Urho3D/UI/UIEvents.h>
+
+
+
+
 #include <MayaScape/ai/evolution_manager.h>
 #include "Game.h"
 #include "Sample2D.h"
 #include "Vehicle.h"
 #include "Player.h"
 
-
-class Player;
-class Character2D;
-class Sample2D;
-class EvolutionManager;
-
 #define MAX_AGENTS 1024 // Set max limit for agents (used for storage)
 
+namespace Urho3D {
+
+class Button;
+class Connection;
+class Scene;
+class Text;
+class UIElement;
+
 // Marker Map Tokens
-using namespace Urho3D;
 Vector3 bkgMarkerToken = Vector3(0.5, 1, 0.5); // Black
-Vector3 trackMarkerToken = Vector3(0.500000059604645,1,0.643137276172638); // #494949
+Vector3 trackMarkerToken = Vector3(0.500000059604645, 1, 0.643137276172638); // #494949
 Vector3 treeMarkerToken = Vector3(0.5, 1, 0.594117641448975); // #303030
-Vector3 waypointToken = Vector3(0.5,1.00000035762787,0.927451014518738); // #dadada
+Vector3 waypointToken = Vector3(0.5, 1.00000035762787, 0.927451014518738); // #dadada
+}
+
+class Character2D;
+class Player;
+class Sample2D;
+class EvolutionManager;
 
 struct ParticlePool {
     bool used; // Is particle emitter used?
@@ -78,6 +112,23 @@ public:
     void Stop() override;
 
 private:
+
+    // Network functions
+    void CreateServerSubsystem();
+    void CreateUI();
+    void CreateAdminPlayer();
+    void SetupViewport();
+    void ChangeDebugHudText();
+    Button* CreateButton(const String& text, int width);
+    void UpdateButtons();
+    void MoveCamera();
+    void HandlePhysicsPreStep(StringHash eventType, VariantMap& eventData);
+    void HandleConnect(StringHash eventType, VariantMap& eventData);
+    void HandleDisconnect(StringHash eventType, VariantMap& eventData);
+    void HandleStartServer(StringHash eventType, VariantMap& eventData);
+    void HandleConnectionStatus(StringHash eventType, VariantMap& eventData);
+    void HandleClientObjectID(StringHash eventType, VariantMap& eventData);
+
     /// Construct the scene content.
     void CreateScene();
     void CreatePlayer();
@@ -195,5 +246,16 @@ private:
     WeakPtr<Text>  textStatus_;
     Timer          fpsTimer_;
     int            framesCount_;
+
+    // Network objects
+    HashMap<Connection*, WeakPtr<Node> > serverObjects_;
+    SharedPtr<UIElement> buttonContainer_;
+    SharedPtr<LineEdit> textEdit_;
+    SharedPtr<Button> connectButton_;
+    SharedPtr<Button> disconnectButton_;
+    SharedPtr<Button> startServerButton_;
+    SharedPtr<Text> instructionsText_;
+    unsigned clientObjectID_;
+    bool isServer_;
 
 };

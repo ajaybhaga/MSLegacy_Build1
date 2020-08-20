@@ -42,12 +42,8 @@ set (TARGET_NAME MayaScape)
 #featuredef.h feature.cpp feature.h
 #console.cpp console.h
 
-
-
-
-#include "HeatSource.h"
-
-define_source_files (EXTRA_H_FILES ${COMMON_SAMPLE_H_FILES} boids.cpp boids.h Missile.cpp Missile.h GameObject.cpp GameObject.h Player.cpp Player.h BUFFList.h Toolkit.h WheelTrackModel.cpp WheelTrackModel.h Vehicle.cpp Vehicle.h RaycastVehicle.cpp RaycastVehicle.h SmoothStep.cpp SmoothStep.h ./Sample2D.h ./Sample2D.cpp ../Utilities2D/Mover.h ../Utilities2D/Mover.cpp ai/genotype.cpp ai/genotype.h util/random_d.h ai/genetic_algorithm.cpp ai/genetic_algorithm.h ai/evolution_manager.cpp ai/evolution_manager.h ai/agent.cpp ai/agent.h ai/neural_layer.cpp ai/neural_layer.h ai/neural_network.cpp ai/neural_network.h util/math_helper.cpp util/math_helper.h util/event.cpp util/event.h ai/agent_controller.cpp ai/agent_controller.h shared_libs.h ai/sensor.cpp ai/sensor.h app.cpp app.h ai/agent_movement.cpp ai/agent_movement.h ai/fsm_event_data.cpp ai/fsm_event_data.h ai/fsm.cpp ai/fsm.h util/semaphore.h ai/agent_fsm.cpp ai/agent_fsm.h util/event.cpp util/event.h types.h stringdef.h pointtree.cpp pointtree.h objectdef.h objmem.cpp objmem.h objects.cpp objects.h movedef.h mapgrid.cpp mapgrid.h map.cpp map.h geometry.cpp geometry.h fpath.cpp fpath.h basedef.h baseobject.cpp baseobject.h astar.cpp astar.h actiondef.h action.cpp action.h)
+set (NETWORK_FILES network/Server.cpp network/Server.h network/ClientObj.cpp network/ClientObj.h network/NetworkActor.cpp network/NetworkActor.h network/ClientApp.cpp network/ClientApp.h)
+define_source_files (EXTRA_H_FILES ${COMMON_SAMPLE_H_FILES} ${NETWORK_FILES} boids.cpp boids.h Missile.cpp Missile.h GameObject.cpp GameObject.h Player.cpp Player.h BUFFList.h Toolkit.h WheelTrackModel.cpp WheelTrackModel.h Vehicle.cpp Vehicle.h RaycastVehicle.cpp RaycastVehicle.h SmoothStep.cpp SmoothStep.h ./Sample2D.h ./Sample2D.cpp ../Utilities2D/Mover.h ../Utilities2D/Mover.cpp ai/genotype.cpp ai/genotype.h util/random_d.h ai/genetic_algorithm.cpp ai/genetic_algorithm.h ai/evolution_manager.cpp ai/evolution_manager.h ai/agent.cpp ai/agent.h ai/neural_layer.cpp ai/neural_layer.h ai/neural_network.cpp ai/neural_network.h util/math_helper.cpp util/math_helper.h util/event.cpp util/event.h ai/agent_controller.cpp ai/agent_controller.h shared_libs.h ai/sensor.cpp ai/sensor.h app.cpp app.h ai/agent_movement.cpp ai/agent_movement.h ai/fsm_event_data.cpp ai/fsm_event_data.h ai/fsm.cpp ai/fsm.h util/semaphore.h ai/agent_fsm.cpp ai/agent_fsm.h util/event.cpp util/event.h types.h stringdef.h pointtree.cpp pointtree.h objectdef.h objmem.cpp objmem.h objects.cpp objects.h movedef.h mapgrid.cpp mapgrid.h map.cpp map.h geometry.cpp geometry.h fpath.cpp fpath.h basedef.h baseobject.cpp baseobject.h astar.cpp astar.h actiondef.h action.cpp action.h)
 
 
 # Setup target with resource copying

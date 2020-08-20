@@ -68,7 +68,8 @@ void Game::Setup()
     engineParameters_[EP_WINDOW_TITLE] = GetTypeName();
     engineParameters_[EP_WINDOW_WIDTH] = 1080;
     engineParameters_[EP_WINDOW_HEIGHT] = 768;
-    engineParameters_[EP_LOG_NAME]     = GetSubsystem<FileSystem>()->GetAppPreferencesDir("urho3d", "logs") + GetTypeName() + ".log";
+    engineParameters_[EP_LOG_NAME]       = GetSubsystem<FileSystem>()->GetProgramDir() + "mayascape.log";
+//    engineParameters_[EP_LOG_NAME]     = GetSubsystem<FileSystem>()->GetAppPreferencesDir("urho3d", "logs") + GetTypeName() + ".log";
     engineParameters_[EP_FULL_SCREEN]  = false;
     engineParameters_[EP_HEADLESS]     = false;
     engineParameters_[EP_SOUND]        = true;
@@ -78,6 +79,7 @@ void Game::Setup()
     // The second and third entries are possible relative paths from the installed program/bin directory to the asset directory -- these entries are for binary when it is in the Urho3D SDK installation location
     if (!engineParameters_.Contains(EP_RESOURCE_PREFIX_PATHS))
         engineParameters_[EP_RESOURCE_PREFIX_PATHS] = ";../share/Resources;../share/Urho3D/Resources";
+//    engineParameters_["ResourcePaths"] = "Data;CoreData;Data/NetDemo;";
 }
 
 void Game::Start()
