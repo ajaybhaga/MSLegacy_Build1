@@ -114,6 +114,9 @@ Node* Server::CreateClientObject(Connection *connection)
         clientObj->SetClientInfo(name, colorIdx);
 
         URHO3D_LOGINFOF("client identity name=%s", name.CString());
+        URHO3D_LOGINFOF("HandleClientConnected - data: [%s, %d]", name.CString(), colorIdx);
+        loginList_.Push(name.CString());
+
     }
 
     return clientNode;
@@ -247,6 +250,8 @@ void Server::HandleClientConnected(StringHash eventType, VariantMap& eventData)
     using namespace ClientConnected;
 
     URHO3D_LOGINFO("HandleClientConnected");
+
+
 }
 
 void Server::HandleClientDisconnected(StringHash eventType, VariantMap& eventData)

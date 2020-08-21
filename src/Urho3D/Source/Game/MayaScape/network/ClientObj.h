@@ -25,6 +25,7 @@
 #include <Urho3D/Scene/LogicComponent.h>
 #include <Urho3D/Core/Variant.h>
 #include <Urho3D/Input/Controls.h>
+#include <MayaScape/Vehicle.h>
 
 namespace Urho3D
 {
@@ -48,8 +49,68 @@ public:
     virtual void ClearControls();
 
 protected:
+    /// Player Controls
     Controls controls_;
+
+    // Player name
     String userName_;
+
     int colorIdx_;
+
+    /// Bullets
+    String bulletType_;
+
+    /// Waypoints
+    Vector<Vector3>* waypoints_ = nullptr;
+    // Target
+    Vector3 toTarget_ = Vector3::ZERO;
+    unsigned int wpActiveIndex_;
+    int targetAgentIndex_;
+
+    float mass_;
+    float speed_;
+    float maxSpeed_;
+    float damping_;
+    float acceleration_;
+    float brake_;
+    Vector3 towards_;
+    Vector2 towards2d_;
+    float turningVelocity_;
+
+    /// The controllable vehicle component.
+    SharedPtr<Vehicle> vehicle_;
+
+    float lastFire_;
+
+    // Previous state
+//    PlayerState prevState_;
+    // Current state
+ //   PlayerState currState_;
+
+    /// Flag when player is facing forward.
+    bool forward_;
+    float heading_;
+
+    int id_;
+    int type_;
+
+    bool isReady_;
+    int life_;
+
+    int score_;
+    int health_;
+
+    Vector3 force_;
+    Vector3 offset_;
+
+    float changeTargetTime_;
+    bool autoSteering_;
+    bool doJump_;
+
+    /// Flag when player is dead.
+    bool killed_;
+    bool isAI_;
+    int agentIndex;
+
 };
 

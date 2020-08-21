@@ -71,6 +71,7 @@ public:
     Node* CreateClientObject(Connection *connection);
     void UpdatePhysicsPreStep(const Controls &controls);
 
+    Vector<Urho3D::String> GetLoginList() { return loginList_; }
 protected:
     void SubscribeToEvents();
     void SendStatusMsg(StringHash msg);
@@ -95,4 +96,6 @@ protected:
     StringHash clientHash_;
     unsigned clientObjectID_;
     SharedPtr<Scene> scene_;
+
+    Vector<Urho3D::String> loginList_;
 };

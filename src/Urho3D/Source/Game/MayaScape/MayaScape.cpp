@@ -1051,9 +1051,9 @@ void MayaScape::CreateScene() {
             debugText_[i] = ui->GetRoot()->CreateChild<Text>("DebugText");
             debugText_[i]->SetAlignment(HA_LEFT, VA_CENTER);
             debugText_[i]->SetPosition(10.0f, 500.0 + (i * 20));
-            debugText_[i]->SetFont(font, 14);
+            debugText_[i]->SetFont(font, 24);
             debugText_[i]->SetTextEffect(TE_SHADOW);
-            debugText_[i]->SetVisible(false);
+            debugText_[i]->SetVisible(true);
             std::string debugData1;
             debugData1.append("-");
             debugText_[i]->SetText(debugData1.c_str());
@@ -2464,21 +2464,21 @@ void MayaScape::HandleRenderUpdate(StringHash eventType, VariantMap &eventData) 
         sprintf(str, "%f,%f,%f", pos.x_, pos.y_, pos.z_);
         playerInfo.clear();
         playerInfo.append("Vehicle position (x,y,z) -> ").append(str);
-        debugText_[i]->SetText(playerInfo.c_str());
+      //  debugText_[i]->SetText(playerInfo.c_str());
 
         i++;
 
         sprintf(str, "%f,%f", xRange, zRange);
         playerInfo.clear();
         playerInfo.append("Vehicle minmap pos (x,z) -> ").append(str);
-        debugText_[i]->SetText(playerInfo.c_str());
+  //      debugText_[i]->SetText(playerInfo.c_str());
 
         i++;
 
         sprintf(str, "focusObjects[%d]=[%f,%f,%f]", focusIndex_, focusObjects_[focusIndex_].x_, focusObjects_[focusIndex_].y_, focusObjects_[focusIndex_].z_);
         playerInfo.clear();
         playerInfo.append("focusObject information pos (x,y,z) -> ").append(str);
-        debugText_[i]->SetText(playerInfo.c_str());
+ //       debugText_[i]->SetText(playerInfo.c_str());
 
         i++;
 
@@ -2495,12 +2495,12 @@ void MayaScape::HandleRenderUpdate(StringHash eventType, VariantMap &eventData) 
             sprintf(str, "pixel [%d,%d] -> (%f, %f, %f)", vx, vz, hsl_.x_, hsl_.y_, hsl_.z_);
             playerInfo.clear();
             playerInfo.append("Vehicle (x,z) -> ").append(str);
-            debugText_[i]->SetText(playerInfo.c_str());
+//            debugText_[i]->SetText(playerInfo.c_str());
             i++;
             sprintf(str, "height [%d,%d] -> %d", vx, vz, terrain_->GetHeightMap()->GetPixel(vx, vz).ToUInt());
             playerInfo.clear();
             playerInfo.append("Vehicle (x,z) -> ").append(str);
-            debugText_[i]->SetText(playerInfo.c_str());
+//            debugText_[i]->SetText(playerInfo.c_str());
             i++;
 
         }
@@ -2683,6 +2683,48 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
     }
     // Update menu background
     bkgSprite_->SetRotation(bkgAngle_);
+    auto *cache = GetSubsystem<ResourceCache>();
+
+    UI *ui = GetSubsystem<UI>();
+    Server *server = GetSubsystem<Server>();
+    Vector<Urho3D::String> loginList = server->GetLoginList();
+
+    /*
+    loginList.Push("Test1");
+    loginList.Push("Test2");
+    loginList.Push("Test3");
+*/
+
+/*
+    std::string playerInfo;
+    char str[40];
+
+    Vector3 pos = player_->GetVehicle()->GetNode()->GetPosition();
+    sprintf(str, "%f,%f,%f", pos.x_, pos.y_, pos.z_);
+    playerInfo.clear();
+    playerInfo.append("Vehicle position (x,y,z) -> ").append(str);
+    //  debugText_[i]->SetText(playerInfo.c_str());
+*/
+
+    if (loginList.Size() > 0) {
+        // Show login list
+        debugText_[0]->SetText("Server: Client List");
+        debugText_[0]->SetAlignment(HA_LEFT, VA_TOP);
+        debugText_[0]->SetPosition(10.0f, 400 );
+        debugText_[0]->SetVisible(true);
+        for (int i = 1; i < loginList.Size()+1; i++) {
+
+            if (loginList.Size() < NUM_DEBUG_FIELDS) {
+                debugText_[i]->SetAlignment(HA_LEFT, VA_TOP);
+                debugText_[i]->SetPosition(10.0f, 400 + (i * 20));
+                debugText_[i]->SetVisible(true);
+                //          std::string debugData1;
+//            debugData1.append("-");
+                debugText_[i]->SetText(loginList[i-1].CString());
+            }
+        }
+    }
+
 
     float deltaSum;
 
@@ -2747,7 +2789,7 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 
     if ((player_->GetVehicle()->controls_.IsDown(BUTTON_Y)) || (input->GetKeyPress(KEY_C))) {
         if (player_->changeTargetTime_ > 0.04f)
-        player_->targetAgentIndex_++;
+            player_->targetAgentIndex_++;
         player_->targetAgentIndex_ = player_->targetAgentIndex_ % EvolutionManager::getInstance()->getAgents().size();
         player_->changeTargetTime_ = 0;
     }
@@ -2758,7 +2800,9 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 
     if (input->GetKeyPress(KEY_R)) {
         // Place on track
-        player_->GetVehicle()->GetNode()->SetPosition(Vector3(raceTrack_->GetPosition().x_+Random(-mapSize/4, mapSize/4), 500.0f, raceTrack_->GetPosition().z_+Random(-mapSize/4, mapSize/4)));
+        player_->GetVehicle()->GetNode()->SetPosition(
+                Vector3(raceTrack_->GetPosition().x_ + Random(-mapSize / 4, mapSize / 4), 500.0f,
+                        raceTrack_->GetPosition().z_ + Random(-mapSize / 4, mapSize / 4)));
     }
 
     if (input->GetKeyPress(KEY_O)) {
@@ -2786,11 +2830,15 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
         if (player_->GetLastFire() > WaitTimeNextFire) {
             player_->SetLastFire(0);
 
-            float wpOffsetX = -mapSize/2;
-            float wpOffsetY = -mapSize/2;
+            float wpOffsetX = -mapSize / 2;
+            float wpOffsetY = -mapSize / 2;
             // Convert marker position to world position for waypoint
-            float wpPosX = (((float)waypoints_[player_->wpActiveIndex_].x_ / (float)terrain_->GetMarkerMap()->GetWidth())*mapSize)+wpOffsetX;
-            float wpPosZ = (((float)waypoints_[player_->wpActiveIndex_].z_ / (float)terrain_->GetMarkerMap()->GetHeight())*mapSize)+wpOffsetY;
+            float wpPosX =
+                    (((float) waypoints_[player_->wpActiveIndex_].x_ / (float) terrain_->GetMarkerMap()->GetWidth()) *
+                     mapSize) + wpOffsetX;
+            float wpPosZ =
+                    (((float) waypoints_[player_->wpActiveIndex_].z_ / (float) terrain_->GetMarkerMap()->GetHeight()) *
+                     mapSize) + wpOffsetY;
 
             URHO3D_LOGINFOF("Fire=%f", player_->GetLastFire());
 
@@ -2864,92 +2912,92 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 */
 
 
+        /*
+        // Clamp player life
+        if (player_->life_ > 100) {
+            player_->life_ = 100;
+        }
+        if (player_->life_ < 0) {
+            player_->life_ = 0;
+        }
+
+
+        // Set animal scale
+      //  player_->GetNode()->GetChildren()[0]->SetScale(20.0f);
+
+        // AI
+        if (agents_) {
+            for (int i = 0; i < EvolutionManager::getInstance()->getAgents().size(); i++) {
+                // Set rotation already here so that it's updated every rendering frame instead of every physics frame
+                agents_[i]->GetNode()->SetRotation(Quaternion(agents_[i]->controls_.yaw_, Vector3::UP));
+                //ai_[i]->GetNode()->SetRotation(Quaternion(0.0f, -180.0f-ai_[i]->heading_, 0.0f));
+                //ai_[i]->GetNode()->SetRotation(Quaternion(-90.0f, ai_[i]->heading_+180.0f, 0.0f));
+                agents_[i]->GetNode()->SetRotation(Quaternion(0.0f, agents_[i]->heading_, 0.0));
+
     /*
-    // Clamp player life
-    if (player_->life_ > 100) {
-        player_->life_ = 100;
-    }
-    if (player_->life_ < 0) {
-        player_->life_ = 0;
-    }
-
-
-    // Set animal scale
-  //  player_->GetNode()->GetChildren()[0]->SetScale(20.0f);
-
-    // AI
-    if (agents_) {
-        for (int i = 0; i < EvolutionManager::getInstance()->getAgents().size(); i++) {
-            // Set rotation already here so that it's updated every rendering frame instead of every physics frame
-            agents_[i]->GetNode()->SetRotation(Quaternion(agents_[i]->controls_.yaw_, Vector3::UP));
-            //ai_[i]->GetNode()->SetRotation(Quaternion(0.0f, -180.0f-ai_[i]->heading_, 0.0f));
-            //ai_[i]->GetNode()->SetRotation(Quaternion(-90.0f, ai_[i]->heading_+180.0f, 0.0f));
-            agents_[i]->GetNode()->SetRotation(Quaternion(0.0f, agents_[i]->heading_, 0.0));
-
-/*
-        static int _sndCnt = 0;
-        float r = Random(-0.0f,5.0f);
-        if (r > 2.5f) {
-            _sndCnt++;
-        }
-
-        if (_sndCnt > 5) {
-            sample2D_->PlaySoundEffect("enemy01-laugh.wav");
-        }
-
-
-            // Update billboards (genotype, powerbar)
-
-            const float BILLBOARD_ROTATION_SPEED = 50.0f;
-
-            // Genotype
-
-            // Rotate the individual billboards within the billboard sets, then recommit to make the changes visible
-            for (unsigned j = 0; j < agents_[i]->genotypeBBSet_->GetNumBillboards(); ++j) {
-                Billboard *bb = agents_[i]->genotypeBBSet_->GetBillboard(j);
-                //  bb->rotation_ += BILLBOARD_ROTATION_SPEED * timeStep;
-                if (agents_[i]) {
-                    Vector3 aiPos = agents_[i]->GetNode()->GetPosition();
-                    bb->position_ = Vector3(aiPos.x_ + (j * 0.02), aiPos.y_, 0.0f);
-
-                    // Already set size in initialization (based on parameter)
-                    //bb->size_ = Vector2((1.0f) * 0.05f, (0.1f) * 0.05f);
-
-
-                    //       bb->position_ = Vector3(player_->GetNode()->GetPosition().x_, player_->GetNode()->GetPosition().y_, -5.0f);
-                }
-
+            static int _sndCnt = 0;
+            float r = Random(-0.0f,5.0f);
+            if (r > 2.5f) {
+                _sndCnt++;
             }
 
-            agents_[i]->genotypeBBSet_->Commit();
-
-
-            // Powerbar
-
-            // Rotate the individual billboards within the billboard sets, then recommit to make the changes visible
-            for (unsigned j = 0; j < agents_[i]->powerbarBBSet_->GetNumBillboards(); ++j) {
-                Billboard *bb = agents_[i]->powerbarBBSet_->GetBillboard(j);
-                //  bb->rotation_ += BILLBOARD_ROTATION_SPEED * timeStep;
-                if (agents_[i]) {
-                    Vector3 aiPos = agents_[i]->GetNode()->GetPosition();
-                    bb->position_ = Vector3(aiPos.x_ + (j * 0.02), aiPos.y_+0.2f, 0.0f);
-
-                    bb->size_ = Vector2((0.4f) * 0.05f, (4.0f) * 0.05f);
-
-                    //       bb->position_ = Vector3(player_->GetNode()->GetPosition().x_, player_->GetNode()->GetPosition().y_, -5.0f);
-                }
-
+            if (_sndCnt > 5) {
+                sample2D_->PlaySoundEffect("enemy01-laugh.wav");
             }
 
-            agents_[i]->powerbarBBSet_->Commit();
 
+                // Update billboards (genotype, powerbar)
+
+                const float BILLBOARD_ROTATION_SPEED = 50.0f;
+
+                // Genotype
+
+                // Rotate the individual billboards within the billboard sets, then recommit to make the changes visible
+                for (unsigned j = 0; j < agents_[i]->genotypeBBSet_->GetNumBillboards(); ++j) {
+                    Billboard *bb = agents_[i]->genotypeBBSet_->GetBillboard(j);
+                    //  bb->rotation_ += BILLBOARD_ROTATION_SPEED * timeStep;
+                    if (agents_[i]) {
+                        Vector3 aiPos = agents_[i]->GetNode()->GetPosition();
+                        bb->position_ = Vector3(aiPos.x_ + (j * 0.02), aiPos.y_, 0.0f);
+
+                        // Already set size in initialization (based on parameter)
+                        //bb->size_ = Vector2((1.0f) * 0.05f, (0.1f) * 0.05f);
+
+
+                        //       bb->position_ = Vector3(player_->GetNode()->GetPosition().x_, player_->GetNode()->GetPosition().y_, -5.0f);
+                    }
+
+                }
+
+                agents_[i]->genotypeBBSet_->Commit();
+
+
+                // Powerbar
+
+                // Rotate the individual billboards within the billboard sets, then recommit to make the changes visible
+                for (unsigned j = 0; j < agents_[i]->powerbarBBSet_->GetNumBillboards(); ++j) {
+                    Billboard *bb = agents_[i]->powerbarBBSet_->GetBillboard(j);
+                    //  bb->rotation_ += BILLBOARD_ROTATION_SPEED * timeStep;
+                    if (agents_[i]) {
+                        Vector3 aiPos = agents_[i]->GetNode()->GetPosition();
+                        bb->position_ = Vector3(aiPos.x_ + (j * 0.02), aiPos.y_+0.2f, 0.0f);
+
+                        bb->size_ = Vector2((0.4f) * 0.05f, (4.0f) * 0.05f);
+
+                        //       bb->position_ = Vector3(player_->GetNode()->GetPosition().x_, player_->GetNode()->GetPosition().y_, -5.0f);
+                    }
+
+                }
+
+                agents_[i]->powerbarBBSet_->Commit();
+
+            }
         }
+
+        player_->life_ = 50;
+         */
+
     }
-
-    player_->life_ = 50;
-     */
-
-     }
 
 
     int life = 100;
@@ -2957,22 +3005,26 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
         life = player_->GetLife();
     }
 
-        UI* ui = GetSubsystem<UI>();
+    ui = GetSubsystem<UI>();
 
-        // Get movement controls and assign them to the vehicle component. If UI has a focused element, clear controls
-        if (!ui->GetFocusElement())
-        {
-            const int CTRL_SPACE = 16;
-            player_->GetVehicle()->controls_.Set(CTRL_FORWARD, input->GetKeyDown(KEY_W) | player_->GetVehicle()->controls_.IsDown(BUTTON_B));
-            player_->GetVehicle()->controls_.Set(CTRL_BACK, input->GetKeyDown(KEY_S) | player_->GetVehicle()->controls_.IsDown(BUTTON_DPAD_DOWN));
-            player_->GetVehicle()->controls_.Set(CTRL_LEFT, input->GetKeyDown(KEY_A) | player_->GetVehicle()->controls_.IsDown(BUTTON_DPAD_LEFT));
-            player_->GetVehicle()->controls_.Set(CTRL_RIGHT, input->GetKeyDown(KEY_D) | player_->GetVehicle()->controls_.IsDown(BUTTON_DPAD_RIGHT));
-            player_->GetVehicle()->controls_.Set(CTRL_SPACE, input->GetKeyDown(KEY_SPACE) | player_->GetVehicle()->controls_.IsDown(BUTTON_X));
+    // Get movement controls and assign them to the vehicle component. If UI has a focused element, clear controls
+    if (!ui->GetFocusElement()) {
+        const int CTRL_SPACE = 16;
+        player_->GetVehicle()->controls_.Set(CTRL_FORWARD, input->GetKeyDown(KEY_W) |
+                                                           player_->GetVehicle()->controls_.IsDown(BUTTON_B));
+        player_->GetVehicle()->controls_.Set(CTRL_BACK, input->GetKeyDown(KEY_S) |
+                                                        player_->GetVehicle()->controls_.IsDown(BUTTON_DPAD_DOWN));
+        player_->GetVehicle()->controls_.Set(CTRL_LEFT, input->GetKeyDown(KEY_A) |
+                                                        player_->GetVehicle()->controls_.IsDown(BUTTON_DPAD_LEFT));
+        player_->GetVehicle()->controls_.Set(CTRL_RIGHT, input->GetKeyDown(KEY_D) |
+                                                         player_->GetVehicle()->controls_.IsDown(BUTTON_DPAD_RIGHT));
+        player_->GetVehicle()->controls_.Set(CTRL_SPACE, input->GetKeyDown(KEY_SPACE) |
+                                                         player_->GetVehicle()->controls_.IsDown(BUTTON_X));
 
 //            player_->GetVehicle()->controls_.Set(CTRL_E, input->GetKeyDown(KEY_E) | player_->GetVehicle()->controls_.IsDown(CONTROLLER_BUTTON_A));
 
-            // Set player to vehicle control
-            player_->SetControls(player_->GetVehicle()->controls_);
+        // Set player to vehicle control
+        player_->SetControls(player_->GetVehicle()->controls_);
 
 /*
             // Add yaw & pitch from the mouse motion or touch input. Used only for the camera, does not affect motion
@@ -3001,60 +3053,50 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
             // Limit pitch
             player_->GetVehicle()->controls_.pitch_ = Clamp(player_->GetVehicle()->controls_.pitch_, 0.0f, 80.0f);
 */
+    } else
+        player_->GetVehicle()->controls_.Set(CTRL_FORWARD | CTRL_BACK | CTRL_LEFT | CTRL_RIGHT | CTRL_SPACE, false);
+
+    // up right
+    if (input->GetKeyPress(KEY_BACKSPACE)) {
+        Node *vehicleNode = player_->GetVehicle()->GetNode();
+
+        // qualify vehicle orientation
+        Vector3 v3Up = vehicleNode->GetWorldUp();
+        float fUp = v3Up.DotProduct(Vector3::UP);
+
+        if (v3Up.y_ < 0.1f) {
+            // maintain its orientation
+            Vector3 vPos = vehicleNode->GetWorldPosition();
+            Vector3 vForward = player_->GetVehicle()->GetNode()->GetDirection();
+            Quaternion qRot;
+            qRot.FromLookRotation(vForward);
+
+            vPos += Vector3::UP * 3.0f;
+            vehicleNode->SetTransform(vPos, qRot);
+            player_->GetVehicle()->ResetForces();
         }
-        else
-            player_->GetVehicle()->controls_.Set(CTRL_FORWARD | CTRL_BACK | CTRL_LEFT | CTRL_RIGHT | CTRL_SPACE, false);
-
-        // up right
-        if (input->GetKeyPress(KEY_BACKSPACE))
-        {
-            Node* vehicleNode = player_->GetVehicle()->GetNode();
-
-            // qualify vehicle orientation
-            Vector3 v3Up = vehicleNode->GetWorldUp();
-            float fUp = v3Up.DotProduct( Vector3::UP );
-
-            if ( v3Up.y_ < 0.1f )
-            {
-                // maintain its orientation
-                Vector3 vPos = vehicleNode->GetWorldPosition();
-                Vector3 vForward = player_->GetVehicle()->GetNode()->GetDirection();
-                Quaternion qRot;
-                qRot.FromLookRotation( vForward );
-
-                vPos += Vector3::UP * 3.0f;
-                vehicleNode->SetTransform( vPos, qRot );
-                player_->GetVehicle()->ResetForces();
-            }
-        }
+    }
 
     // Toggle physics debug geometry with space
-    if ( input->GetKeyPress(KEY_F5))
-    {
+    if (input->GetKeyPress(KEY_F5)) {
         drawDebug_ = !drawDebug_;
     }
 
     // Check for loading / saving the scene
-    if (input->GetKeyPress(KEY_K))
-    {
+    if (input->GetKeyPress(KEY_K)) {
         File saveFile(context_, GetSubsystem<FileSystem>()->GetProgramDir() + "Data/Scenes/MayaScape_Output.xml",
                       FILE_WRITE);
         scene_->SaveXML(saveFile);
     }
 
     // updating half the boids at a time depending on the update cycle index
-    if (updateCycleIndex == 0)
-    {
-        for (int i = 0; i < (numOfBoidsets/2); i++)
-        {
+    if (updateCycleIndex == 0) {
+        for (int i = 0; i < (numOfBoidsets / 2); i++) {
             boids[i].Update(timeStep);
         }
         updateCycleIndex = 1;
-    }
-    else if (updateCycleIndex == 1)
-    {
-        for (int i = (numOfBoidsets / 2); i < numOfBoidsets; i++)
-        {
+    } else if (updateCycleIndex == 1) {
+        for (int i = (numOfBoidsets / 2); i < numOfBoidsets; i++) {
             boids[i].Update(timeStep);
         }
         updateCycleIndex = 0;
@@ -3074,7 +3116,7 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
                                renderer->GetNumPrimitives(),
                                framesCount_);
 
-        #ifdef SHOW_CAM_POS
+#ifdef SHOW_CAM_POS
         String x, y, z;
         char buff[20];
         sprintf(buff, ", cam: %.1f, ", cameraNode_->GetPosition().x_);
@@ -3084,7 +3126,7 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
         sprintf(buff, "%.1f", cameraNode_->GetPosition().z_);
         z = String(buff);
         stat += x + y + z;
-        #endif
+#endif
 
         textStatus_->SetText(stat);
         framesCount_ = 0;
@@ -3161,8 +3203,10 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 
     }*/
 
-    // Call our render update
-    HandleRenderUpdate(eventType, eventData);
+    if (!isServer_) {
+        // Call our render update
+        HandleRenderUpdate(eventType, eventData);
+    }
 }
 
 void MayaScape::HandlePostUpdate(StringHash eventType, VariantMap &eventData) {
@@ -3413,6 +3457,8 @@ void MayaScape::CreateAdminPlayer()
     clientObj->SetClientInfo("ADMIN", 99);
     clientObjectID_ = clientNode->GetID();
     isServer_ = true;
+
+//    serverObjects_->
 }
 
 void MayaScape::CreateUI()
@@ -3747,7 +3793,8 @@ void MayaScape::HandleConnect(StringHash eventType, VariantMap& eventData)
     Server *server = GetSubsystem<Server>();
 
     // Hard-coded game server address for now
-    String address = "www.monkeymaya.com";
+//    String address = "www.monkeymaya.com";
+    String address = "localhost";
 
 //    String address = textEdit_->GetText().Trimmed();
 
