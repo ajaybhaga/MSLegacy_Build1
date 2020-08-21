@@ -199,6 +199,8 @@ void Server::HandleClientIdentity(StringHash eventType, VariantMap& eventData)
     Connection* newConnection = static_cast<Connection*>(eventData[P_CONNECTION].GetPtr());
     newConnection->SetScene(scene_);
 
+    URHO3D_LOGINFO("HandleClientIdentity - client assigned for scene replication.");
+
     // Then create a controllable object for that client
     Node* clientObject = CreateClientObject(newConnection);
     serverObjects_[newConnection] = clientObject;

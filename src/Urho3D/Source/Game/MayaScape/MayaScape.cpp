@@ -413,10 +413,10 @@ void MayaScape::Start() {
 
     CreateServerSubsystem();
 
-    sample2D_ = new Sample2D(context_);
+//    sample2D_ = new Sample2D(context_);
 
     // Set filename for load/save functions
-    sample2D_->demoFilename_ = "Platformer2D";
+//    sample2D_->demoFilename_ = "Platformer2D";
 
     context_->RegisterSubsystem(new GameController(context_));
 
@@ -1380,7 +1380,6 @@ void MayaScape::CreateScene() {
     light->SetShadowCascade(CascadeParameters(10.0f, 50.0f, 200.0f, 0.0f, 0.8f));
     light->SetSpecularIntensity(0.5f);
 */
-    sample2D_->scene_ = scene_;
 ///
 
     // Create heightmap terrain with collision
@@ -2177,10 +2176,6 @@ void MayaScape::HandleRenderUpdate(StringHash eventType, VariantMap &eventData) 
     //    URHO3D_LOGINFOF("delta=%f", delta);
     //    URHO3D_LOGINFOF("factor=%f", factor);
 
-
-    // Zoom in/out
-    if (cameraNode_)
-        sample2D_->Zoom(cameraNode_->GetComponent<Camera>());
 
     // Clamp focus index
     focusIndex_ = focusIndex_ % focusObjects_.Size();
@@ -3412,13 +3407,15 @@ void MayaScape::HandlePostRenderUpdate(StringHash eventType, VariantMap &eventDa
 }
 
 void MayaScape::ReloadScene(bool reInit) {
+/*
     String filename = sample2D_->demoFilename_;
     if (!reInit)
         filename += "InGame";
 
     File loadFile(context_, GetSubsystem<FileSystem>()->GetProgramDir() + "Data/Scenes/" + filename + ".xml",
                   FILE_READ);
-    scene_->LoadXML(loadFile);
+    scene_->LoadXML(loadFile);*/
+
 }
 
 void MayaScape::PlaySoundEffect(const String& soundName)
@@ -3897,6 +3894,8 @@ void MayaScape::HandleConnect(StringHash eventType, VariantMap& eventData)
             light->SetSpecularIntensity(0.5f);
     */
         URHO3D_LOGINFOF("client idx=%i, username=%s", idx, name.CString());
+
+//         server-
 
     } else {
         URHO3D_LOGINFOF("Connection to server failed =%s", address.CString());
