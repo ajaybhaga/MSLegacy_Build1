@@ -437,6 +437,7 @@ void MayaScape::Start() {
     // Create P1 player
     CreatePlayer();
 
+    // Start in menu mode
     UpdateUIState(false);
 
     ResourceCache* cache = GetSubsystem<ResourceCache>();
@@ -1668,6 +1669,14 @@ void MayaScape::CreateScene() {
 }
 
 void MayaScape::UpdateUIState(bool state) {
+
+    // Do the opposite for menu
+    bkgSprite_->SetVisible(!state);
+    versionText_->SetVisible(!state);
+    studioText_->SetVisible(!state);
+    instructionsText_->SetVisible(!state);
+    buttonContainer_->SetVisible(!state);
+
     // Create sprite and add to the UI layout
     powerBarP1Sprite_->SetVisible(state);
     powerBarBkgP1Sprite_->SetVisible(state);
@@ -1680,7 +1689,6 @@ void MayaScape::UpdateUIState(bool state) {
     miniMapBkgSprite_->SetVisible(state);
     markerMapBkgSprite_->SetVisible(state);
     steerWheelSprite_->SetVisible(state);
-
 
 
     // Create the UI for displaying the remaining lifes
@@ -1715,7 +1723,7 @@ void MayaScape::SubscribeToEvents() {
 
     // Subscribe to button actions
     SubscribeToEvent(playButton_, E_RELEASED, URHO3D_HANDLER(MayaScape, HandlePlayButton));
-    SubscribeToEvent(connectButton_, E_RELEASED, URHO3D_HANDLER(MayaScape, HandleConnect));
+//    SubscribeToEvent(connectButton_, E_RELEASED, URHO3D_HANDLER(MayaScape, HandleConnect));
     SubscribeToEvent(disconnectButton_, E_RELEASED, URHO3D_HANDLER(MayaScape, HandleDisconnect));
     SubscribeToEvent(startServerButton_, E_RELEASED, URHO3D_HANDLER(MayaScape, HandleStartServer));
     SubscribeToEvent(exitButton_, E_RELEASED, URHO3D_HANDLER(MayaScape, HandleExit));
@@ -2332,72 +2340,80 @@ void MayaScape::HandleRenderUpdate(StringHash eventType, VariantMap &eventData) 
 //    float maxX = terrain_->GetHeightMap()->GetWidth()*terrain_->GetPatchSize();
 //    float maxY = terrain_->GetHeightMap()->GetHeight()*terrain_->GetPatchSize();
 
-    // Calculate mini map position
-    Vector3 shiftedRange = player_->GetVehicle()->GetNode()->GetPosition() + Vector3(mapSize/2, mapSize/2, mapSize/2);
+    // Only show once vehicle is activated
+    if (player_->GetVehicle()->GetNode()) {
+        // Calculate mini map position
+        Vector3 shiftedRange =
+                player_->GetVehicle()->GetNode()->GetPosition() + Vector3(mapSize / 2, mapSize / 2, mapSize / 2);
 
-    // 1600+1600
-    float xRange = (shiftedRange.x_/mapSize) * miniMapWidth;
-    float zRange = (shiftedRange.z_/mapSize) * miniMapHeight;
+        // 1600+1600
+        float xRange = (shiftedRange.x_ / mapSize) * miniMapWidth;
+        float zRange = (shiftedRange.z_ / mapSize) * miniMapHeight;
 
-    float miniMapP1X = miniMapBkgSprite_->GetPosition().x_;
-    float miniMapP1Y = miniMapBkgSprite_->GetPosition().y_;
+        float miniMapP1X = miniMapBkgSprite_->GetPosition().x_;
+        float miniMapP1Y = miniMapBkgSprite_->GetPosition().y_;
 
-    // Update mini map for P1 position
-//    miniMapP1Sprite_->SetPosition(Vector2(776.0f-16.0f, 300.0f));
-    float startRotOffset = 180.0f;
-    miniMapP1Sprite_->SetPosition(Vector2(miniMapP1X-xRange+0.0f, miniMapP1Y-zRange+0.0f));
-    miniMapP1Sprite_->SetRotation(vehicleRot_.YawAngle()+startRotOffset);
+        // Update mini map for P1 position
+    //    miniMapP1Sprite_->SetPosition(Vector2(776.0f-16.0f, 300.0f));
+        float startRotOffset = 180.0f;
+        miniMapP1Sprite_->SetPosition(Vector2(miniMapP1X - xRange + 0.0f, miniMapP1Y - zRange + 0.0f));
+        miniMapP1Sprite_->SetRotation(vehicleRot_.YawAngle() + startRotOffset);
 
-    float wpOffsetX = -mapSize/2;
-    float wpOffsetY = -mapSize/2;
+        float wpOffsetX = -mapSize / 2;
+        float wpOffsetY = -mapSize / 2;
 
-    int index = player_->wpActiveIndex_;
+        int index = player_->wpActiveIndex_;
 
-    if (index < 0) index = 0;
-    // Convert marker position to world position for waypoint
-    float wpPosX = (((float)waypoints_[index].x_ / (float)terrain_->GetMarkerMap()->GetWidth())*mapSize)+wpOffsetX;
-    float wpPosZ = (((float)waypoints_[index].z_ / (float)terrain_->GetMarkerMap()->GetHeight())*mapSize)+wpOffsetY;
+        if (index < 0) index = 0;
+        // Convert marker position to world position for waypoint
+        float wpPosX =
+                (((float) waypoints_[index].x_ / (float) terrain_->GetMarkerMap()->GetWidth()) * mapSize) + wpOffsetX;
+        float wpPosZ =
+                (((float) waypoints_[index].z_ / (float) terrain_->GetMarkerMap()->GetHeight()) * mapSize) + wpOffsetY;
 
-    // Calculate mini map position for waypoint
-    shiftedRange = Vector3(wpPosX, 0.0f, wpPosZ) + Vector3(mapSize/2, mapSize/2, mapSize/2);
+        // Calculate mini map position for waypoint
+        shiftedRange = Vector3(wpPosX, 0.0f, wpPosZ) + Vector3(mapSize / 2, mapSize / 2, mapSize / 2);
 
-    // 1600+1600
-    xRange = (shiftedRange.x_/mapSize) * miniMapWidth;
-    zRange = (shiftedRange.z_/mapSize) * miniMapHeight;
+        // 1600+1600
+        xRange = (shiftedRange.x_ / mapSize) * miniMapWidth;
+        zRange = (shiftedRange.z_ / mapSize) * miniMapHeight;
 
-    float miniMapWPX = miniMapBkgSprite_->GetPosition().x_;
-    float miniMapWPY = miniMapBkgSprite_->GetPosition().y_;
+        float miniMapWPX = miniMapBkgSprite_->GetPosition().x_;
+        float miniMapWPY = miniMapBkgSprite_->GetPosition().y_;
 
 
-    // Update mini map for WP position
-//    miniMapP1Sprite_->SetPosition(Vector2(776.0f-16.0f, 300.0f));
-    miniMapWPSprite_->SetPosition(Vector2(miniMapWPX-xRange, miniMapWPY-zRange));
-//    miniMapWPSprite_->SetRotation(vehicleRot_.YawAngle());
+        // Update mini map for WP position
+    //    miniMapP1Sprite_->SetPosition(Vector2(776.0f-16.0f, 300.0f));
+        miniMapWPSprite_->SetPosition(Vector2(miniMapWPX - xRange, miniMapWPY - zRange));
+    //    miniMapWPSprite_->SetRotation(vehicleRot_.YawAngle());
 
-    float steering = player_->GetVehicle()->GetSteering();
-//    Quaternion vRot = vehicle_->GetNode()->GetRotation();
+        float steering = player_->GetVehicle()->GetSteering();
+    //    Quaternion vRot = vehicle_->GetNode()->GetRotation();
 
-    steerWheelSprite_->SetRotation(360.0f*steering);
-    player_->GetVehicleHeadLamp()->SetPosition(Vector3(player_->GetVehicle()->GetNode()->GetPosition().x_, player_->GetVehicle()->GetNode()->GetPosition().y_+5.0f, player_->GetVehicle()->GetNode()->GetPosition().z_));
-    player_->GetVehicleHeadLamp()->SetDirection(Vector3(player_->GetVehicle()->GetNode()->GetRotation().x_, 1.0f, player_->GetVehicle()->GetNode()->GetRotation().z_));
+        steerWheelSprite_->SetRotation(360.0f * steering);
+        player_->GetVehicleHeadLamp()->SetPosition(Vector3(player_->GetVehicle()->GetNode()->GetPosition().x_,
+                                                           player_->GetVehicle()->GetNode()->GetPosition().y_ + 5.0f,
+                                                           player_->GetVehicle()->GetNode()->GetPosition().z_));
+        player_->GetVehicleHeadLamp()->SetDirection(Vector3(player_->GetVehicle()->GetNode()->GetRotation().x_, 1.0f,
+                                                            player_->GetVehicle()->GetNode()->GetRotation().z_));
 
-    // Update vehicle head lamp lighting
-    Light* light = player_->GetVehicleHeadLamp()->GetComponent<Light>();
-    // Light* light = vehicleHeadLamp_->CreateComponent<Light>();
-    //light->SetLightType(LIGHT_SPOT)
-    light->SetLightType(LIGHT_POINT);
-    light->SetRange(30.0f);
+        // Update vehicle head lamp lighting
+        Light *light = player_->GetVehicleHeadLamp()->GetComponent<Light>();
+        // Light* light = vehicleHeadLamp_->CreateComponent<Light>();
+        //light->SetLightType(LIGHT_SPOT)
+        light->SetLightType(LIGHT_POINT);
+        light->SetRange(30.0f);
 
-    float rpmLightFactor = 40.0f;
-    float rpmLight = rpm/4500.0f;
-    if (rpmLight > 0.8f) rpmLight = 0.8f;
-    light->SetBrightness(0.2f+(rpmLight*rpmLightFactor));
-    light->SetCastShadows(true);
-    //   light->SetShadowBias(BiasParameters(0.00025f, 0.5f));
+        float rpmLightFactor = 40.0f;
+        float rpmLight = rpm / 4500.0f;
+        if (rpmLight > 0.8f) rpmLight = 0.8f;
+        light->SetBrightness(0.2f + (rpmLight * rpmLightFactor));
+        light->SetCastShadows(true);
+        //   light->SetShadowBias(BiasParameters(0.00025f, 0.5f));
 
-    // Update focus objects
-    focusObjects_[0] = player_->GetVehicle()->GetNode()->GetPosition(); // Vehicle
-
+        // Update focus objects
+        focusObjects_[0] = player_->GetVehicle()->GetNode()->GetPosition(); // Vehicle
+    }
 
     int i = 0;
 
@@ -2459,6 +2475,7 @@ void MayaScape::HandleRenderUpdate(StringHash eventType, VariantMap &eventData) 
     if (player_->GetVehicle())
     {
 
+        /*
         std::string playerInfo;
         char str[40];
 
@@ -2481,10 +2498,10 @@ void MayaScape::HandleRenderUpdate(StringHash eventType, VariantMap &eventData) 
         playerInfo.clear();
         playerInfo.append("focusObject information pos (x,y,z) -> ").append(str);
  //       debugText_[i]->SetText(playerInfo.c_str());
-
+*/
         i++;
 
-
+/*
         if (terrain_->GetMarkerMap()) {
             //float vx = xRange; // vehicle pos
             //float vz = zRange;
@@ -2506,7 +2523,7 @@ void MayaScape::HandleRenderUpdate(StringHash eventType, VariantMap &eventData) 
             i++;
 
         }
-
+*/
         /*
         i++;
         playerInfo.clear();
@@ -2516,7 +2533,7 @@ void MayaScape::HandleRenderUpdate(StringHash eventType, VariantMap &eventData) 
         i++;
         playerInfo.clear();
 */
-
+/*
         // speed
         char buff[20];
 
@@ -2546,7 +2563,7 @@ void MayaScape::HandleRenderUpdate(StringHash eventType, VariantMap &eventData) 
         float angvel = player_->GetVehicle()->GetAngularVelocity();
         sprintf(buff, ", %.0f Angular Velocity", angvel);
         data += String(buff);
-
+*/
         // vehicle_->DebugDraw(Color(1.0, 0.0, 1.0));
 
         // sprintf(buff, ", %.0f RPM", rpm);
@@ -2689,13 +2706,15 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 
     UI *ui = GetSubsystem<UI>();
     Server *server = GetSubsystem<Server>();
-    Vector<Urho3D::String> loginList = server->GetLoginList();
 
-    /*
-    loginList.Push("Test1");
-    loginList.Push("Test2");
-    loginList.Push("Test3");
-*/
+    Vector<Urho3D::String> loginList;
+
+    // On the client, use the lcoal login list
+    if (isServer_) {
+        loginList = server->GetLoginList();
+    } else {
+        loginList = loginList_;
+    }
 
 /*
     std::string playerInfo;
@@ -2708,25 +2727,46 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
     //  debugText_[i]->SetText(playerInfo.c_str());
 */
 
-    if (loginList.Size() > 0) {
-        // Show login list
-        debugText_[0]->SetText("Server: Client List");
-        debugText_[0]->SetAlignment(HA_LEFT, VA_TOP);
-        debugText_[0]->SetPosition(10.0f, 400 );
-        debugText_[0]->SetVisible(true);
-        for (int i = 1; i < loginList.Size()+1; i++) {
+    // Login List
+    if (isServer_) {
+        if (loginList.Size() > 0) {
+            // Show login list
+            debugText_[0]->SetText("Server: Client List");
+            debugText_[0]->SetAlignment(HA_LEFT, VA_TOP);
+            debugText_[0]->SetPosition(10.0f, 400);
+            debugText_[0]->SetVisible(true);
+            for (int i = 1; i < loginList.Size() + 1; i++) {
 
-            if (loginList.Size() < NUM_DEBUG_FIELDS) {
-                debugText_[i]->SetAlignment(HA_LEFT, VA_TOP);
-                debugText_[i]->SetPosition(10.0f, 400 + (i * 20));
-                debugText_[i]->SetVisible(true);
-                //          std::string debugData1;
+                if (loginList.Size() < NUM_DEBUG_FIELDS) {
+                    debugText_[i]->SetAlignment(HA_LEFT, VA_TOP);
+                    debugText_[i]->SetPosition(10.0f, 400 + (i * 20));
+                    debugText_[i]->SetVisible(true);
+                    //          std::string debugData1;
 //            debugData1.append("-");
-                debugText_[i]->SetText(loginList[i-1].CString());
+                    debugText_[i]->SetText(loginList[i - 1].CString());
+                }
+            }
+        }
+    } else {
+        if (loginList.Size() > 0) {
+            // Show login list
+            debugText_[0]->SetText("Client: Connection List");
+            debugText_[0]->SetAlignment(HA_LEFT, VA_TOP);
+            debugText_[0]->SetPosition(10.0f, 400);
+            debugText_[0]->SetVisible(true);
+            for (int i = 1; i < loginList.Size() + 1; i++) {
+
+                if (loginList.Size() < NUM_DEBUG_FIELDS) {
+                    debugText_[i]->SetAlignment(HA_LEFT, VA_TOP);
+                    debugText_[i]->SetPosition(10.0f, 400 + (i * 20));
+                    debugText_[i]->SetVisible(true);
+                    //          std::string debugData1;
+//            debugData1.append("-");
+                    debugText_[i]->SetText(loginList[i - 1].CString());
+                }
             }
         }
     }
-
 
     float deltaSum;
 
@@ -3208,7 +3248,7 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 
     if (!isServer_) {
         // Call our render update
-    //    HandleRenderUpdate(eventType, eventData);
+        HandleRenderUpdate(eventType, eventData);
     }
 }
 
@@ -3411,8 +3451,6 @@ void MayaScape::PlaySoundEffect(const String& soundName)
 
 
 void MayaScape::HandlePlayButton(StringHash eventType, VariantMap &eventData) {
-//    sample2D_->PlaySoundEffect("enemy01-laugh.wav");
-//    sample2D_->PlaySoundEffect("BAY-r1.wav");
 
     PlaySoundEffect("BAY-r1-mono.wav");
 
@@ -3425,19 +3463,12 @@ void MayaScape::HandlePlayButton(StringHash eventType, VariantMap &eventData) {
         // Reload scene
         ReloadScene(true);
 
-    /*
-    // Hide Instructions and Play/Exit buttons
-    Text *instructionText = static_cast<Text *>(ui->GetRoot()->GetChild("Instructions", true));
-    instructionText->SetText("");
-    Button *exitButton = static_cast<Button *>(ui->GetRoot()->GetChild("ExitButton", true));
-    exitButton->SetVisible(false);
-    Button *playButton = static_cast<Button *>(ui->GetRoot()->GetChild("PlayButton", true));
-    playButton->SetVisible(false);
-*/
     // Hide mouse cursor
     auto *input = GetSubsystem<Input>();
     input->SetMouseVisible(false);
 
+    // Call on connect to server
+    HandleConnect(eventType, eventData);
 }
 
 // Network functions
@@ -3505,7 +3536,7 @@ void MayaScape::CreateUI()
     textureHeight = bkgTexture->GetHeight();
 
     // Set logo sprite scale
-    bkgSprite_->SetScale((256.0f / textureWidth)*5.8f);
+    bkgSprite_->SetScale((256.0f / textureWidth)*6.2f);
 
     // Set logo sprite size
     bkgSprite_->SetSize(textureWidth, textureHeight);
@@ -3531,7 +3562,7 @@ void MayaScape::CreateUI()
     versionText_->SetColor(Color::WHITE);
     // Position the text relative to the screen center
     versionText_->SetHorizontalAlignment(HA_CENTER);
-    versionText_->SetPosition(0, 20);
+    versionText_->SetPosition(15, 20);
     // Hide once connected
     versionText_->SetVisible(true);
 
@@ -3541,7 +3572,7 @@ void MayaScape::CreateUI()
     studioText_->SetColor(Color::BLACK);
     // Position the text relative to the screen center
     studioText_->SetHorizontalAlignment(HA_CENTER);
-    studioText_->SetPosition(0, 90);
+    studioText_->SetPosition(0, 720);
     // Hide once connected
     studioText_->SetVisible(true);
 
@@ -3550,28 +3581,27 @@ void MayaScape::CreateUI()
     // Construct the instructions text element
     instructionsText_ = ui->GetRoot()->CreateChild<Text>();
     instructionsText_->SetText(
-            "WASD to move, RMB to rotate view, T to swap mat"
+            ""
+            "An online open world combat racing game."
     );
-    instructionsText_->SetFont(cache->GetResource<Font>("Fonts/CompassGold.ttf"), 12);
-    instructionsText_->SetColor(Color::CYAN);
+    instructionsText_->SetFont(cache->GetResource<Font>("Fonts/CompassGold.ttf"), 14);
+    instructionsText_->SetColor(Color::WHITE);
     // Position the text relative to the screen center
     instructionsText_->SetHorizontalAlignment(HA_CENTER);
-    instructionsText_->SetPosition(0, 20);
+    instructionsText_->SetPosition(0, 550);
     // Hide until connected
     instructionsText_->SetVisible(false);
 
     buttonContainer_ = root->CreateChild<UIElement>();
-    buttonContainer_->SetFixedSize(600, 240);
-    buttonContainer_->SetPosition(170, 300);
+    buttonContainer_->SetFixedSize(600, 220);
+    buttonContainer_->SetPosition(180, 300);
     buttonContainer_->SetHorizontalAlignment((HA_CENTER));
     buttonContainer_->SetLayoutMode(LM_VERTICAL);
     buttonContainer_->SetLayoutSpacing(10.0);
-
 //    textEdit_ = buttonContainer_->CreateChild<LineEdit>();
 //    textEdit_->SetStyleAuto();
 
     playButton_ = CreateButton("Play", 240);
-    connectButton_ = CreateButton("Connect", 240);
     disconnectButton_ = CreateButton("Disconnect", 240);
     startServerButton_ = CreateButton("Start Server", 240);
     exitButton_ = CreateButton("Exit", 240);
@@ -3674,7 +3704,6 @@ void MayaScape::UpdateButtons()
 
     playButton_->SetVisible(!serverConnection && !serverRunning);
     // Show and hide buttons so that eg. Connect and Disconnect are never shown at the same time
-    connectButton_->SetVisible(!serverConnection && !serverRunning);
     disconnectButton_->SetVisible(serverConnection || serverRunning);
     Text* discText = disconnectButton_->GetChildStaticCast<Text>(String("text"));
     if (serverConnection)
@@ -3687,8 +3716,11 @@ void MayaScape::UpdateButtons()
     }
     startServerButton_->SetVisible(!serverConnection && !serverRunning);
     exitButton_->SetVisible(!serverConnection && !serverRunning);
+
   //  textEdit_->SetVisible(!serverConnection && !serverRunning);
 }
+
+
 /*
 void MayaScape::MoveCamera() {
     // Right mouse button controls mouse cursor visibility: hide when pressed
@@ -3794,6 +3826,8 @@ void MayaScape::HandleConnect(StringHash eventType, VariantMap& eventData)
                     "VEGAS GOLD"
             };
 
+    // Client code
+    isServer_ = false;
     Server *server = GetSubsystem<Server>();
 
     // Hard-coded game server address for now
@@ -3811,13 +3845,34 @@ void MayaScape::HandleConnect(StringHash eventType, VariantMap& eventData)
     identity["UserName"] = name;
     identity["ColorIdx"] = idx;
 
-    server->Connect(address, SERVER_PORT, identity);
+    // Client connect to server
+    if (server->Connect(address, SERVER_PORT, identity)) {
+        URHO3D_LOGINFOF("client identity name=%s", name.CString());
+        URHO3D_LOGINFOF("HandleClientConnected - data: [%s, %d]", name.CString(), idx);
+        // Store in local login list
+        loginList_.Push(name.CString());
 
-    UpdateButtons();
+        // Change UI -> hide menu and show game
+        UpdateButtons();
+        // Switch to game mode
+        UpdateUIState(true);
+        started_= true;
 
-    isServer_ = false;
+        // Client startup code
 
-    // Client startup code
+        // Set logo sprite alignment
+        logoSprite_->SetAlignment(HA_CENTER, VA_BOTTOM);
+        logoSprite_->SetPosition(-280,-3);
+
+        // Make logo not fully opaque to show the scene underneath
+        logoSprite_->SetOpacity(0.3f);
+
+
+        URHO3D_LOGINFOF("client idx=%i, username=%s", idx, name.CString());
+
+    } else {
+        URHO3D_LOGINFOF("Connection to server failed =%s", address.CString());
+    }
 }
 
 void MayaScape::HandleDisconnect(StringHash eventType, VariantMap& eventData)

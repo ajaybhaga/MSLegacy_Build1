@@ -182,6 +182,7 @@ private:
 //    WeakPtr<Character2D> agents_[MAX_AGENTS];
 
     bool started_; // Is Game started?
+    Vector<Urho3D::String> loginList_;
 
     SharedPtr<Player> player_; // This player
     SharedPtr<Player> agents_[MAX_AGENTS]; // Agents
@@ -279,7 +280,6 @@ private:
     SharedPtr<UIElement> buttonContainer_;
     SharedPtr<LineEdit> textEdit_;
     SharedPtr<Button> playButton_;
-    SharedPtr<Button> connectButton_;
     SharedPtr<Button> disconnectButton_;
     SharedPtr<Button> startServerButton_;
     SharedPtr<Button> exitButton_;

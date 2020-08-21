@@ -90,6 +90,7 @@ void Server::Disconnect()
         serverConnection->Disconnect();
         scene_->Clear(true, false);
         clientObjectID_ = 0;
+        loginList_.Clear();
     }
     // Or if we were running a server, stop it
     else if (network->IsServerRunning())
