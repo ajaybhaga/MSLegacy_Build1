@@ -681,6 +681,8 @@ void MayaScape::CreateScene() {
 
     // server requires client hash and scene info
     Server *server = GetSubsystem<Server>();
+
+    // Register Network Actor
     server->RegisterClientHashAndScene(NetworkActor::GetTypeStatic(), scene_);
 
     // Create octree and physics world with default settings
