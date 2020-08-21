@@ -3865,8 +3865,5 @@ void MayaScape::HandleClientObjectID(StringHash eventType, VariantMap& eventData
 
 void MayaScape::HandleExit(StringHash eventType, VariantMap& eventData)
 {
-    // Call stop
-    Stop();
-
-    // TODO: Proper shutdown of window
+    engine_->Exit();
 }
