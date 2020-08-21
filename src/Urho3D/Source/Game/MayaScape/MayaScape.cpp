@@ -205,6 +205,10 @@
 
 #include "boids.h"
 
+
+
+#define GAME_SERVER_ADDRESS "www.monkeymaya.com"
+
 int numOfBoidsets = 10; // needs to be an even number for the boid splitting to work properly
 int updateCycleIndex = 0;
 BoidSet boids[10]; // 10 x 20 boids
@@ -452,7 +456,7 @@ void MayaScape::Start() {
     // targetCameraPos_ = Vector3(0.0f, 40.0f, CAMERA_DISTANCE);
     fpsTimer_.Reset();
     framesCount_ = 0;
-    
+
 
     // Hook up to the frame update events
     SubscribeToEvents();
@@ -650,6 +654,7 @@ void MayaScape::CreatePlayer() {
     // Player is replaced with NetworkActor -> which is a Player
     player_ = playerNode->CreateComponent<NetworkActor>();
     //player_->Init();
+    player_->isServer_ = isServer_;
 
     player_->SetWaypoints(&waypointsWorld_);
 
@@ -689,9 +694,15 @@ void MayaScape::CreateScene() {
     // Create octree and physics world with default settings
     // Create them as local so that they are not needlessly replicated when a client connects
     scene_->CreateComponent<Octree>(LOCAL);
-    PhysicsWorld *physicsWorld = scene_->CreateComponent<PhysicsWorld>(LOCAL);
-    DebugRenderer *dbgRenderer = scene_->CreateComponent<DebugRenderer>(LOCAL);
-    physicsWorld->SetDebugRenderer(dbgRenderer);
+
+    if (isServer_) {
+        PhysicsWorld *physicsWorld = scene_->CreateComponent<PhysicsWorld>(LOCAL);
+        DebugRenderer *dbgRenderer = scene_->CreateComponent<DebugRenderer>(LOCAL);
+        physicsWorld->SetDebugRenderer(dbgRenderer);
+
+        // On server disable interpolation
+        physicsWorld->SetInterpolation(false);
+    }
 
     // On client
     if (!isServer_) {
@@ -745,6 +756,21 @@ void MayaScape::CreateScene() {
         camera->SetFarClip(1000.0f);
 
         UI *ui = GetSubsystem<UI>();
+
+        packetsIn_ = ui->GetRoot()->CreateChild<Text>();
+        packetsIn_->SetText("Packets in : 0");
+        packetsIn_->SetFont(cache->GetResource<Font>("Fonts/SinsGold.ttf"), 15);
+        packetsIn_->SetHorizontalAlignment(HA_LEFT);
+        packetsIn_->SetVerticalAlignment(VA_CENTER);
+        packetsIn_->SetPosition(10, -10);
+
+        packetsOut_ = ui->GetRoot()->CreateChild<Text>();
+        packetsOut_->SetText("Packets out: 0");
+        packetsOut_->SetFont(cache->GetResource<Font>("Fonts/SinsGold.ttf"), 15);
+        packetsOut_->SetHorizontalAlignment(HA_LEFT);
+        packetsOut_->SetVerticalAlignment(VA_CENTER);
+        packetsOut_->SetPosition(10, 10);
+
 
         // Set the default UI style and font
         //ui->GetRoot()->SetDefaultStyle(cache->GetResource<XMLFile>("UI/DefaultStyle.xml"));
@@ -1679,27 +1705,33 @@ void MayaScape::UpdateUIState(bool state) {
     instructionsText_->SetVisible(!state);
     buttonContainer_->SetVisible(!state);
 
-    // Create sprite and add to the UI layout
-    powerBarP1Sprite_->SetVisible(state);
-    powerBarBkgP1Sprite_->SetVisible(state);
-    rpmBarP1Sprite_->SetVisible(state);
-    rpmBarBkgP1Sprite_->SetVisible(state);
-    velBarP1Sprite_->SetVisible(state);
-    velBarBkgP1Sprite_->SetVisible(state);
-    miniMapP1Sprite_->SetVisible(state);
-    miniMapWPSprite_->SetVisible(state);
-    miniMapBkgSprite_->SetVisible(state);
-    markerMapBkgSprite_->SetVisible(state);
-    steerWheelSprite_->SetVisible(state);
+
+    // On client
+    if (!isServer_) {
+        // Create sprite and add to the UI layout
+        powerBarP1Sprite_->SetVisible(state);
+        powerBarBkgP1Sprite_->SetVisible(state);
+        rpmBarP1Sprite_->SetVisible(state);
+        rpmBarBkgP1Sprite_->SetVisible(state);
+        velBarP1Sprite_->SetVisible(state);
+        velBarBkgP1Sprite_->SetVisible(state);
+        miniMapP1Sprite_->SetVisible(state);
+        miniMapWPSprite_->SetVisible(state);
+        miniMapBkgSprite_->SetVisible(state);
+        markerMapBkgSprite_->SetVisible(state);
+        steerWheelSprite_->SetVisible(state);
 
 
-    // Create the UI for displaying the remaining lifes
+        // Create the UI for displaying the remaining lifes
 //    lifeUI->SetVisible(false);
 //    auto *lifeText = lifeUI->CreateChild<Text>("LifeText2");
 
-    powerBarText_->SetVisible(state);
-    rpmBarText_->SetVisible(state);
-    velBarText_->SetVisible(state);
+        powerBarText_->SetVisible(state);
+        rpmBarText_->SetVisible(state);
+        velBarText_->SetVisible(state);
+    } else {
+        player_->vehicle_->SetVisible(false);
+    }
 
     // Debug text
     for (int i = 0; i < NUM_DEBUG_FIELDS; i++) {
@@ -3265,6 +3297,26 @@ void MayaScape::HandlePostUpdate(StringHash eventType, VariantMap &eventData) {
                                      -10.0f)); // Camera tracks character
 */
 
+    if (packetCounterTimer_.GetMSec(false) > 1000 && GetSubsystem<Network>()->GetServerConnection())
+    {
+        packetsIn_->SetText("Packets  in: " + String(GetSubsystem<Network>()->GetServerConnection()->GetPacketsInPerSec()));
+        packetsOut_->SetText("Packets out: " + String(GetSubsystem<Network>()->GetServerConnection()->GetPacketsOutPerSec()));
+        packetCounterTimer_.Reset();
+    }
+    if (packetCounterTimer_.GetMSec(false) > 1000 && GetSubsystem<Network>()->GetClientConnections().Size())
+    {
+        int packetsIn = 0;
+        int packetsOut = 0;
+        auto connections = GetSubsystem<Network>()->GetClientConnections();
+        for (auto it = connections.Begin(); it != connections.End(); ++it ) {
+            packetsIn += (*it)->GetPacketsInPerSec();
+            packetsOut += (*it)->GetPacketsOutPerSec();
+        }
+        packetsIn_->SetText("Packets  in: " + String(packetsIn));
+        packetsOut_->SetText("Packets out: " + String(packetsOut));
+        packetCounterTimer_.Reset();
+    }
+
 
     if (player_->GetVehicle()->GetNode()) {
 
@@ -3494,6 +3546,7 @@ void MayaScape::CreateAdminPlayer()
 
     ClientObj *clientObj = (ClientObj*)clientNode->CreateComponent(NetworkActor::GetTypeStatic());
 
+    ((NetworkActor*)clientObj)->isServer_ = isServer_;
     // set identity
     clientObj->SetClientInfo("ADMIN", 99);
     clientObjectID_ = clientNode->GetID();
@@ -3816,9 +3869,8 @@ void MayaScape::HandlePhysicsPreStep(StringHash eventType, VariantMap& eventData
 }
 
 void MayaScape::HandleConnectionFailed(StringHash eventType, VariantMap &eventData) {
-    URHO3D_LOGINFO("Connection to server failed!!!");
-    engine_->Exit();
-
+    URHO3D_LOGINFO("Connection to server failed!");
+    InitMsgWindow("Connection failure", "Connection to server failed!");
 }
 
 void MayaScape::HandleConnect(StringHash eventType, VariantMap& eventData)
@@ -3844,7 +3896,8 @@ void MayaScape::HandleConnect(StringHash eventType, VariantMap& eventData)
 
     // Hard-coded game server address for now
 //    String address = "www.monkeymaya.com";
-    String address = "localhost";
+//    String address = "localhost";
+    String address = GAME_SERVER_ADDRESS;
 
 //    String address = textEdit_->GetText().Trimmed();
 
@@ -3928,6 +3981,8 @@ void MayaScape::HandleStartServer(StringHash eventType, VariantMap& eventData)
     UpdateUIState(true);
     started_= true;
 
+//    scene_->SetUpdateEnabled(false);
+
     // Set logo sprite alignment
     logoSprite_->SetAlignment(HA_CENTER, VA_BOTTOM);
     logoSprite_->SetPosition(-280,-3);
@@ -3972,3 +4027,60 @@ void MayaScape::HandleExit(StringHash eventType, VariantMap& eventData)
 {
     engine_->Exit();
 }
+
+void MayaScape::InitMsgWindow(String title, String message)
+{
+    UI *ui = GetSubsystem<UI>();
+    ResourceCache* cache = GetSubsystem<ResourceCache>();
+
+    // Create the Window and add it to the UI's root node
+    msgWindow_ = new Window(context_);
+    ui->GetRoot()->AddChild(msgWindow_);
+
+    // Set Window size and layout settings
+    msgWindow_->SetMinWidth(384);
+    msgWindow_->SetLayout(LM_VERTICAL, 6, IntRect(6, 6, 6, 6));
+    msgWindow_->SetAlignment(HA_CENTER, VA_CENTER);
+    msgWindow_->SetName(message);
+
+
+    // Create Window 'titlebar' container
+    auto* titleBar = new UIElement(context_);
+    titleBar->SetMinSize(0, 24);
+    titleBar->SetVerticalAlignment(VA_TOP);
+    titleBar->SetLayoutMode(LM_HORIZONTAL);
+
+    // Create the Window title Text
+    auto* windowTitle = new Text(context_);
+    windowTitle->SetName("WindowTitle");
+    windowTitle->SetText(title);
+//    windowTitle->SetFont(cache->GetResource<Font>("Fonts/SinsGold.ttf"), 15);
+
+    // Create the Window's close button
+    auto* buttonClose = new Button(context_);
+    buttonClose->SetName("CloseButton");
+
+    // Add the controls to the title bar
+    titleBar->AddChild(windowTitle);
+    titleBar->AddChild(buttonClose);
+
+    // Add the title bar to the Window
+    msgWindow_->AddChild(titleBar);
+
+    // Apply styles
+    msgWindow_->SetStyleAuto();
+    windowTitle->SetStyleAuto();
+    buttonClose->SetStyle("CloseButton");
+
+    // Subscribe to buttonClose release (following a 'press') events
+    SubscribeToEvent(buttonClose, E_RELEASED, URHO3D_HANDLER(MayaScape, HandleClosePressed));
+
+    // Subscribe also to all UI mouse clicks just to see where we have clicked
+  //  SubscribeToEvent(E_UIMOUSECLICK, URHO3D_HANDLER(HelloGUI, HandleControlClicked));
+}
+
+void MayaScape::HandleClosePressed(StringHash eventType, VariantMap& eventData) {
+    // Shutdown
+    engine_->Exit();
+}
+

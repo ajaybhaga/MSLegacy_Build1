@@ -172,9 +172,10 @@ void Vehicle::ApplyAttributes()
 // This function is called only from the main program when initially creating 
 // the vehicle, not on scene load
 //=============================================================================
-void Vehicle::Init()
+void Vehicle::Init(bool isServer)
 {
     ResourceCache* cache = GetSubsystem<ResourceCache>();
+
 
     // node collision
     SubscribeToEvent(GetNode(), E_NODECOLLISION, URHO3D_HANDLER(Vehicle, HandleVehicleCollision));
@@ -183,7 +184,18 @@ void Vehicle::Init()
     Node* adjNode = node_->CreateChild("AdjNode");
     adjNode->SetRotation(Quaternion(0.0, 0.0, -90.0f));
 
+/*
+    // On client
+    if (!isServer) {
+        // Don't create raycast vehicle, let server handle it
+        raycastVehicle_ = nullptr
+    } else {
+        raycastVehicle_ = node_->CreateComponent<RaycastVehicle>();
+    }
+*/
     raycastVehicle_ = node_->CreateComponent<RaycastVehicle>();
+    raycastVehicle_->SetEnabled(true);
+
     CollisionShape* hullColShape = node_->CreateComponent<CollisionShape>();
     StaticModel* hullObject = node_->CreateComponent<StaticModel>();
 
@@ -336,8 +348,7 @@ void Vehicle::Init()
 
             pWheel->SetMaterial(cache->GetResource<Material>("Offroad/Models/Materials/Tire.xml"));
             pWheel->SetCastShadows(true);
-
-//            pWheel->SetEnabled(false);
+//            pWheel->SetEnabled(true);
 
 
             // track

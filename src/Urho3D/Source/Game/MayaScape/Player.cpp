@@ -100,7 +100,7 @@ void Player::Init()
     vehicleNode->SetEnabled(false);
     // Create the vehicle logic component
     vehicle_ = vehicleNode->CreateComponent<Vehicle>();
-    vehicle_->Init();
+    vehicle_->Init(false);
 //    SetControls(ve)
 
     wpActiveIndex_ = 0;

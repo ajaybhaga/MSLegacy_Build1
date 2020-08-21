@@ -50,6 +50,7 @@
 
 
 #include <MayaScape/ai/evolution_manager.h>
+#include <Urho3D/UI/Window.h>
 #include "Game.h"
 #include "Sample2D.h"
 #include "Vehicle.h"
@@ -177,10 +178,13 @@ private:
     // Display Genetic Algorithm Evolution Manager statistics
     void ShowEvolutionManagerStats();
 
-
+    void InitMsgWindow(String title, String message);
+    void HandleClosePressed(StringHash eventType, VariantMap& eventData);
 
     bool started_; // Is Game started?
     Vector<Urho3D::String> loginList_;
+
+    SharedPtr<Window> msgWindow_;
 
     SharedPtr<NetworkActor> player_; // This player
     SharedPtr<NetworkActor> agents_[MAX_AGENTS]; // Agents
@@ -285,5 +289,14 @@ private:
     SharedPtr<Text> instructionsText_;
     unsigned clientObjectID_;
     bool isServer_;
+
+
+
+    /// Packets in per second
+    SharedPtr<Text> packetsIn_;
+    /// Packets out per second
+    SharedPtr<Text> packetsOut_;
+    /// Packet counter UI update timer
+    Timer packetCounterTimer_;
 
 };

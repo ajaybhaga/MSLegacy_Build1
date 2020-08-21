@@ -148,6 +148,8 @@ public:
     /// The controllable vehicle component.
     SharedPtr<Vehicle> vehicle_;
 
+    bool isServer_;
+
     /// Flag when player is dead.
     bool killed_;
     bool isAI_;
