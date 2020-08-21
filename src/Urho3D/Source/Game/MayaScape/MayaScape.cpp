@@ -440,11 +440,13 @@ void MayaScape::Start() {
     UpdateUIState(false);
 
     ResourceCache* cache = GetSubsystem<ResourceCache>();
+
+    /*
     // Create boids
     for (int i = 0; i < numOfBoidsets; i++)
     {
         boids[i].Initialise(cache, scene_, Vector3(0.0f, 20.0f, 0.0f));
-    }
+    }*/
 
     // targetCameraPos_ = Vector3(0.0f, 40.0f, CAMERA_DISTANCE);
     fpsTimer_.Reset();
@@ -3089,6 +3091,7 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
         scene_->SaveXML(saveFile);
     }
 
+    /*
     // updating half the boids at a time depending on the update cycle index
     if (updateCycleIndex == 0) {
         for (int i = 0; i < (numOfBoidsets / 2); i++) {
@@ -3100,7 +3103,7 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
             boids[i].Update(timeStep);
         }
         updateCycleIndex = 0;
-    }
+    }*/
 
 
 
@@ -3205,7 +3208,7 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 
     if (!isServer_) {
         // Call our render update
-        HandleRenderUpdate(eventType, eventData);
+    //    HandleRenderUpdate(eventType, eventData);
     }
 }
 
@@ -3219,12 +3222,13 @@ void MayaScape::HandlePostUpdate(StringHash eventType, VariantMap &eventData) {
 */
 
 
-    if (player_->GetVehicle()) {
+    if (player_->GetVehicle()->GetNode()) {
 
         using namespace Update;
         float timeStep = eventData[P_TIMESTEP].GetFloat();
 
         Node *vehicleNode = player_->GetVehicle()->GetNode();
+//vehicleNode = NULL -> this is the problem
 
         // smooth step
         const float rotLerpRate = 10.0f;
@@ -3321,7 +3325,7 @@ void MayaScape::HandlePostRenderUpdate(StringHash eventType, VariantMap &eventDa
     // Scale down bone
 //    player_->
     if (player_) {
-        auto *model_ = player_->GetNode()->GetComponent<AnimatedModel>(true);
+//        auto *model_ = player_->GetNode()->GetComponent<AnimatedModel>(true);
         //node_->GetComponent<AnimatedModel>(true);
 
 
@@ -3812,6 +3816,8 @@ void MayaScape::HandleConnect(StringHash eventType, VariantMap& eventData)
     UpdateButtons();
 
     isServer_ = false;
+
+    // Client startup code
 }
 
 void MayaScape::HandleDisconnect(StringHash eventType, VariantMap& eventData)

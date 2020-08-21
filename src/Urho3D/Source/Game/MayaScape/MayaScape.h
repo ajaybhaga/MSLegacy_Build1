@@ -56,7 +56,7 @@
 #include "Player.h"
 
 #define APP_VERSION "MayaSpace v0.1 beta"
-#define STUDIO_VERSION "Maya Monkey Studios 2020"
+#define STUDIO_VERSION "Monkey Maya Studios 2020"
 
 #define MAX_AGENTS 1024 // Set max limit for agents (used for storage)
 
