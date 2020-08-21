@@ -483,22 +483,23 @@ void MayaScape::CreateAgents() {
         //modelNode = sample2D_->CreateCharacter(0.0f, Vector3(3.5f + Random(-agentDropBoxSize, agentDropBoxSize), 80.0f, 0.0f + Random(-agentDropBoxSize, agentDropBoxSize)), 2);
         //agents_[i] = modelNode->CreateComponent<Character2D>(); // Create a logic component to handle character behavior
 //        agents_[i]->agentIndex = i;
-        Node* agentNode = scene_->CreateChild("Player");
+        Node *agentNode = scene_->CreateChild("Player");
 
         // Create the vehicle logic component
-        agents_[i] = agentNode->CreateComponent<Player>();
-        agents_[i]->Init();
+        agents_[i] = agentNode->CreateComponent<NetworkActor>();
+//        agents_[i]->Init();
         agents_[i]->SetWaypoints((&waypointsWorld_));
 
         // Place on track
-        agents_[i]->GetNode()->SetPosition(Vector3(-814.0f+Random(-400.f, 400.0f), 400.0f, -595.0f+Random(-400.f, 400.0f)));
+        agents_[i]->GetNode()->SetPosition(
+                Vector3(-814.0f + Random(-400.f, 400.0f), 400.0f, -595.0f + Random(-400.f, 400.0f)));
 
         // Store initial player position as focus
 //        focusObjects_.Push(player_->GetNode()->GetPosition());
 
         // Place on at corner of map
 //        TerrainPatch* p = terrain_->GetPatch(0, 0);
- //       IntVector2 v = p->GetCoordinates();
+        //       IntVector2 v = p->GetCoordinates();
 
         agents_[i]->GetNode()->SetRotation(Quaternion(0.0, -90.0, 0.0));
 
@@ -509,14 +510,14 @@ void MayaScape::CreateAgents() {
         //    agents_[i]->vehicle_->Init();
 
 //        String name = String("AI-Bear-P") + String(i);
-  //      agents_[i]->GetNode()->SetName(name.CString());
+        //      agents_[i]->GetNode()->SetName(name.CString());
         agents_[i]->isAI_ = true;
 //        agents_[i]->playerPos_ = player_->GetNode()->GetPosition();
         agents_[i]->id_ = 1 + i;
         agents_[i]->type_ = 2;
 
-        agents_[i]->genotypeNode_ = scene_->CreateChild("Genotype " + i);
-        agents_[i]->powerbarNode_ = scene_->CreateChild("Powerbar " + i);
+//        agents_[i]->genotypeNode_ = scene_->CreateChild("Genotype " + i);
+//       agents_[i]->powerbarNode_ = scene_->CreateChild("Powerbar " + i);
 
         // Get AI position
         Vector3 aiPos = agents_[i]->GetNode()->GetPosition();
@@ -531,27 +532,26 @@ void MayaScape::CreateAgents() {
 
         // BillboardSet* billboardObject;
 
-                Node* pbNode = scene_->CreateChild("PowerBar");
+        Node *pbNode = scene_->CreateChild("PowerBar");
 //        smokeNode->SetPosition(Vector3(Random(200.0f) - 100.0f, Random(20.0f) + 10.0f, Random(200.0f) - 100.0f));
         //pbNode->SetPosition(Vector3(3.5f+Random(-2.0f,2.0f), 20.0f, 0.0f));
         pbNode->SetPosition(Vector3(-0.02f, 0.25f, 0.0f));
 //        pbNode->SetScale(Vector3(0.5f,0.5f,0.5f));
-        auto* billboardObject = pbNode->CreateComponent<BillboardSet>();
+        auto *billboardObject = pbNode->CreateComponent<BillboardSet>();
         billboardObject->SetNumBillboards(NUM_BILLBOARDS);
         billboardObject->SetMaterial(cache->GetResource<Material>("Materials/PowerBar.xml"));
         billboardObject->SetSorted(true);
 
-        for (unsigned j = 0; j < NUM_BILLBOARDS; ++j)
-        {
-            Billboard* bb = billboardObject->GetBillboard(j);
+        for (unsigned j = 0; j < NUM_BILLBOARDS; ++j) {
+            Billboard *bb = billboardObject->GetBillboard(j);
 //            bb->position_ = Vector3(Random(12.0f) - 6.0f, Random(8.0f) - 4.0f, -5.0f);
             bb->position_ = Vector3(aiPos.x_, aiPos.y_, 0.0f);
-            bb->size_ = Vector2((256.0f/512.0f)*0.06f, (256.0f/144.0f)*0.06f);
+            bb->size_ = Vector2((256.0f / 512.0f) * 0.06f, (256.0f / 144.0f) * 0.06f);
             bb->rotation_ = 90.0f; //Random() * 360.0f;
             bb->enabled_ = true;
 
 //            bb->uv_ = Rect(left,top,right,bottom);
-            bb->uv_ = Rect(0.0,0.5,1.0,1.0);
+            bb->uv_ = Rect(0.0, 0.5, 1.0, 1.0);
 
             // After modifying the billboards, they need to be "committed" so that the BillboardSet updates its internals
             billboardObject->Commit();
@@ -611,6 +611,7 @@ void MayaScape::CreateAgents() {
 */
         // Powerbar
 
+        /*
         agents_[i]->powerbarNode_->SetPosition(Vector3(0.0, 0.25f, 0.0f));
         agents_[i]->powerbarBBSet_ = agents_[i]->powerbarNode_->CreateComponent<BillboardSet>();
         agents_[i]->powerbarBBSet_->SetNumBillboards(1);
@@ -635,8 +636,8 @@ void MayaScape::CreateAgents() {
             // After modifying the billboards, they need to be "committed" so that the BillboardSet updates its internals
             agents_[i]->powerbarBBSet_->Commit();
         }
+    }*/
     }
-
 }
 
 
@@ -646,9 +647,9 @@ void MayaScape::CreatePlayer() {
     // Place on track
     playerNode->SetPosition(Vector3(-814.0f+Random(-400.f, 400.0f), 200.0f, -595.0f+Random(-400.f, 400.0f)));
 
-    // Create the vehicle logic component
-    player_ = playerNode->CreateComponent<Player>();
-    player_->Init();
+    // Player is replaced with NetworkActor -> which is a Player
+    player_ = playerNode->CreateComponent<NetworkActor>();
+    //player_->Init();
 
     player_->SetWaypoints(&waypointsWorld_);
 
@@ -1713,9 +1714,9 @@ void MayaScape::UpdateUIState(bool state) {
 void MayaScape::HandleSceneRendered(StringHash eventType, VariantMap &eventData) {
     UnsubscribeFromEvent(E_ENDRENDERING);
     // Save the scene so we can reload it later
-    sample2D_->SaveScene(true);
+//    sample2D_->SaveScene(true);
     // Pause the scene as long as the UI is hiding it
-    scene_->SetUpdateEnabled(false);
+ //   scene_->SetUpdateEnabled(false);
 }
 
 void MayaScape::SubscribeToEvents() {
@@ -1729,6 +1730,9 @@ void MayaScape::SubscribeToEvents() {
     SubscribeToEvent(disconnectButton_, E_RELEASED, URHO3D_HANDLER(MayaScape, HandleDisconnect));
     SubscribeToEvent(startServerButton_, E_RELEASED, URHO3D_HANDLER(MayaScape, HandleStartServer));
     SubscribeToEvent(exitButton_, E_RELEASED, URHO3D_HANDLER(MayaScape, HandleExit));
+
+//    E_CONNECTFAILED
+    SubscribeToEvent(E_CONNECTFAILED, URHO3D_HANDLER(MayaScape, HandleConnectionFailed));
 
     // Subscribe to server events
     SubscribeToEvent(E_SERVERSTATUS, URHO3D_HANDLER(MayaScape, HandleConnectionStatus));
@@ -2393,11 +2397,14 @@ void MayaScape::HandleRenderUpdate(StringHash eventType, VariantMap &eventData) 
     //    Quaternion vRot = vehicle_->GetNode()->GetRotation();
 
         steerWheelSprite_->SetRotation(360.0f * steering);
+
+       /* DISABLED HEADLAMP RENABLE AFTER UPDATE
         player_->GetVehicleHeadLamp()->SetPosition(Vector3(player_->GetVehicle()->GetNode()->GetPosition().x_,
                                                            player_->GetVehicle()->GetNode()->GetPosition().y_ + 5.0f,
                                                            player_->GetVehicle()->GetNode()->GetPosition().z_));
         player_->GetVehicleHeadLamp()->SetDirection(Vector3(player_->GetVehicle()->GetNode()->GetRotation().x_, 1.0f,
                                                             player_->GetVehicle()->GetNode()->GetRotation().z_));
+
 
         // Update vehicle head lamp lighting
         Light *light = player_->GetVehicleHeadLamp()->GetComponent<Light>();
@@ -2412,7 +2419,7 @@ void MayaScape::HandleRenderUpdate(StringHash eventType, VariantMap &eventData) 
         light->SetBrightness(0.2f + (rpmLight * rpmLightFactor));
         light->SetCastShadows(true);
         //   light->SetShadowBias(BiasParameters(0.00025f, 0.5f));
-
+*/
         // Update focus objects
         focusObjects_[0] = player_->GetVehicle()->GetNode()->GetPosition(); // Vehicle
     }
@@ -3811,6 +3818,12 @@ void MayaScape::HandlePhysicsPreStep(StringHash eventType, VariantMap& eventData
     }
 }
 
+void MayaScape::HandleConnectionFailed(StringHash eventType, VariantMap &eventData) {
+    URHO3D_LOGINFO("Connection to server failed!!!");
+    engine_->Exit();
+
+}
+
 void MayaScape::HandleConnect(StringHash eventType, VariantMap& eventData)
 {
     static const int MAX_ARRAY_SIZE = 10;
@@ -3849,6 +3862,7 @@ void MayaScape::HandleConnect(StringHash eventType, VariantMap& eventData)
 
     // Client connect to server
     if (server->Connect(address, SERVER_PORT, identity)) {
+
         URHO3D_LOGINFOF("client identity name=%s", name.CString());
         URHO3D_LOGINFOF("HandleClientConnected - data: [%s, %d]", name.CString(), idx);
         // Store in local login list
@@ -3859,9 +3873,6 @@ void MayaScape::HandleConnect(StringHash eventType, VariantMap& eventData)
         // Switch to game mode
         UpdateUIState(true);
         started_= true;
-
-        // Client startup code
-
         // Set logo sprite alignment
         logoSprite_->SetAlignment(HA_CENTER, VA_BOTTOM);
         logoSprite_->SetPosition(-280,-3);
@@ -3869,11 +3880,27 @@ void MayaScape::HandleConnect(StringHash eventType, VariantMap& eventData)
         // Make logo not fully opaque to show the scene underneath
         logoSprite_->SetOpacity(0.3f);
 
+        // Client startup code
 
+
+        terrain_->SetEnabled(true);
+        //     player_->vehicle_->SetVisible(true);
+    /*
+            // Create a directional light with shadows
+            Node* lightNode = scene_->CreateChild("DirectionalLight", LOCAL);
+            lightNode->SetDirection(Vector3(0.3f, -0.5f, 0.425f));
+            Light* light = lightNode->CreateComponent<Light>();
+            light->SetLightType(LIGHT_DIRECTIONAL);
+            light->SetCastShadows(true);
+            light->SetShadowBias(BiasParameters(0.00025f, 0.5f));
+            light->SetShadowCascade(CascadeParameters(10.0f, 50.0f, 200.0f, 0.0f, 0.8f));
+            light->SetSpecularIntensity(0.5f);
+    */
         URHO3D_LOGINFOF("client idx=%i, username=%s", idx, name.CString());
 
     } else {
         URHO3D_LOGINFOF("Connection to server failed =%s", address.CString());
+        engine_->Exit();
     }
 }
 
@@ -3888,12 +3915,34 @@ void MayaScape::HandleDisconnect(StringHash eventType, VariantMap& eventData)
 void MayaScape::HandleStartServer(StringHash eventType, VariantMap& eventData)
 {
     Server *server = GetSubsystem<Server>();
-    server->StartServer(SERVER_PORT);
+    if (!server->StartServer(SERVER_PORT)) {
+        engine_->Exit();
+    }
+
+    // Server code
 
     // create Admin
     CreateAdminPlayer();
 
     UpdateButtons();
+    // Switch to game mode
+    UpdateUIState(true);
+    started_= true;
+
+    // Set logo sprite alignment
+    logoSprite_->SetAlignment(HA_CENTER, VA_BOTTOM);
+    logoSprite_->SetPosition(-280,-3);
+
+    // Make logo not fully opaque to show the scene underneath
+    logoSprite_->SetOpacity(0.3f);
+
+    Renderer* renderer = GetSubsystem<Renderer>();
+    Network* network = GetSubsystem<Network>();
+    Connection* serverConnection = network->GetServerConnection();
+    bool serverRunning = network->IsServerRunning();
+//    renderer->Set
+    //renderer->SetViewport(0, viewport);
+
 }
 
 void MayaScape::HandleConnectionStatus(StringHash eventType, VariantMap& eventData)

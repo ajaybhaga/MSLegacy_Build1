@@ -106,6 +106,7 @@ public:
     Vector3 GetForwardVector() { if (raycastVehicle_) { raycastVehicle_->GetForwardVector(); } else return Vector3::ZERO; }
 
     void DebugDraw(const Color &color);
+    void SetVisible(bool visible);
 
     /// Movement controls.
     Controls controls_;
@@ -130,8 +131,6 @@ protected:
 
     void PostUpdateWheelEffects();
     void HandleVehicleCollision(StringHash eventType, VariantMap & eventData);
-
-protected:
 
 //
     SharedPtr<RaycastVehicle> raycastVehicle_;

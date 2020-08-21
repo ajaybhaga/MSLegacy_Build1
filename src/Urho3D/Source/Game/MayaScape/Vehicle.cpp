@@ -47,6 +47,8 @@
 #include "types.h"
 #include "Missile.h"
 
+#include "network/NetworkActor.h"
+
 #include <SDL/SDL_log.h>
 #include <Urho3D/DebugNew.h>
 
@@ -193,7 +195,7 @@ void Vehicle::Init()
     raycastVehicle_->SetMass(m_fVehicleMass);
     raycastVehicle_->SetLinearDamping(0.2f);
     raycastVehicle_->SetAngularDamping(0.1f);
-    raycastVehicle_->SetCollisionLayer(1);
+    raycastVehicle_->SetCollisionLayer(NETWORKACTOR_COL_LAYER);
     raycastVehicle_->AddBodyToWorld();
 
 //    Model *vehModel = cache->GetResource<Model>("Models/Vehicles/Offroad/Models/offroadVehicle.mdl");
@@ -335,7 +337,7 @@ void Vehicle::Init()
             pWheel->SetMaterial(cache->GetResource<Material>("Offroad/Models/Materials/Tire.xml"));
             pWheel->SetCastShadows(true);
 
-            pWheel->SetEnabled(false);
+//            pWheel->SetEnabled(false);
 
 
             // track
@@ -420,29 +422,27 @@ void Vehicle::FixedUpdate(float timeStep)
         if (newSteering != 0.0f || accelerator != 0.0f) {
             raycastVehicle_->Activate();
         }
+
+
+        UpdateGear();
+
+        UpdateSteering(newSteering);
+
+        ApplyEngineForces(accelerator, braking);
+
+        // do this right after applyEngineForce and before applying other forces
+        if (ApplyStiction(newSteering, accelerator, braking)) {
+            return;
+        }
+
+        ApplyDownwardForce();
+
+        LimitLinearAndAngularVelocity();
+
+        AutoCorrectPitchRoll();
+
+        UpdateDrift();
     }
-
-
-    UpdateGear();
-
-    UpdateSteering(newSteering);
-
-    ApplyEngineForces(accelerator, braking);
-
-    // do this right after applyEngineForce and before applying other forces
-    if ( ApplyStiction(newSteering, accelerator, braking) )
-    {
-        return;
-    }
-
-    ApplyDownwardForce();
-
-    LimitLinearAndAngularVelocity();
-
-    AutoCorrectPitchRoll();
-
-    UpdateDrift();
-
 }
 
 //=============================================================================
@@ -966,6 +966,14 @@ void Vehicle::DebugDraw(const Color &color)
 
     }
 }
+
+void Vehicle::SetVisible(bool visible) {
+    GetNode()->SetEnabled(visible);
+    for (Node *w : m_vpNodeWheel) {
+        w->SetEnabled(visible);
+    }
+}
+
 
 const SharedPtr<RaycastVehicle> &Vehicle::GetRaycastVehicle() const {
     return raycastVehicle_;

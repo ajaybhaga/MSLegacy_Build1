@@ -132,6 +132,7 @@ private:
     void HandleConnectionStatus(StringHash eventType, VariantMap& eventData);
     void HandleClientObjectID(StringHash eventType, VariantMap& eventData);
     void HandleExit(StringHash eventType, VariantMap& eventData);
+    void HandleConnectionFailed(StringHash eventType, VariantMap &eventData);
 
     /// Construct the scene content.
     void CreateScene();
@@ -145,6 +146,7 @@ private:
     /// Handle the logic update event.
     void HandleUpdate(StringHash eventType, VariantMap& eventData);
     void HandleRenderUpdate(StringHash eventType, VariantMap &eventData);
+
 
     /// Handle the logic post update event.
     void HandlePostUpdate(StringHash eventType, VariantMap& eventData);
@@ -177,15 +179,11 @@ private:
 
 
 
-        /// The controllable character component.
-//    WeakPtr<Character2D> player_;
-//    WeakPtr<Character2D> agents_[MAX_AGENTS];
-
     bool started_; // Is Game started?
     Vector<Urho3D::String> loginList_;
 
-    SharedPtr<Player> player_; // This player
-    SharedPtr<Player> agents_[MAX_AGENTS]; // Agents
+    SharedPtr<NetworkActor> player_; // This player
+    SharedPtr<NetworkActor> agents_[MAX_AGENTS]; // Agents
 
 
     SharedPtr<Terrain> terrain_;
