@@ -206,8 +206,8 @@
 #include "boids.h"
 
 
-
-#define GAME_SERVER_ADDRESS "www.monkeymaya.com"
+#define GAME_SERVER_ADDRESS "localhost"
+//#define GAME_SERVER_ADDRESS "www.monkeymaya.com"
 
 int numOfBoidsets = 10; // needs to be an even number for the boid splitting to work properly
 int updateCycleIndex = 0;
@@ -1699,7 +1699,6 @@ void MayaScape::CreateScene() {
 void MayaScape::UpdateUIState(bool state) {
 
     // Do the opposite for menu
-    bkgSprite_->SetVisible(!state);
     versionText_->SetVisible(!state);
     studioText_->SetVisible(!state);
     instructionsText_->SetVisible(!state);
@@ -1708,6 +1707,8 @@ void MayaScape::UpdateUIState(bool state) {
 
     // On client
     if (!isServer_) {
+        bkgSprite_->SetVisible(!state);
+
         // Create sprite and add to the UI layout
         powerBarP1Sprite_->SetVisible(state);
         powerBarBkgP1Sprite_->SetVisible(state);
@@ -1729,17 +1730,29 @@ void MayaScape::UpdateUIState(bool state) {
         powerBarText_->SetVisible(state);
         rpmBarText_->SetVisible(state);
         velBarText_->SetVisible(state);
+
+
+        // Debug text
+        for (int i = 0; i < NUM_DEBUG_FIELDS; i++) {
+            debugText_[i]->SetVisible(state);
+        }
+
+        packetsIn_->SetVisible(state);
+        packetsOut_->SetVisible(state);
+
     } else {
+        // On server
         player_->vehicle_->SetVisible(false);
+
+
+        // Debug text
+        for (int i = 0; i < NUM_DEBUG_FIELDS; i++) {
+            debugText_[i]->SetVisible(!state);
+        }
+
+        packetsIn_->SetVisible(!state);
+        packetsOut_->SetVisible(!state);
     }
-
-    // Debug text
-    for (int i = 0; i < NUM_DEBUG_FIELDS; i++) {
-        debugText_[i]->SetVisible(state);
-    }
-
-
-    // TODO: Enable 3d objects
 }
 
 void MayaScape::HandleSceneRendered(StringHash eventType, VariantMap &eventData) {
@@ -2747,7 +2760,8 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 
     // On the client, use the lcoal login list
     if (isServer_) {
-        loginList = server->GetLoginList();
+        HashMap<String, Connection*> map = server->GetLoginList();
+        loginList = map.Keys();
     } else {
         loginList = loginList_;
     }
@@ -2765,6 +2779,7 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 
     // Login List
     if (isServer_) {
+/* DISABLE ON-SCREEN LOGIN LIST - will show through console
         if (loginList.Size() > 0) {
             // Show login list
             debugText_[0]->SetText("Server: Client List");
@@ -2782,7 +2797,8 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
                     debugText_[i]->SetText(loginList[i - 1].CString());
                 }
             }
-        }
+        }*/
+
     } else {
         if (loginList.Size() > 0) {
             // Show login list
@@ -3981,7 +3997,8 @@ void MayaScape::HandleStartServer(StringHash eventType, VariantMap& eventData)
     UpdateUIState(true);
     started_= true;
 
-//    scene_->SetUpdateEnabled(false);
+    // Disable updates (allow focus on processing for server)
+    scene_->SetUpdateEnabled(false);
 
     // Set logo sprite alignment
     logoSprite_->SetAlignment(HA_CENTER, VA_BOTTOM);
@@ -4018,7 +4035,10 @@ void MayaScape::HandleConnectionStatus(StringHash eventType, VariantMap& eventDa
 
 void MayaScape::HandleClientObjectID(StringHash eventType, VariantMap& eventData)
 {
+    // (On server) -> once client is connected
+
     clientObjectID_ = eventData[ClientObjectID::P_ID].GetUInt();
+
 }
 
 
@@ -4084,3 +4104,15 @@ void MayaScape::HandleClosePressed(StringHash eventType, VariantMap& eventData) 
     engine_->Exit();
 }
 
+
+void MayaScape::OutputLoginListToConsole() {
+
+    URHO3D_LOGINFO("**** CLIENT: CLIENT LIST *****************************************************");
+
+    for (int i = 0; i < loginList_.Size(); i++) {
+        URHO3D_LOGINFOF("**** LOGIN: %s", loginList_.At(i).CString());
+    }
+
+    URHO3D_LOGINFO("******************************************************************************");
+
+}

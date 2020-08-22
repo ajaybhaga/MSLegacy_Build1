@@ -116,8 +116,8 @@ Node* Server::CreateClientObject(Connection *connection)
 
         URHO3D_LOGINFOF("client identity name=%s", name.CString());
         URHO3D_LOGINFOF("HandleClientConnected - data: [%s, %d]", name.CString(), colorIdx);
-        loginList_.Push(name.CString());
-
+        // Store login name with connection
+        loginList_.Populate(name.CString(), connection);
     }
 
     return clientNode;
@@ -205,6 +205,9 @@ void Server::HandleClientIdentity(StringHash eventType, VariantMap& eventData)
     Node* clientObject = CreateClientObject(newConnection);
     serverObjects_[newConnection] = clientObject;
 
+    // Output the updated login list
+    OutputLoginListToConsole();
+
     // Finally send the object's node ID using a remote event
     VariantMap remoteEventData;
     remoteEventData[ClientObjectID::P_ID] = clientObject->GetID();
@@ -215,7 +218,6 @@ void Server::HandleClientSceneLoaded(StringHash eventType, VariantMap& eventData
 {
 	using namespace ClientSceneLoaded;
     URHO3D_LOGINFO("HandleClientSceneLoaded");
-    // some process yet tbd
 }
 
 void Server::HandleNetworkUpdateSent(StringHash eventType, VariantMap& eventData)
@@ -262,6 +264,9 @@ void Server::HandleClientDisconnected(StringHash eventType, VariantMap& eventDat
     using namespace ClientConnected;
     URHO3D_LOGINFO("HandleClientDisconnected");
 
+    // (On server)
+    // This updates the login list by allowing a few cycles to update
+
     // When a client disconnects, remove the controlled object
     Connection* connection = static_cast<Connection*>(eventData[P_CONNECTION].GetPtr());
     Node* object = serverObjects_[connection];
@@ -270,7 +275,28 @@ void Server::HandleClientDisconnected(StringHash eventType, VariantMap& eventDat
         object->Remove();
     }
 
+
+    Vector<Connection*> connectList = loginList_.Values();
+
+    URHO3D_LOGINFO("**** FINDING CONNECTION TO REMOVE FROM LOGIN LIST");
+
+    for (int i = 0; i < connectList.Size(); i++) {
+        if (connectList[i] == connection) {
+            // Match
+            URHO3D_LOGINFOF("**** MATCH: %s", loginList_.Keys()[i].CString());
+
+            // Remove login from list
+            loginList_.Erase(loginList_.Keys()[i]);
+            break;
+        }
+    }
+
     serverObjects_.Erase(connection);
+
+    OutputLoginListToConsole();
+
+    URHO3D_LOGINFO("**** HandleClientDisconnected COMPLETED");
+
 }
 
 void Server::HandleClientObjectID(StringHash eventType, VariantMap& eventData)
@@ -278,4 +304,18 @@ void Server::HandleClientObjectID(StringHash eventType, VariantMap& eventData)
     URHO3D_LOGINFOF("HandleClientObjectID: clientID = %u", clientObjectID_);
 
     clientObjectID_ = eventData[ClientObjectID::P_ID].GetUInt();
+}
+
+void Server::OutputLoginListToConsole() {
+
+    URHO3D_LOGINFO("**** SERVER: CLIENT LIST *****************************************************");
+
+    Vector<Connection*> connectList = loginList_.Values();
+
+    for (int i = 0; i < connectList.Size(); i++) {
+        URHO3D_LOGINFOF("**** LOGIN: %s", loginList_.Keys()[i].CString());
+    }
+
+    URHO3D_LOGINFO("******************************************************************************");
+
 }

@@ -181,6 +181,9 @@ private:
     void InitMsgWindow(String title, String message);
     void HandleClosePressed(StringHash eventType, VariantMap& eventData);
 
+    void OutputLoginListToConsole();
+
+
     bool started_; // Is Game started?
     Vector<Urho3D::String> loginList_;
 

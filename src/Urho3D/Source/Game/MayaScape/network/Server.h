@@ -71,7 +71,7 @@ public:
     Node* CreateClientObject(Connection *connection);
     void UpdatePhysicsPreStep(const Controls &controls);
 
-    Vector<Urho3D::String> GetLoginList() { return loginList_; }
+    HashMap<String, Connection*> GetLoginList() { return loginList_; }
 protected:
     void SubscribeToEvents();
     void SendStatusMsg(StringHash msg);
@@ -90,6 +90,8 @@ protected:
     void HandleClientIdentity(StringHash eventType, VariantMap& eventData);
     void HandleClientSceneLoaded(StringHash eventType, VariantMap& eventData);
 
+    void OutputLoginListToConsole();
+
 protected:
     /// Mapping from client connections to controllable objects.
     HashMap<Connection*, WeakPtr<Node> > serverObjects_;
@@ -97,5 +99,5 @@ protected:
     unsigned clientObjectID_;
     SharedPtr<Scene> scene_;
 
-    Vector<Urho3D::String> loginList_;
+    HashMap<String, Connection*> loginList_;
 };
