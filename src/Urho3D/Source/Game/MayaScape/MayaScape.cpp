@@ -30,9 +30,6 @@
 #include <Urho3D/Audio/Audio.h>
 #include <Urho3D/UI/Button.h>
 #include <Urho3D/Urho2D/CollisionBox2D.h>
-#include <Urho3D/Urho2D/CollisionChain2D.h>
-#include <Urho3D/Urho2D/CollisionCircle2D.h>
-#include <Urho3D/Urho2D/CollisionPolygon2D.h>
 #include <Urho3D/Core/CoreEvents.h>
 #include <Urho3D/Graphics/DebugRenderer.h>
 #include <Urho3D/Engine/Engine.h>
@@ -74,19 +71,6 @@
 #include <Urho3D/Physics/Constraint.h>
 #include <Urho3D/Physics/PhysicsWorld.h>
 #include <Urho3D/Physics/PhysicsUtils.h>
-
-
-
-#include <Urho3D/Core/CoreEvents.h>
-#include <Urho3D/Engine/Engine.h>
-#include <Urho3D/Graphics/Camera.h>
-#include <Urho3D/Graphics/Graphics.h>
-#include <Urho3D/Graphics/Octree.h>
-#include <Urho3D/Graphics/Renderer.h>
-#include <Urho3D/Graphics/Zone.h>
-#include <Urho3D/Graphics/Material.h>
-#include <Urho3D/Graphics/Model.h>
-#include <Urho3D/Graphics/StaticModel.h>
 #include <Urho3D/Input/Controls.h>
 #include <Urho3D/Input/Input.h>
 #include <Urho3D/IO/Log.h>
@@ -96,57 +80,26 @@
 #include <Urho3D/Physics/PhysicsEvents.h>
 #include <Urho3D/Physics/PhysicsWorld.h>
 #include <Urho3D/Physics/RigidBody.h>
-#include <Urho3D/Physics/CollisionShape.h>
-#include <Urho3D/Graphics/DebugRenderer.h>
-#include <Urho3D/Resource/ResourceCache.h>
-#include <Urho3D/Scene/Scene.h>
-#include <Urho3D/UI/Button.h>
-#include <Urho3D/UI/Font.h>
-#include <Urho3D/UI/LineEdit.h>
-#include <Urho3D/UI/Text.h>
-#include <Urho3D/UI/Text3D.h>
 #include <Urho3D/UI/UI.h>
 #include <Urho3D/UI/UIEvents.h>
 
 
-#include <Urho3D/Graphics/AnimatedModel.h>
-#include <Urho3D/Graphics/Animation.h>
-#include <Urho3D/Graphics/AnimationState.h>
+#include <Urho3D/IO/IOEvents.h>
+#include <Urho3D/IO/VectorBuffer.h>
+
 #include <Urho3D/Urho2D/AnimatedSprite2D.h>
 #include <Urho3D/Urho2D/AnimationSet2D.h>
 #include <Urho3D/UI/BorderImage.h>
-#include <Urho3D/UI/Button.h>
-#include <Urho3D/Graphics/Camera.h>
-#include <Urho3D/Urho2D/CollisionBox2D.h>
-#include <Urho3D/Urho2D/CollisionChain2D.h>
-#include <Urho3D/Urho2D/CollisionCircle2D.h>
-#include <Urho3D/Urho2D/CollisionPolygon2D.h>
 #include <Urho3D/Core/Context.h>
-#include <Urho3D/Core/CoreEvents.h>
-#include <Urho3D/Engine/Engine.h>
 #include <Urho3D/IO/File.h>
-#include <Urho3D/IO/FileSystem.h>
-#include <Urho3D/UI/Font.h>
-#include <Urho3D/Input/Input.h>
 #include <Urho3D/Urho2D/ParticleEffect2D.h>
 #include <Urho3D/Urho2D/ParticleEmitter2D.h>
-#include <Urho3D/Resource/ResourceCache.h>
 #include <Urho3D/Urho2D/RigidBody2D.h>
-#include <Urho3D/Scene/Scene.h>
-#include <Urho3D/Audio/Sound.h>
-#include <Urho3D/Audio/SoundSource.h>
 #include <Urho3D/Core/StringUtils.h>
-#include <Urho3D/UI/Text.h>
-#include <Urho3D/Input/Input.h>
-#include <Urho3D/IO/Log.h>
 #include <Urho3D/Graphics/Texture2D.h>
 #include <Urho3D/Urho2D/TileMap2D.h>
-#include <Urho3D/Urho2D/TileMapLayer2D.h>
 #include <Urho3D/Urho2D/TileMap3D.h>
-#include <Urho3D/Urho2D/TileMapLayer3D.h>
 #include <Urho3D/Urho2D/TmxFile2D.h>
-#include <Urho3D/UI/UI.h>
-#include <Urho3D/UI/UIEvents.h>
 #include <Urho3D/Scene/ValueAnimation.h>
 
 #include "network/Server.h"
@@ -205,7 +158,8 @@
 
 #include "boids.h"
 
-
+// Identifier for the chat network messages
+const int MSG_CHAT = 153;
 #define GAME_SERVER_ADDRESS "localhost"
 //#define GAME_SERVER_ADDRESS "www.monkeymaya.com"
 
@@ -1765,6 +1719,16 @@ void MayaScape::HandleSceneRendered(StringHash eventType, VariantMap &eventData)
 
 void MayaScape::SubscribeToEvents() {
 
+    // Subscribe to UI element events
+    SubscribeToEvent(textEdit_, E_TEXTFINISHED, URHO3D_HANDLER(MayaScape, HandleSend));
+//    SubscribeToEvent(sendButton_, E_RELEASED, URHO3D_HANDLER(MayaScape, HandleSend));
+
+    // Subscribe to log messages so that we can pipe them to the chat window
+    SubscribeToEvent(E_LOGMESSAGE, URHO3D_HANDLER(MayaScape, HandleLogMessage));
+
+    // Subscribe to network events
+    SubscribeToEvent(E_NETWORKMESSAGE, URHO3D_HANDLER(MayaScape, HandleNetworkMessage));
+
     SubscribeToEvent(E_PHYSICSPRESTEP, URHO3D_HANDLER(MayaScape, HandlePhysicsPreStep));
     SubscribeToEvent(E_POSTUPDATE, URHO3D_HANDLER(MayaScape, HandlePostUpdate));
 
@@ -1780,7 +1744,19 @@ void MayaScape::SubscribeToEvents() {
 
     // Subscribe to server events
     SubscribeToEvent(E_SERVERSTATUS, URHO3D_HANDLER(MayaScape, HandleConnectionStatus));
+/*
+ *     SubscribeToEvent(E_SERVERCONNECTED, URHO3D_HANDLER(Chat, HandleConnectionStatus));
+    SubscribeToEvent(E_SERVERDISCONNECTED, URHO3D_HANDLER(Chat, HandleConnectionStatus));
+    SubscribeToEvent(E_CONNECTFAILED, URHO3D_HANDLER(Chat, HandleConnectionStatus));
+
+ *
+ */
+
+
     SubscribeToEvent(E_CLIENTOBJECTID, URHO3D_HANDLER(MayaScape, HandleClientObjectID));
+
+    // Events sent between client & server (remote events) must be explicitly registered or else they are not allowed to be received
+    GetSubsystem<Network>()->RegisterRemoteEvent(E_CLIENTOBJECTID);
 
     // Subscribe function for processing update events
     SubscribeToEvent(E_UPDATE, URHO3D_HANDLER(MayaScape, HandleUpdate));
@@ -3375,13 +3351,17 @@ void MayaScape::HandlePostUpdate(StringHash eventType, VariantMap &eventData) {
         if (result.body_)
             cameraTargetPos = cameraStartPos + cameraRay.direction_ * (result.distance_ - 0.5f);
 
-        cameraNode_->SetPosition(cameraTargetPos);
-        cameraNode_->SetRotation(dir);
+        /* DISABLE HERE -> move to MoveCamera */
+        // Camera lock to target position
+//        cameraNode_->SetPosition(cameraTargetPos);
+//        cameraNode_->SetRotation(dir);
+
 
         // On client
         if (!isServer_) {
 
             if (started_) {
+
                 // Always show waypoints
                 player_->DebugDraw(Color::MAGENTA);
             }
@@ -3579,6 +3559,7 @@ void MayaScape::CreateUI()
     XMLFile* uiStyle = cache->GetResource<XMLFile>("UI/DefaultStyle.xml");
     root->SetDefaultStyle(uiStyle);
 
+
     SharedPtr<Cursor> cursor(new Cursor(context_));
     cursor->SetStyleAuto(uiStyle);
     ui->SetCursor(cursor);
@@ -3673,8 +3654,9 @@ void MayaScape::CreateUI()
     buttonContainer_->SetHorizontalAlignment((HA_CENTER));
     buttonContainer_->SetLayoutMode(LM_VERTICAL);
     buttonContainer_->SetLayoutSpacing(10.0);
-//    textEdit_ = buttonContainer_->CreateChild<LineEdit>();
-//    textEdit_->SetStyleAuto();
+    textEdit_ = buttonContainer_->CreateChild<LineEdit>();
+    textEdit_->SetStyleAuto();
+    textEdit_->SetVisible(false);
 
     playButton_ = CreateButton("Play", 240);
     disconnectButton_ = CreateButton("Disconnect", 240);
@@ -3714,8 +3696,23 @@ void MayaScape::CreateUI()
     // Set a low priority for the logo so that other UI elements can be drawn on top
     logoSprite_->SetPriority(-100);
 
+    auto* font = cache->GetResource<Font>("Fonts/SinsGold.ttf");
+    chatHistoryText_ = root->CreateChild<Text>();
+    chatHistoryText_->SetFont(font, 12);
+    chatHistoryText_->SetVisible(false);
 
     UpdateButtons();
+
+    float rowHeight = chatHistoryText_->GetRowHeight();
+    // Row height would be zero if the font failed to load
+    if (rowHeight)
+    {
+        float numberOfRows = (graphics->GetHeight() - 100) / rowHeight;
+        chatHistory_.Resize(static_cast<unsigned int>(numberOfRows));
+    }
+
+    // No viewports or scene is defined. However, the default zone's fog color controls the fill color
+    GetSubsystem<Renderer>()->GetDefaultZone()->SetFogColor(Color(0.0f, 0.0f, 0.1f));
 }
 
 void MayaScape::SetupViewport()
@@ -3796,7 +3793,6 @@ void MayaScape::UpdateButtons()
 }
 
 
-/*
 void MayaScape::MoveCamera() {
     // Right mouse button controls mouse cursor visibility: hide when pressed
     UI *ui = GetSubsystem<UI>();
@@ -3807,6 +3803,8 @@ void MayaScape::MoveCamera() {
     const float MOUSE_SENSITIVITY = 0.1f;
 
     if (started_) {
+        URHO3D_LOGINFO("--- Moving camera ");
+
         // Use this frame's mouse motion to adjust camera node yaw and pitch. Clamp the pitch and only move the camera
         // when the cursor is hidden
         if (!ui->GetCursor()->IsVisible()) {
@@ -3822,13 +3820,16 @@ void MayaScape::MoveCamera() {
         // Only move the camera / show instructions if we have a controllable object
         bool showInstructions = false;
         if (clientObjectID_) {
-            Node *ballNode = scene_->GetNode(clientObjectID_);
-            if (ballNode) {
+
+            URHO3D_LOGINFO("--- Found controllable object -> locking camera ");
+
+            Node *actorNode = scene_->GetNode(clientObjectID_);
+            if (actorNode) {
                 const float CAMERA_DISTANCE = 5.0f;
 
-                Vector3 startPos = ballNode->GetPosition();
+                Vector3 startPos = actorNode->GetPosition();
                 Vector3 destPos =
-                        ballNode->GetPosition() + cameraNode_->GetRotation() * Vector3::BACK * CAMERA_DISTANCE;
+                        actorNode->GetPosition() + cameraNode_->GetRotation() * Vector3::BACK * CAMERA_DISTANCE;
                 Vector3 seg = destPos - startPos;
                 Ray cameraRay(startPos, seg.Normalized());
                 float cameraRayLength = seg.Length();
@@ -3842,12 +3843,13 @@ void MayaScape::MoveCamera() {
                 cameraNode_->SetPosition(destPos);
                 showInstructions = true;
             }
+        } else {
+            URHO3D_LOGINFO("--- Could not find controllable object, aborting.");
         }
 
         instructionsText_->SetVisible(showInstructions);
     }
-}*/
-
+}
 
 
 void MayaScape::HandlePhysicsPreStep(StringHash eventType, VariantMap& eventData)
@@ -3866,6 +3868,9 @@ void MayaScape::HandlePhysicsPreStep(StringHash eventType, VariantMap& eventData
     controls.Set(NTWK_SWAP_MAT, input->GetKeyDown(KEY_T));
 
     server->UpdatePhysicsPreStep(controls);
+
+
+    // Server send controls to client
 
     // server is not a connection but direct controller
     if (isServer_)
@@ -3919,7 +3924,10 @@ void MayaScape::HandleConnect(StringHash eventType, VariantMap& eventData)
 
     // randomize (or customize) client info/data
     int idx = Random(MAX_ARRAY_SIZE - 1);
-    String name = colorArray[idx];
+    char buffer[200];
+    String baseName = colorArray[idx];
+    sprintf(buffer, "%s-%d", baseName.CString(), Random(1,1000));
+    String name = buffer;
     URHO3D_LOGINFOF("client idx=%i, username=%s", idx, name.CString());
 
     VariantMap& identity = GetEventDataMap();
@@ -3950,6 +3958,17 @@ void MayaScape::HandleConnect(StringHash eventType, VariantMap& eventData)
 
 
         terrain_->SetEnabled(true);
+
+
+
+        String address = textEdit_->GetText().Trimmed();
+        // Empty the text edit after reading the address to connect to
+        textEdit_->SetText(String::EMPTY);
+
+        UpdateButtons();
+
+        MoveCamera();
+
         //     player_->vehicle_->SetVisible(true);
     /*
             // Create a directional light with shadows
@@ -4035,9 +4054,16 @@ void MayaScape::HandleConnectionStatus(StringHash eventType, VariantMap& eventDa
 
 void MayaScape::HandleClientObjectID(StringHash eventType, VariantMap& eventData)
 {
-    // (On server) -> once client is connected
+    // On client
 
+    URHO3D_LOGINFO("*** HandleClientObjectID");
+
+    // Client stores client object id
     clientObjectID_ = eventData[ClientObjectID::P_ID].GetUInt();
+
+
+    // Apply transformations to camera
+    MoveCamera();
 
 }
 
@@ -4115,4 +4141,79 @@ void MayaScape::OutputLoginListToConsole() {
 
     URHO3D_LOGINFO("******************************************************************************");
 
+}
+
+
+
+void MayaScape::ShowChatText(const String& row)
+{
+    chatHistory_.Erase(0);
+    chatHistory_.Push(row);
+
+    // Concatenate all the rows in history
+    String allRows;
+    for (unsigned i = 0; i < chatHistory_.Size(); ++i)
+        allRows += chatHistory_[i] + "\n";
+
+    chatHistoryText_->SetText(allRows);
+}
+
+void MayaScape::HandleLogMessage(StringHash /*eventType*/, VariantMap& eventData)
+{
+    using namespace LogMessage;
+
+    ShowChatText(eventData[P_MESSAGE].GetString());
+}
+
+void MayaScape::HandleSend(StringHash /*eventType*/, VariantMap& eventData)
+{
+    String text = textEdit_->GetText();
+    if (text.Empty())
+        return; // Do not send an empty message
+
+    auto* network = GetSubsystem<Network>();
+    Connection* serverConnection = network->GetServerConnection();
+
+    if (serverConnection)
+    {
+        // A VectorBuffer object is convenient for constructing a message to send
+        VectorBuffer msg;
+        msg.WriteString(text);
+        // Send the chat message as in-order and reliable
+        serverConnection->SendMessage(MSG_CHAT, true, true, msg);
+        // Empty the text edit after sending
+        textEdit_->SetText(String::EMPTY);
+    }
+}
+
+void MayaScape::HandleNetworkMessage(StringHash /*eventType*/, VariantMap& eventData)
+{
+    auto* network = GetSubsystem<Network>();
+
+    using namespace NetworkMessage;
+
+    int msgID = eventData[P_MESSAGEID].GetInt();
+    if (msgID == MSG_CHAT)
+    {
+        const PODVector<unsigned char>& data = eventData[P_DATA].GetBuffer();
+        // Use a MemoryBuffer to read the message data so that there is no unnecessary copying
+        MemoryBuffer msg(data);
+        String text = msg.ReadString();
+
+        // If we are the server, prepend the sender's IP address and port and echo to everyone
+        // If we are a client, just display the message
+        if (network->IsServerRunning())
+        {
+            auto* sender = static_cast<Connection*>(eventData[P_CONNECTION].GetPtr());
+
+            text = sender->ToString() + " " + text;
+
+            VectorBuffer sendMsg;
+            sendMsg.WriteString(text);
+            // Broadcast as in-order and reliable
+            network->BroadcastMessage(MSG_CHAT, true, true, sendMsg);
+        }
+
+        ShowChatText(text);
+    }
 }

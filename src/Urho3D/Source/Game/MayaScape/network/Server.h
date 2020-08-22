@@ -100,4 +100,6 @@ protected:
     SharedPtr<Scene> scene_;
 
     HashMap<String, Connection*> loginList_;
+
+    WeakPtr<Node> app_;
 };

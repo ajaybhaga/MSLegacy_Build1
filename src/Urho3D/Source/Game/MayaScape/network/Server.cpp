@@ -304,6 +304,7 @@ void Server::HandleClientObjectID(StringHash eventType, VariantMap& eventData)
     URHO3D_LOGINFOF("HandleClientObjectID: clientID = %u", clientObjectID_);
 
     clientObjectID_ = eventData[ClientObjectID::P_ID].GetUInt();
+
 }
 
 void Server::OutputLoginListToConsole() {

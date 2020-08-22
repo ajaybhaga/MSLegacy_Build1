@@ -51,6 +51,7 @@
 
 #include <MayaScape/ai/evolution_manager.h>
 #include <Urho3D/UI/Window.h>
+#include <MayaScape/network/NetworkActor.h>
 #include "Game.h"
 #include "Sample2D.h"
 #include "Vehicle.h"
@@ -104,6 +105,8 @@ class MayaScape : public Game
 {
     URHO3D_OBJECT(MayaScape, Game);
 
+    void MoveCamera();
+
 public:
     /// Construct.
     explicit MayaScape(Context* context);
@@ -125,7 +128,7 @@ private:
     void ChangeDebugHudText();
     Button* CreateButton(const String& text, int width);
     void UpdateButtons();
-    void MoveCamera();
+
     void HandlePhysicsPreStep(StringHash eventType, VariantMap& eventData);
     void HandleConnect(StringHash eventType, VariantMap& eventData);
     void HandleDisconnect(StringHash eventType, VariantMap& eventData);
@@ -134,6 +137,14 @@ private:
     void HandleClientObjectID(StringHash eventType, VariantMap& eventData);
     void HandleExit(StringHash eventType, VariantMap& eventData);
     void HandleConnectionFailed(StringHash eventType, VariantMap &eventData);
+
+    /// Handle log message event; pipe it also to the chat display.
+    void HandleLogMessage(StringHash eventType, VariantMap& eventData);
+    /// Handle pressing the send button.
+    void HandleSend(StringHash eventType, VariantMap& eventData);
+    /// Handle an incoming network message.
+    void HandleNetworkMessage(StringHash eventType, VariantMap& eventData);
+    void ShowChatText(const String& row);
 
     /// Construct the scene content.
     void CreateScene();
@@ -184,7 +195,7 @@ private:
     void OutputLoginListToConsole();
 
 
-    bool started_; // Is Game started?
+        bool started_; // Is Game started?
     Vector<Urho3D::String> loginList_;
 
     SharedPtr<Window> msgWindow_;
@@ -221,6 +232,13 @@ private:
     SharedPtr<Text> powerBarText_;
     SharedPtr<Text> rpmBarText_;
     SharedPtr<Text> velBarText_;
+
+    /// Strings printed so far.
+    Vector<String> chatHistory_;
+    /// Chat text element.
+    SharedPtr<Text> chatHistoryText_;
+    /// Server address / chat message line editor element.
+    SharedPtr<LineEdit> textEdit_;
 
     // Menu background sprite.
     SharedPtr<Sprite> bkgSprite_;
@@ -283,7 +301,6 @@ private:
     // Network objects
     HashMap<Connection*, WeakPtr<Node> > serverObjects_;
     SharedPtr<UIElement> buttonContainer_;
-    SharedPtr<LineEdit> textEdit_;
     SharedPtr<Button> playButton_;
     SharedPtr<Button> disconnectButton_;
     SharedPtr<Button> startServerButton_;
