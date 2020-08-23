@@ -160,6 +160,8 @@
 
 // Identifier for the chat network messages
 const int MSG_CHAT = 153;
+const int MSG_NODE_ERROR = 154;
+
 #define GAME_SERVER_ADDRESS "localhost"
 //#define GAME_SERVER_ADDRESS "www.monkeymaya.com"
 
@@ -371,11 +373,6 @@ void MayaScape::Start() {
 
     CreateServerSubsystem();
 
-//    sample2D_ = new Sample2D(context_);
-
-    // Set filename for load/save functions
-//    sample2D_->demoFilename_ = "Platformer2D";
-
     context_->RegisterSubsystem(new GameController(context_));
 
     // Reset focus index
@@ -390,7 +387,7 @@ void MayaScape::Start() {
     SetupViewport();
 
     // Create AI agents
-    CreateAgents();
+    //CreateAgents();
 
     // Create P1 player
     CreatePlayer();
@@ -606,7 +603,7 @@ void MayaScape::CreatePlayer() {
     playerNode->SetPosition(Vector3(-814.0f+Random(-400.f, 400.0f), 200.0f, -595.0f+Random(-400.f, 400.0f)));
 
     // Player is replaced with NetworkActor -> which is a Player
-    player_ = playerNode->CreateComponent<NetworkActor>();
+    player_ = playerNode->CreateComponent<NetworkActor>(REPLICATED);
     //player_->Init();
     player_->isServer_ = isServer_;
 
@@ -642,8 +639,9 @@ void MayaScape::CreateScene() {
     // server requires client hash and scene info
     Server *server = GetSubsystem<Server>();
 
-    // Register Network Actor
+    // Register Network Actor and local client scene
     server->RegisterClientHashAndScene(NetworkActor::GetTypeStatic(), scene_);
+    URHO3D_LOGINFOF("Local: Scene checksum -> %d", ToStringHex(scene_->GetChecksum()).CString());
 
     // Create octree and physics world with default settings
     // Create them as local so that they are not needlessly replicated when a client connects
@@ -1758,6 +1756,8 @@ void MayaScape::SubscribeToEvents() {
     // Events sent between client & server (remote events) must be explicitly registered or else they are not allowed to be received
     GetSubsystem<Network>()->RegisterRemoteEvent(E_CLIENTOBJECTID);
 
+//    SubscribeToEvent(E_CLIENTSCENELOADED, URHO3D_HANDLER(MayaScape, HandleClientSceneLoaded));
+
     // Subscribe function for processing update events
     SubscribeToEvent(E_UPDATE, URHO3D_HANDLER(MayaScape, HandleUpdate));
 
@@ -2802,12 +2802,16 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 
 //        Vector3 targetAgent = agents_[player_->targetAgentIndex_]->GetVehicle()->GetNode()->GetPosition();
 
+
+    // DISABLE AGENT TARGETING FOR NOW
+    /*
         btTransform trans;
         agents_[player_->targetAgentIndex_]->vehicle_->GetRaycastVehicle()->getWorldTransform(trans);
         Vector3 posWS = ToVector3(trans.getOrigin());
         Vector3 targetAgent = posWS;
         player_->SetTarget(targetAgent);
 
+*/
 
         GameController *gameController = GetSubsystem<GameController>();
         player_->GetVehicle()->controls_.buttons_ = 0;
@@ -3548,7 +3552,6 @@ void MayaScape::CreateAdminPlayer()
     clientObjectID_ = clientNode->GetID();
     isServer_ = true;
 
-//    serverObjects_->
 }
 
 void MayaScape::CreateUI()
@@ -3793,7 +3796,7 @@ void MayaScape::UpdateButtons()
 }
 
 
-void MayaScape::MoveCamera() {
+void MayaScape::MoveCamera(Node *actorNode) {
     // Right mouse button controls mouse cursor visibility: hide when pressed
     UI *ui = GetSubsystem<UI>();
     Input *input = GetSubsystem<Input>();
@@ -3821,13 +3824,15 @@ void MayaScape::MoveCamera() {
         bool showInstructions = false;
         if (clientObjectID_) {
 
-            URHO3D_LOGINFO("--- Found controllable object -> locking camera ");
+            URHO3D_LOGINFOF("--- Found controllable object: %u", clientObjectID_);
 
-            Node *actorNode = scene_->GetNode(clientObjectID_);
             if (actorNode) {
                 const float CAMERA_DISTANCE = 5.0f;
 
                 Vector3 startPos = actorNode->GetPosition();
+                URHO3D_LOGINFOF("--- Found controllable object -> position: [%f, %f, %f] ", actorNode->GetPosition().x_, actorNode->GetPosition().y_, actorNode->GetPosition().z_);
+
+
                 Vector3 destPos =
                         actorNode->GetPosition() + cameraNode_->GetRotation() * Vector3::BACK * CAMERA_DISTANCE;
                 Vector3 seg = destPos - startPos;
@@ -3842,6 +3847,9 @@ void MayaScape::MoveCamera() {
                 // Move camera some distance away from the ball
                 cameraNode_->SetPosition(destPos);
                 showInstructions = true;
+            } else {
+                URHO3D_LOGINFO("--- Could not get NetworkActor, aborting.");
+                SaveScene(false);
             }
         } else {
             URHO3D_LOGINFO("--- Could not find controllable object, aborting.");
@@ -3967,7 +3975,19 @@ void MayaScape::HandleConnect(StringHash eventType, VariantMap& eventData)
 
         UpdateButtons();
 
-        MoveCamera();
+        //MoveCamera();
+
+
+               //URHO3D_LOGINFOF("Client: Scene checksum -> %d", scene_->GetChecksum());
+
+        // Save initial scene for debugging
+        //SaveScene(true);
+
+
+
+        // On client
+        //player_->vehicle_->SetVisible(true);
+
 
         //     player_->vehicle_->SetVisible(true);
     /*
@@ -4006,7 +4026,12 @@ void MayaScape::HandleStartServer(StringHash eventType, VariantMap& eventData)
         engine_->Exit();
     }
 
+    // Save initial scene for server
+   // initialScene_ = SaveScene(true);
+
     // Server code
+    //File sceneFile(context_, initialScene_, FILE_READ);
+    //server->InitializeScene(sceneFile);
 
     // create Admin
     CreateAdminPlayer();
@@ -4055,16 +4080,58 @@ void MayaScape::HandleConnectionStatus(StringHash eventType, VariantMap& eventDa
 void MayaScape::HandleClientObjectID(StringHash eventType, VariantMap& eventData)
 {
     // On client
+    // server requires client hash and scene info
+    Server *server = GetSubsystem<Server>();
 
     URHO3D_LOGINFO("*** HandleClientObjectID");
 
     // Client stores client object id
     clientObjectID_ = eventData[ClientObjectID::P_ID].GetUInt();
 
+    URHO3D_LOGINFOF("Client -> HandleClientObjectID: %u", clientObjectID_);
+
+    URHO3D_LOGINFOF("Client -> scene checksum: %d", ToStringHex(scene_->GetChecksum()).CString());
+
+
+    auto* network = GetSubsystem<Network>();
+    Connection* serverConnection = network->GetServerConnection();
+
+    if (serverConnection)
+    {
+        // A VectorBuffer object is convenient for constructing a message to send
+        VectorBuffer msg;
+        msg.WriteString("hello!");
+        // Send the chat message as in-order and reliable
+        serverConnection->SendMessage(MSG_NODE_ERROR, true, true, msg);
+        // Empty the text edit after sending
+        textEdit_->SetText(String::EMPTY);
+
+        URHO3D_LOGINFOF("Client -> sent node error message: %s", msg.GetData());
+    }
+
+
+    Node *actorNode = nullptr;
+    int attempts = 0;
+
+    while ((actorNode == nullptr) && (attempts < 5)) {
+        actorNode = scene_->GetNode(clientObjectID_);
+
+        if (!actorNode) {
+            URHO3D_LOGINFO("Client -> could not retrieve actorNode, waiting 500 ms and trying again.");
+            // Wait 500 ms and try again
+            Time::Sleep(500);
+            attempts++;
+
+        }
+    }
+    if (!actorNode) {
+        URHO3D_LOGINFO("Client -> could not retrieve actorNode, exiting.");
+        engine_->Exit();
+    }
+    URHO3D_LOGINFOF("Client -> actorNode: %d", actorNode->GetID());
 
     // Apply transformations to camera
-    MoveCamera();
-
+    MoveCamera(actorNode);
 }
 
 
@@ -4193,6 +4260,17 @@ void MayaScape::HandleNetworkMessage(StringHash /*eventType*/, VariantMap& event
     using namespace NetworkMessage;
 
     int msgID = eventData[P_MESSAGEID].GetInt();
+
+    URHO3D_LOGINFOF("HandleNetworkMessage: msgID -> %d", msgID);
+
+    if (msgID == MSG_NODE_ERROR)
+    {
+        // Client cannot get Network Actor, resend
+        scene_->MarkReplicationDirty(scene_);
+        scene_->MarkNetworkUpdate();
+    }
+
+
     if (msgID == MSG_CHAT)
     {
         const PODVector<unsigned char>& data = eventData[P_DATA].GetBuffer();
@@ -4216,4 +4294,20 @@ void MayaScape::HandleNetworkMessage(StringHash /*eventType*/, VariantMap& event
 
         ShowChatText(text);
     }
+}
+
+void MayaScape::HandleClientSceneLoaded(StringHash eventType, VariantMap& eventData)
+{
+    using namespace ClientSceneLoaded;
+    URHO3D_LOGINFO("MayaScape::HandleClientSceneLoaded");
+}
+
+
+String MayaScape::SaveScene(bool initial) {
+    String filename = "MayaScape_demo";
+    if (!initial)
+        filename += "InGame";
+    File saveFile(context_, GetSubsystem<FileSystem>()->GetProgramDir() + "Data/Scenes/" + filename + ".xml", FILE_WRITE);
+    scene_->SaveXML(saveFile);
+    return saveFile.GetName();
 }

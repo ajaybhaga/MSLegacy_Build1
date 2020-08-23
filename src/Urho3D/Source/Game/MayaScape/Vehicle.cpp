@@ -1001,7 +1001,7 @@ void Vehicle::HandleVehicleCollision(StringHash eventType, VariantMap & eventDat
     // decrease health if player player collides with boids
 //    Player* player = static_cast<Player*>(eventData["owner"].GetPtr());
 
-    URHO3D_LOGDEBUGF("collide node name: [%s]", collidedNode->GetName().CString());
+   // URHO3D_LOGDEBUGF("collide node name: [%s]", collidedNode->GetName().CString());
     // Get the other colliding body, make sure it is moving (has nonzero mass)
     auto* otherBody = static_cast<RigidBody*>(eventData[P_OTHERBODY].GetPtr());
 

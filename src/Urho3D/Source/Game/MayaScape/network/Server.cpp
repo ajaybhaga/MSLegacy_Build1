@@ -57,6 +57,14 @@ void Server::RegisterClientHashAndScene(StringHash clientHash, Scene *scene)
     scene_ = scene;
 }
 
+void Server::InitializeScene(File &file)
+{
+    scene_->InstantiateXML(file, Vector3::ZERO, Quaternion());
+    File saveFile(context_, GetSubsystem<FileSystem>()->GetProgramDir() + "Data/Scenes/" + "MayaScape-ServerSceneInit.xml", FILE_WRITE);
+    scene_->SaveXML(saveFile);
+    URHO3D_LOGINFOF("InitializeScene: Scene checksum -> %s", ToStringHex(scene_->GetChecksum()).CString());
+}
+
 bool Server::StartServer(unsigned short port)
 {
     return GetSubsystem<Network>()->StartServer(port);
@@ -200,6 +208,8 @@ void Server::HandleClientIdentity(StringHash eventType, VariantMap& eventData)
     newConnection->SetScene(scene_);
 
     URHO3D_LOGINFO("HandleClientIdentity - client assigned for scene replication.");
+    URHO3D_LOGINFOF("Server: Scene checksum -> %s", ToStringHex(scene_->GetChecksum()).CString());
+
 
     // Then create a controllable object for that client
     Node* clientObject = CreateClientObject(newConnection);
@@ -218,6 +228,8 @@ void Server::HandleClientSceneLoaded(StringHash eventType, VariantMap& eventData
 {
 	using namespace ClientSceneLoaded;
     URHO3D_LOGINFO("HandleClientSceneLoaded");
+    URHO3D_LOGINFOF("Server: Scene checksum -> %s", ToStringHex(scene_->GetChecksum()).CString());
+
 }
 
 void Server::HandleNetworkUpdateSent(StringHash eventType, VariantMap& eventData)
@@ -230,10 +242,12 @@ void Server::HandleNetworkUpdateSent(StringHash eventType, VariantMap& eventData
     {
         if (clientObjectID_)
         {
+
             Node *clientNode = scene_->GetChild(clientObjectID_);
 
             if (clientNode)
             {
+
                 ClientObj *clientObj = clientNode->GetDerivedComponent<ClientObj>();
 
                 if (clientObj)
@@ -304,6 +318,41 @@ void Server::HandleClientObjectID(StringHash eventType, VariantMap& eventData)
     URHO3D_LOGINFOF("HandleClientObjectID: clientID = %u", clientObjectID_);
 
     clientObjectID_ = eventData[ClientObjectID::P_ID].GetUInt();
+
+/*
+
+
+    // This function is different on the client and server. The client collects controls (WASD controls + yaw angle)
+    // and sets them to its server connection object, so that they will be sent to the server automatically at a
+    // fixed rate, by default 30 FPS. The server will actually apply the controls (authoritative simulation.)
+    Network* network = GetSubsystem<Network>();
+    Connection* serverConnection = network->GetServerConnection();
+
+    // Server: apply controls to client objects
+    if (network->IsServerRunning())
+    {
+        const Vector<SharedPtr<Connection> >& connections = network->GetClientConnections();
+
+        for (unsigned i = 0; i < connections.Size(); ++i)
+        {
+            Connection* connection = connections[i];
+
+            // Get the object this connection is controlling
+            Node* clientNode = serverObjects_[connection];
+
+            if (!clientNode)
+                continue;
+
+            clientNode->MarkNetworkUpdate();
+
+            ClientObj* clientObj = clientNode->GetDerivedComponent<ClientObj>();
+            if (clientObj)
+            {
+  //              clientObj->SetControls(controls);
+            }
+        }
+    }*/
+//    return GetSubsystem<Network>()->StartServer(port);
 
 }
 

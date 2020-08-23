@@ -68,6 +68,8 @@ public:
     bool Connect(const String &address, unsigned short port, const VariantMap& identity = Variant::emptyVariantMap);
     void Disconnect();
 
+    void InitializeScene(File &file);
+
     Node* CreateClientObject(Connection *connection);
     void UpdatePhysicsPreStep(const Controls &controls);
 

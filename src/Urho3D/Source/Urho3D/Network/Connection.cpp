@@ -917,6 +917,8 @@ void Connection::ProcessSceneLoaded(int msgID, MemoryBuffer& msg)
 
     unsigned checksum = msg.ReadUInt();
 
+    URHO3D_LOGINFOF("msg checksum [%s] = scene checksum [%s]", ToStringHex(checksum).CString(), ToStringHex(scene_->GetChecksum()).CString());
+
     if (checksum != scene_->GetChecksum())
     {
         URHO3D_LOGINFO("Scene checksum error from client " + ToString());

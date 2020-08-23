@@ -105,7 +105,7 @@ class MayaScape : public Game
 {
     URHO3D_OBJECT(MayaScape, Game);
 
-    void MoveCamera();
+    void MoveCamera(Node *actorNode);
 
 public:
     /// Construct.
@@ -194,8 +194,11 @@ private:
 
     void OutputLoginListToConsole();
 
+    void HandleClientSceneLoaded(StringHash eventType, VariantMap& eventData);
+    String SaveScene(bool initial);
 
-        bool started_; // Is Game started?
+    String initialScene_;
+    bool started_; // Is Game started?
     Vector<Urho3D::String> loginList_;
 
     SharedPtr<Window> msgWindow_;
