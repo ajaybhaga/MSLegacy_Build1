@@ -604,7 +604,6 @@ void MayaScape::CreatePlayer() {
 
     // Player is replaced with NetworkActor -> which is a Player
     player_ = playerNode->CreateComponent<NetworkActor>(REPLICATED);
-    //player_->Init();
     player_->isServer_ = isServer_;
 
     player_->SetWaypoints(&waypointsWorld_);
@@ -616,18 +615,7 @@ void MayaScape::CreatePlayer() {
     TerrainPatch* p = terrain_->GetPatch(0, 0);
     IntVector2 v = p->GetCoordinates();
 
-    playerNode->SetRotation(Quaternion(0.0, -90.0, 0.0));
-}
-
-void MayaScape::SetCameraTarget() {
-
-    auto vehicleNode = player_->GetVehicle()->GetNode();
-    // smooth step
-    vehicleRot_ = vehicleNode->GetRotation();
-    Quaternion dir(vehicleRot_.YawAngle(), Vector3::UP);
-    dir = dir * Quaternion(player_->GetVehicle()->controls_.yaw_, Vector3::UP);
-    dir = dir * Quaternion(player_->GetVehicle()->controls_.pitch_, Vector3::RIGHT);
-    targetCameraPos_ = vehicleNode->GetPosition() - dir * Vector3(0.0f, 0.0f, CAMERA_DISTANCE);
+    playerNode->SetRotation(Quaternion(0.0, -0.0, -0.0));
 }
 
 void MayaScape::CreateScene() {
@@ -3310,78 +3298,6 @@ void MayaScape::HandlePostUpdate(StringHash eventType, VariantMap &eventData) {
     }
 
 
-    if (player_->GetVehicle()->GetNode()) {
-
-        using namespace Update;
-        float timeStep = eventData[P_TIMESTEP].GetFloat();
-
-        Node *vehicleNode = player_->GetVehicle()->GetNode();
-//vehicleNode = NULL -> this is the problem
-
-        // smooth step
-        const float rotLerpRate = 10.0f;
-        const float maxVel = 50.0f;
-        const float damping = 0.2f;
-
-        // Physics update has completed. Position camera behind vehicle
-        vehicleRot_ = SmoothStepAngle(vehicleRot_, vehicleNode->GetRotation(), timeStep * rotLerpRate);
-        Quaternion dir(vehicleRot_.YawAngle(), Vector3::UP);
-        dir = dir * Quaternion(player_->GetVehicle()->controls_.yaw_, Vector3::UP);
-        dir = dir * Quaternion(player_->GetVehicle()->controls_.pitch_, Vector3::RIGHT);
-
-        // Calculate ray based on focus object
-        float curDist = (focusObjects_[focusIndex_] - targetCameraPos_).Length();
-        curDist = SpringDamping(curDist, CAMERA_DISTANCE, springVelocity_, damping, maxVel, timeStep);
-
-        // Calculate position based on focus object
-        Vector3 targetPos = focusObjects_[focusIndex_] - dir * Vector3(0.0f, 0.0f, curDist);
-
-        // Set camera target position
-        targetCameraPos_ = targetPos;
-
-        Vector3 cameraTargetPos = targetCameraPos_;
-        Vector3 cameraStartPos = focusObjects_[focusIndex_];
-
-        // Raycast camera against static objects (physics collision mask 2)
-        // and move it closer to the vehicle if something in between
-        Ray cameraRay(cameraStartPos, cameraTargetPos - cameraStartPos);
-        float cameraRayLength = (cameraTargetPos - cameraStartPos).Length();
-        PhysicsRaycastResult result;
-
-        if ((!isServer_) && (started_)) {
-            if (scene_->GetComponent<PhysicsWorld>()) {
-
-                scene_->GetComponent<PhysicsWorld>()->RaycastSingle(result, cameraRay, cameraRayLength, 2);
-                if (result.body_)
-                    cameraTargetPos = cameraStartPos + cameraRay.direction_ * (result.distance_ - 0.5f);
-            }
-        }
-//        cameraNode_->SetPosition(cameraTargetPos);
-//        cameraNode_->SetRotation(dir);
-
-
-        // On client
-        if (!isServer_) {
-
-            if (started_) {
-
-                // Always show waypoints
-                player_->DebugDraw(Color::MAGENTA);
-            }
-        }
-
-        if (drawDebug_) {
-  //          scene_->GetComponent<PhysicsWorld>()->DrawDebugGeometry(true);
-//            player_->GetVehicle()->DebugDraw(Color::MAGENTA);
-
-//               terrain_->SetViewMask(0);
-
-            trackColShape_->DrawDebugGeometry(scene_->GetComponent<DebugRenderer>(), false);
-
-        }
-
-    }
-
 //    targetCameraPos_ = Vector3(0.0f, 60.0f, CAMERA_DISTANCE);
 //    cameraNode_->SetPosition(targetCameraPos_);
 //    cameraNode_->SetRotation(Quaternion(30.0, 0.0, 0.0));
@@ -3417,8 +3333,12 @@ void MayaScape::HandlePostUpdate(StringHash eventType, VariantMap &eventData) {
     actorNode = scene_->GetNode(clientObjectID_);
 
     if (actorNode) {
+
+        using namespace Update;
+        float timeStep = eventData[P_TIMESTEP].GetFloat();
+
         // Apply transformations to camera
-        MoveCamera(actorNode);
+        MoveCamera(actorNode, timeStep);
     }
 
 }
@@ -3803,7 +3723,7 @@ void MayaScape::UpdateButtons()
 }
 
 
-void MayaScape::MoveCamera(Node *actorNode) {
+void MayaScape::MoveCamera(Node *actorNode, float timeStep) {
     // Right mouse button controls mouse cursor visibility: hide when pressed
     UI *ui = GetSubsystem<UI>();
     Input *input = GetSubsystem<Input>();
@@ -3837,10 +3757,108 @@ void MayaScape::MoveCamera(Node *actorNode) {
                 //URHO3D_LOGINFOF("--- Found controllable object: %u", clientObjectID_);
 
                 if (actorNode) {
-                    const float CAMERA_DISTANCE = 5.0f;
+                    const float CAMERA_DISTANCE = 15.0f;
 
                     Vector3 startPos = actorNode->GetPosition();
-                URHO3D_LOGINFOF("--- Found controllable object -> position: [%f, %f, %f] ", actorNode->GetPosition().x_, actorNode->GetPosition().y_, actorNode->GetPosition().z_);
+                    URHO3D_LOGINFOF("--- Found controllable object -> position: [%f, %f, %f] ", actorNode->GetPosition().x_, actorNode->GetPosition().y_, actorNode->GetPosition().z_);
+
+                    // Snap camera to vehicle once available
+
+                        // smooth step
+                        const float rotLerpRate = 10.0f;
+                        const float maxVel = 50.0f;
+                        const float damping = 0.2f;
+
+//                    vehicleRot_ = vehicleNode->GetRotation();
+                        // Physics update has completed. Position camera behind vehicle
+/*                        vehicleRot_ = SmoothStepAngle(vehicleRot_, player_->GetNode()->GetRotation(), timeStep * rotLerpRate);*/
+                        Quaternion dir(vehicleRot_.YawAngle(), Vector3::UP);
+ //                       dir = dir * Quaternion(player_->GetVehicle()->controls_.yaw_, Vector3::UP);
+//                        dir = dir * Quaternion(player_->GetVehicle()->controls_.pitch_, Vector3::RIGHT);
+
+                        // Calculate ray based on focus object
+//                    float curDist = (focusObjects_[focusIndex_] - targetCameraPos_).Length();
+                        float curDist = (actorNode->GetPosition() - targetCameraPos_).Length();
+                        curDist = SpringDamping(curDist, CAMERA_DISTANCE, springVelocity_, damping, maxVel, timeStep);
+
+                        // Calculate position based on focus object
+                        Vector3 targetPos = actorNode->GetPosition() - dir * Vector3(0.0f, 0.0f, curDist);
+
+                        // Set camera target position
+                        targetCameraPos_ = targetPos;
+
+                        Vector3 cameraTargetPos = targetCameraPos_;
+                        Vector3 cameraStartPos = actorNode->GetPosition();
+
+                        // Raycast camera against static objects (physics collision mask 2)
+                        // and move it closer to the vehicle if something in between
+                        Ray cameraRay(cameraStartPos, cameraTargetPos - cameraStartPos);
+                        float cameraRayLength = (cameraTargetPos - cameraStartPos).Length();
+                        PhysicsRaycastResult result;
+
+                        if ((!isServer_) && (started_)) {
+                            if (scene_->GetComponent<PhysicsWorld>()) {
+
+                                scene_->GetComponent<PhysicsWorld>()->RaycastSingle(result, cameraRay, cameraRayLength,
+                                                                                    NETWORKACTOR_COL_LAYER);
+                                if (result.body_)
+                                    cameraTargetPos = cameraStartPos + cameraRay.direction_ * (result.distance_ - 0.5f);
+                            }
+                        }
+
+                        // Apply camera transformations
+                        cameraNode_->SetPosition(cameraTargetPos);
+                        cameraNode_->SetRotation(dir);
+
+                    // On client
+                    if (!isServer_) {
+
+                        if (started_) {
+
+                            // Always show waypoints
+//                            player_->DebugDraw(Color::MAGENTA);
+                        }
+                    }
+
+                    if (drawDebug_) {
+                        //          scene_->GetComponent<PhysicsWorld>()->DrawDebugGeometry(true);
+//            player_->GetVehicle()->DebugDraw(Color::MAGENTA);
+
+//               terrain_->SetViewMask(0);
+
+            //            trackColShape_->DrawDebugGeometry(scene_->GetComponent<DebugRenderer>(), false);
+
+                    }
+
+
+
+
+/*
+                    // Calculate ray based on focus object
+                    float curDist = (focusObjects_[focusIndex_] - targetCameraPos_).Length();
+                    curDist = SpringDamping(curDist, CAMERA_DISTANCE, springVelocity_, damping, maxVel, timeStep);
+
+                    // Calculate position based on focus object
+                    Vector3 targetPos = actorNode->GetPosition() - dir * Vector3(0.0f, 0.0f, curDist);
+
+                    // Set camera target position
+                    targetCameraPos_ = targetPos;
+
+                    Vector3 cameraTargetPos = targetCameraPos_;
+                    Vector3 cameraStartPos = actorNode->GetPosition();
+
+                    // Raycast camera against static objects (physics collision mask 2)
+                    // and move it closer to the vehicle if something in between
+                    Ray cameraRay(cameraStartPos, cameraTargetPos - cameraStartPos);
+                    float cameraRayLength = (cameraTargetPos - cameraStartPos).Length();
+                    PhysicsRaycastResult result;
+
+                    scene_->GetComponent<PhysicsWorld>()->RaycastSingle(result, cameraRay, cameraRayLength, NETWORKACTOR_COL_LAYER);
+                    if (result.body_)
+                        cameraTargetPos = cameraStartPos + cameraRay.direction_ * (result.distance_ - 0.5f);
+
+
+
 
 
                     Vector3 destPos =
@@ -3849,13 +3867,17 @@ void MayaScape::MoveCamera(Node *actorNode) {
                     Ray cameraRay(startPos, seg.Normalized());
                     float cameraRayLength = seg.Length();
                     PhysicsRaycastResult result;
-                    scene_->GetComponent<PhysicsWorld>()->SphereCast(result, cameraRay, 0.2f, cameraRayLength,
+                    scene_->GetComponent<PhysicsWorld>()->SphereCast(result, cameraRay, 1.0f, cameraRayLength,
                                                                      NETWORKACTOR_COL_LAYER);
                     if (result.body_)
                         destPos = startPos + cameraRay.direction_ * result.distance_;
 
                     // Move camera some distance away from the ball
                     cameraNode_->SetPosition(destPos);
+*/
+
+
+
                     showInstructions = true;
                 } else {
                     URHO3D_LOGINFO("--- Could not get NetworkActor, aborting.");
@@ -3984,8 +4006,6 @@ void MayaScape::HandleConnect(StringHash eventType, VariantMap& eventData)
         textEdit_->SetText(String::EMPTY);
 
         UpdateButtons();
-
-        //MoveCamera();
 
 
                //URHO3D_LOGINFOF("Client: Scene checksum -> %d", scene_->GetChecksum());
@@ -4124,8 +4144,12 @@ void MayaScape::HandleClientObjectID(StringHash eventType, VariantMap& eventData
 
     if (actorNode) {
 //        URHO3D_LOGINFOF("Client -> actorNode: %d", actorNode->GetID());
+
+        using namespace Update;
+        float timeStep = eventData[P_TIMESTEP].GetFloat();
+
         // Apply transformations to camera
-        MoveCamera(actorNode);
+        MoveCamera(actorNode, timeStep);
     }
 }
 

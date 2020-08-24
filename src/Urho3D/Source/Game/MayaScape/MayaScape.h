@@ -105,7 +105,8 @@ class MayaScape : public Game
 {
     URHO3D_OBJECT(MayaScape, Game);
 
-    void MoveCamera(Node *actorNode);
+
+    void MoveCamera(Node *actorNode, float timeStep);
 
 public:
     /// Construct.
@@ -149,9 +150,7 @@ private:
     /// Construct the scene content.
     void CreateScene();
     void CreatePlayer();
-    void SetCameraTarget();
     void CreateAgents();
-
 
         /// Subscribe to application-wide logic update events.
     void SubscribeToEvents();

@@ -78,23 +78,10 @@ void NetworkActor::DelayedStart()
 
 void NetworkActor::Create()
 {
-    //
-
     ResourceCache* cache = GetSubsystem<ResourceCache>();
 
     Node* adjNode = node_->CreateChild("AdjNode");
     adjNode->SetRotation(Quaternion(0.0, 0.0, -90.0f));
-
-
-    ///
-/*
-    // model
-    StaticModel* ballModel = node_->GetOrCreateComponent<StaticModel>();
-    ballModel->SetModel(cache->GetResource<Model>("Models/Sphere.mdl"));
-    String matName = ToString("NetDemo/ballmat%i.xml", colorIdx_);
-    ballModel->SetMaterial(cache->GetResource<Material>(matName));
-    ballModel->SetCastShadows(true);
-*/
 
 
     // Init vehicle
@@ -113,10 +100,7 @@ void NetworkActor::Create()
     targetAgentIndex_ = 0;
 
     // physics components
-//    pRigidBody_ = vehicleNode->CreateComponent<RigidBody>();
-//    pRigidBody_->SetMass(1.0f);
 //    pRigidBody_->SetUseGravity(false);
-    //   pRigidBody_->SetTrigger(true);
 
     pRigidBody_ = node_->GetOrCreateComponent<RigidBody>();
     pRigidBody_->SetCollisionLayer(NETWORKACTOR_COL_LAYER);
@@ -134,7 +118,7 @@ void NetworkActor::Create()
     nodeInfo_->SetPosition(node_->GetPosition() + Vector3(0.0f, 1.1f, 0.0f));
     Text3D *text3D = nodeInfo_->CreateComponent<Text3D>();
     text3D->SetColor(Color::GREEN);
-    text3D->SetFont(cache->GetResource<Font>("Fonts/Anonymous Pro.ttf"), 12);
+    text3D->SetFont(cache->GetResource<Font>("Fonts/Anonymous Pro.ttf"), 16);
     text3D->SetText(userName_);
     text3D->SetFaceCameraMode(FC_ROTATE_XYZ);
 
