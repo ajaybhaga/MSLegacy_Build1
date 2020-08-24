@@ -492,7 +492,7 @@ void MayaScape::CreateAgents() {
         //pbNode->SetPosition(Vector3(3.5f+Random(-2.0f,2.0f), 20.0f, 0.0f));
         pbNode->SetPosition(Vector3(-0.02f, 0.25f, 0.0f));
 //        pbNode->SetScale(Vector3(0.5f,0.5f,0.5f));
-        auto *billboardObject = pbNode->CreateComponent<BillboardSet>();
+        auto *billboardObject = pbNode->CreateComponent<BillboardSet>(LOCAL);
         billboardObject->SetNumBillboards(NUM_BILLBOARDS);
         billboardObject->SetMaterial(cache->GetResource<Material>("Materials/PowerBar.xml"));
         billboardObject->SetSorted(true);
@@ -646,15 +646,12 @@ void MayaScape::CreateScene() {
     // Create octree and physics world with default settings
     // Create them as local so that they are not needlessly replicated when a client connects
     scene_->CreateComponent<Octree>(LOCAL);
+    PhysicsWorld *physicsWorld = scene_->CreateComponent<PhysicsWorld>(LOCAL);
+    DebugRenderer *dbgRenderer = scene_->CreateComponent<DebugRenderer>(LOCAL);
+    physicsWorld->SetDebugRenderer(dbgRenderer);
 
-    if (isServer_) {
-        PhysicsWorld *physicsWorld = scene_->CreateComponent<PhysicsWorld>(LOCAL);
-        DebugRenderer *dbgRenderer = scene_->CreateComponent<DebugRenderer>(LOCAL);
-        physicsWorld->SetDebugRenderer(dbgRenderer);
-
-        // On server disable interpolation
-        physicsWorld->SetInterpolation(false);
-    }
+    // On server disable interpolation
+    physicsWorld->SetInterpolation(false);
 
     // On client
     if (!isServer_) {
@@ -663,12 +660,12 @@ void MayaScape::CreateScene() {
         // so that it won't be destroyed and recreated, and we don't have to redefine the viewport on load
         cameraNode_ = scene_->CreateChild("Camera", LOCAL);
 //    cameraNode_ = new Node(context_);
-        auto *camera = cameraNode_->CreateComponent<Camera>();
+        auto *camera = cameraNode_->CreateComponent<Camera>(LOCAL);
         camera->SetFarClip(500.0f);
         cameraNode_->SetPosition(Vector3(0.0f, 5.0f, 0.0f));
 
         // Enable for 3D sounds to work (attach to camera node)
-        SoundListener *listener = cameraNode_->CreateComponent<SoundListener>();
+        SoundListener *listener = cameraNode_->CreateComponent<SoundListener>(LOCAL);
         GetSubsystem<Audio>()->SetListener(listener);
 
         // you can set master volumes for the different kinds if sounds, here 30% for music
@@ -677,7 +674,7 @@ void MayaScape::CreateScene() {
         // Create a directional light with shadows
         Node *lightNode = scene_->CreateChild("DirectionalLight", LOCAL);
         lightNode->SetDirection(Vector3(0.3f, -0.5f, 0.425f));
-        Light *light = lightNode->CreateComponent<Light>();
+        Light *light = lightNode->CreateComponent<Light>(LOCAL);
         light->SetLightType(LIGHT_DIRECTIONAL);
         light->SetCastShadows(true);
         light->SetShadowBias(BiasParameters(0.00025f, 0.5f));
@@ -691,7 +688,7 @@ void MayaScape::CreateScene() {
 
         // Create static scene content. First create a zone for ambient lighting and fog control
         Node *zoneNode = scene_->CreateChild("Zone", LOCAL);
-        Zone *zone = zoneNode->CreateComponent<Zone>();
+        Zone *zone = zoneNode->CreateComponent<Zone>(LOCAL);
         zone->SetAmbientColor(Color(0.15f, 0.15f, 0.15f));
         zone->SetFogColor(Color(0.5f, 0.5f, 0.7f));
         zone->SetFogStart(700.0f);
@@ -823,11 +820,11 @@ void MayaScape::CreateScene() {
 
         powerBarText_ = ui->GetRoot()->CreateChild<Text>("powerBarText");
         powerBarText_->SetAlignment(HA_LEFT, VA_TOP);
-        powerBarText_->SetPosition(300.0f-textOverlap, 20.0);
+        powerBarText_->SetPosition(300.0f - textOverlap, 20.0);
         powerBarText_->SetFont(font, 15);
         powerBarText_->SetTextEffect(TE_SHADOW);
         powerBarText_->SetText(String("HEALTH"));
-        powerBarText_ ->SetVisible(false);
+        powerBarText_->SetVisible(false);
 
         int textureWidth;
         int textureHeight;
@@ -858,11 +855,11 @@ void MayaScape::CreateScene() {
 
         rpmBarText_ = ui->GetRoot()->CreateChild<Text>("rpmBarText");
         rpmBarText_->SetAlignment(HA_LEFT, VA_TOP);
-        rpmBarText_->SetPosition(300.0f-textOverlap, 170.0);
+        rpmBarText_->SetPosition(300.0f - textOverlap, 170.0);
         rpmBarText_->SetFont(font, 15);
         rpmBarText_->SetTextEffect(TE_SHADOW);
         rpmBarText_->SetText(String("RPM"));
-        rpmBarText_ ->SetVisible(false);
+        rpmBarText_->SetVisible(false);
 
 
         textureWidth = rpmBarTexture->GetWidth();
@@ -891,11 +888,11 @@ void MayaScape::CreateScene() {
 
         velBarText_ = ui->GetRoot()->CreateChild<Text>("velBarText");
         velBarText_->SetAlignment(HA_LEFT, VA_TOP);
-        velBarText_->SetPosition(300.0f-textOverlap, 90.0);
+        velBarText_->SetPosition(300.0f - textOverlap, 90.0);
         velBarText_->SetFont(font, 15);
         velBarText_->SetTextEffect(TE_SHADOW);
         velBarText_->SetText(String("SPEED"));
-        velBarText_ ->SetVisible(false);
+        velBarText_->SetVisible(false);
 
         textureWidth = rpmBarTexture->GetWidth();
         textureHeight = rpmBarTexture->GetHeight();
@@ -930,7 +927,7 @@ void MayaScape::CreateScene() {
 
         miniMapP1Sprite_->SetScale(0.4);//256.0f / textureWidth);
         miniMapP1Sprite_->SetSize(textureWidth, textureHeight);
-        miniMapP1Sprite_->SetHotSpot(textureWidth/2, textureHeight/2);
+        miniMapP1Sprite_->SetHotSpot(textureWidth / 2, textureHeight / 2);
         miniMapP1Sprite_->SetAlignment(HA_LEFT, VA_TOP);
 //    miniMapP1Sprite_->SetPosition(Vector2(miniMapP1X-16.0f, miniMapP1Y));
 //    miniMapP1Sprite_->SetPosition(Vector2(miniMapP1X+256.0f-16.0f, miniMapP1Y));
@@ -948,7 +945,7 @@ void MayaScape::CreateScene() {
 
         miniMapWPSprite_->SetScale(0.4);//256.0f / textureWidth);
         miniMapWPSprite_->SetSize(textureWidth, textureHeight);
-        miniMapWPSprite_->SetHotSpot(textureWidth/2, textureHeight/2);
+        miniMapWPSprite_->SetHotSpot(textureWidth / 2, textureHeight / 2);
         miniMapWPSprite_->SetAlignment(HA_LEFT, VA_TOP);
 //    miniMapP1Sprite_->SetPosition(Vector2(miniMapP1X-16.0f, miniMapP1Y));
 //    miniMapP1Sprite_->SetPosition(Vector2(miniMapP1X+256.0f-16.0f, miniMapP1Y));
@@ -961,14 +958,14 @@ void MayaScape::CreateScene() {
         textureWidth = miniMapBkgTexture->GetWidth();
         textureHeight = miniMapBkgTexture->GetHeight();
 
-        float miniMapX = 1000.0f+45.0f;
-        float miniMapY = 300.0f-15.0f;
+        float miniMapX = 1000.0f + 45.0f;
+        float miniMapY = 300.0f - 15.0f;
 
         miniMapBkgSprite_->SetScale(256.0f / textureWidth);
         miniMapBkgSprite_->SetSize(textureWidth, textureHeight);
         miniMapBkgSprite_->SetHotSpot(textureWidth, textureHeight);
         miniMapBkgSprite_->SetAlignment(HA_LEFT, VA_TOP);
-        miniMapBkgSprite_->SetPosition(Vector2(miniMapX,  miniMapY));
+        miniMapBkgSprite_->SetPosition(Vector2(miniMapX, miniMapY));
         miniMapBkgSprite_->SetOpacity(0.2f);
         // Set a low priority so that other UI elements can be drawn on top
         miniMapBkgSprite_->SetPriority(-100);
@@ -985,7 +982,7 @@ void MayaScape::CreateScene() {
         markerMapBkgSprite_->SetSize(textureWidth, textureHeight);
         markerMapBkgSprite_->SetHotSpot(textureWidth, textureHeight);
         markerMapBkgSprite_->SetAlignment(HA_LEFT, VA_TOP);
-        markerMapBkgSprite_->SetPosition(Vector2(miniMapX,  miniMapY));
+        markerMapBkgSprite_->SetPosition(Vector2(miniMapX, miniMapY));
         markerMapBkgSprite_->SetOpacity(0.5f);
         // Set a low priority so that other UI elements can be drawn on top
         miniMapBkgSprite_->SetPriority(-100);
@@ -996,13 +993,13 @@ void MayaScape::CreateScene() {
         textureHeight = steerWheelTexture->GetHeight();
 
         float steerWheelX = 900.0f;
-        float steerWheelY = 600.0f-15.0f;
+        float steerWheelY = 600.0f - 15.0f;
 
         steerWheelSprite_->SetScale(256.0f / textureWidth);
         steerWheelSprite_->SetSize(textureWidth, textureHeight);
-        steerWheelSprite_->SetHotSpot(textureWidth/2, textureHeight/2);
+        steerWheelSprite_->SetHotSpot(textureWidth / 2, textureHeight / 2);
         steerWheelSprite_->SetAlignment(HA_LEFT, VA_TOP);
-        steerWheelSprite_->SetPosition(Vector2(steerWheelX,  steerWheelY));
+        steerWheelSprite_->SetPosition(Vector2(steerWheelX, steerWheelY));
         steerWheelSprite_->SetOpacity(0.5f);
         // Set a low priority so that other UI elements can be drawn on top
         steerWheelSprite_->SetPriority(-100);
@@ -1042,6 +1039,7 @@ void MayaScape::CreateScene() {
             debugData1.append("-");
             debugText_[i]->SetText(debugData1.c_str());
         }
+    }
 
 
         /*
@@ -1053,7 +1051,6 @@ void MayaScape::CreateScene() {
         lifeText->SetVisible(false);
 
     */
-        using namespace std;
 
 
 /*
@@ -1346,7 +1343,6 @@ void MayaScape::CreateScene() {
 
 
 
-    }
     /*
     // Create a directional light with cascaded shadow mapping
     Node* lightNode = scene_->CreateChild("DirectionalLight");
@@ -1358,9 +1354,10 @@ void MayaScape::CreateScene() {
     light->SetShadowCascade(CascadeParameters(10.0f, 50.0f, 200.0f, 0.0f, 0.8f));
     light->SetSpecularIntensity(0.5f);
 */
-///
 
-    // Create heightmap terrain with collision
+    using namespace std;
+
+// Create heightmap terrain with collision
     Node* terrainNode = scene_->CreateChild("Terrain", LOCAL);
     terrainNode->SetPosition(Vector3::ZERO);
     terrain_ = terrainNode->CreateComponent<Terrain>();
@@ -1375,7 +1372,6 @@ void MayaScape::CreateScene() {
     terrain_->SetMaterial(cache->GetResource<Material>("Materials/Terrain.xml"));
 
     terrain_->SetOccluder(true);
-    terrain_->SetEnabled(false);
 
     // TRACK MARKER
     // HSL -> 0.500000059604645,1,0.643137276172638
@@ -1418,9 +1414,9 @@ void MayaScape::CreateScene() {
     URHO3D_LOGINFOF("***** TREE COUNT: [%d]", trees_.Size());
     URHO3D_LOGINFOF("***** WAYPOINT COUNT: [%d]", waypoints_.Size());
 
-    RigidBody* body = terrainNode->CreateComponent<RigidBody>();
-    body->SetCollisionLayer(2); // Use layer bitmask 2 for static geometry
-    CollisionShape* shape = terrainNode->CreateComponent<CollisionShape>();
+    RigidBody* body = terrainNode->CreateComponent<RigidBody>(LOCAL);
+    body->SetCollisionLayer(NETWORKACTOR_COL_LAYER); // Use layer bitmask 2 for static geometry
+    CollisionShape* shape = terrainNode->CreateComponent<CollisionShape>(LOCAL);
 
     // Assigns terrain collision map (calculated based on heightmap)
     shape->SetTerrain();
@@ -1459,7 +1455,7 @@ void MayaScape::CreateScene() {
 
         raceTrack_->SetScale(30.0f);
 
-        auto* object = adjNode->CreateComponent<StaticModel>();
+        auto* object = adjNode->CreateComponent<StaticModel>(LOCAL);
         std::string mdlPath = "Models/Tracks/Models/trackA.mdl";
         std::string matPath = "Models/Tracks/Models/trackA.txt";
         auto* model = cache->GetResource<Model>(mdlPath.c_str());
@@ -1468,9 +1464,9 @@ void MayaScape::CreateScene() {
         object->SetCastShadows(true);
         object->SetEnabled(false);
 
-        body = adjNode->CreateComponent<RigidBody>();
+        body = adjNode->CreateComponent<RigidBody>(LOCAL);
         body->SetCollisionLayer(2);
-        trackColShape_ = adjNode->CreateComponent<CollisionShape>();
+        trackColShape_ = adjNode->CreateComponent<CollisionShape>(LOCAL);
         trackColShape_->SetTriangleMesh(object->GetModel(), 0);
 //        trackColShape_->SetConvexHull(model);
 
@@ -1509,7 +1505,7 @@ void MayaScape::CreateScene() {
 
         objectNode->SetScale(20.0f);
 
-        auto* object = adjNode->CreateComponent<StaticModel>();
+        auto* object = adjNode->CreateComponent<StaticModel>(LOCAL);
 
         // Random
         int r = std::round(Random(0.0f, 5.0f));
@@ -1538,9 +1534,9 @@ void MayaScape::CreateScene() {
         object->SetMaterial(cache->GetResource<Material>("Materials/LOWPOLY-COLORS.xml"));
         object->SetCastShadows(true);
 
-        auto* body = adjNode->CreateComponent<RigidBody>();
+        auto* body = adjNode->CreateComponent<RigidBody>(LOCAL);
         body->SetCollisionLayer(2);
-        auto* shape = objectNode->CreateComponent<CollisionShape>();
+        auto* shape = objectNode->CreateComponent<CollisionShape>(LOCAL);
         shape->SetTriangleMesh(object->GetModel(), 0);
     }
 
@@ -1573,7 +1569,7 @@ void MayaScape::CreateScene() {
 
         objectNode->SetScale(20.0f);
 
-        auto* object = adjNode->CreateComponent<StaticModel>();
+        auto* object = adjNode->CreateComponent<StaticModel>(LOCAL);
          object->SetModel(cache->GetResource<Model>("Models/AssetPack/castle-flag.mdl"));
 
         //       object->SetMaterial(cache->GetResource<Material>("Materials/LOWPOLY_COLORS.xml")
@@ -1581,9 +1577,9 @@ void MayaScape::CreateScene() {
         object->SetCastShadows(true);
         object->SetEnabled(false);
 
-        auto* body = adjNode->CreateComponent<RigidBody>();
+        auto* body = adjNode->CreateComponent<RigidBody>(LOCAL);
         body->SetCollisionLayer(2);
-        auto* shape = objectNode->CreateComponent<CollisionShape>();
+        auto* shape = objectNode->CreateComponent<CollisionShape>(LOCAL);
         shape->SetTriangleMesh(object->GetModel(), 0);
     }
 
@@ -2073,7 +2069,7 @@ void MayaScape::SetParticleEmitter(int hitId, float contactX, float contactY, in
             particlePool_[i].used = true;
             particlePool_[i].usedBy = hitId;
             particlePool_[i].node = scene_->CreateChild("GreenSpiral");
-            auto *particleEmitter = particlePool_[i].node->CreateComponent<ParticleEmitter2D>();
+            auto *particleEmitter = particlePool_[i].node->CreateComponent<ParticleEmitter2D>(LOCAL);
             particleEmitter->SetEffect(particleEffect);
             particlePool_[i].node->SetPosition(Vector3(position.x_, position.y_, 0.0));
             particlePool_[i].lastEmit = timeStep;
@@ -3351,12 +3347,15 @@ void MayaScape::HandlePostUpdate(StringHash eventType, VariantMap &eventData) {
         Ray cameraRay(cameraStartPos, cameraTargetPos - cameraStartPos);
         float cameraRayLength = (cameraTargetPos - cameraStartPos).Length();
         PhysicsRaycastResult result;
-        scene_->GetComponent<PhysicsWorld>()->RaycastSingle(result, cameraRay, cameraRayLength, 2);
-        if (result.body_)
-            cameraTargetPos = cameraStartPos + cameraRay.direction_ * (result.distance_ - 0.5f);
 
-        /* DISABLE HERE -> move to MoveCamera */
-        // Camera lock to target position
+        if ((!isServer_) && (started_)) {
+            if (scene_->GetComponent<PhysicsWorld>()) {
+
+                scene_->GetComponent<PhysicsWorld>()->RaycastSingle(result, cameraRay, cameraRayLength, 2);
+                if (result.body_)
+                    cameraTargetPos = cameraStartPos + cameraRay.direction_ * (result.distance_ - 0.5f);
+            }
+        }
 //        cameraNode_->SetPosition(cameraTargetPos);
 //        cameraNode_->SetRotation(dir);
 
@@ -3413,6 +3412,14 @@ void MayaScape::HandlePostUpdate(StringHash eventType, VariantMap &eventData) {
     }
     cameraNode_->SetPosition(cameraTargetPos);
     cameraNode_->SetRotation(dir);*/
+
+    Node *actorNode = nullptr;
+    actorNode = scene_->GetNode(clientObjectID_);
+
+    if (actorNode) {
+        // Apply transformations to camera
+        MoveCamera(actorNode);
+    }
 
 }
 
@@ -3489,7 +3496,7 @@ void MayaScape::PlaySoundEffect(const String& soundName)
 
     auto* cache = GetSubsystem<ResourceCache>();
 //    auto* source = scene_->CreateComponent<SoundSource>();
-    auto* source = scene_->CreateComponent<SoundSource3D>();
+    auto* source = scene_->CreateComponent<SoundSource3D>(LOCAL);
 
 
     // loading the sound
@@ -3542,9 +3549,9 @@ void MayaScape::CreateServerSubsystem()
 void MayaScape::CreateAdminPlayer()
 {
     Node* clientNode = scene_->CreateChild("Admin");
-    clientNode->SetPosition(Vector3(Random(40.0f) - 20.0f, 5.0f, Random(40.0f) - 20.0f));
+    clientNode->SetPosition(Vector3(Random(40.0f) - 20.0f, 100.0f, Random(40.0f) - 20.0f));
 
-    ClientObj *clientObj = (ClientObj*)clientNode->CreateComponent(NetworkActor::GetTypeStatic());
+    ClientObj *clientObj = (ClientObj*)clientNode->CreateComponent(NetworkActor::GetTypeStatic(), REPLICATED);
 
     ((NetworkActor*)clientObj)->isServer_ = isServer_;
     // set identity
@@ -3806,56 +3813,60 @@ void MayaScape::MoveCamera(Node *actorNode) {
     const float MOUSE_SENSITIVITY = 0.1f;
 
     if (started_) {
-        URHO3D_LOGINFO("--- Moving camera ");
 
-        // Use this frame's mouse motion to adjust camera node yaw and pitch. Clamp the pitch and only move the camera
-        // when the cursor is hidden
-        if (!ui->GetCursor()->IsVisible()) {
-            IntVector2 mouseMove = input->GetMouseMove();
-            yaw_ += MOUSE_SENSITIVITY * mouseMove.x_;
-            pitch_ += MOUSE_SENSITIVITY * mouseMove.y_;
-            pitch_ = Clamp(pitch_, 1.0f, 90.0f);
-        }
+        // For clients
+        if (!isServer_) {
+            //URHO3D_LOGINFO("--- Moving camera ");
 
-        // Construct new orientation for the camera scene node from yaw and pitch. Roll is fixed to zero
-        cameraNode_->SetRotation(Quaternion(pitch_, yaw_, 0.0f));
+            // Use this frame's mouse motion to adjust camera node yaw and pitch. Clamp the pitch and only move the camera
+            // when the cursor is hidden
+            if (!ui->GetCursor()->IsVisible()) {
+                IntVector2 mouseMove = input->GetMouseMove();
+                yaw_ += MOUSE_SENSITIVITY * mouseMove.x_;
+                pitch_ += MOUSE_SENSITIVITY * mouseMove.y_;
+                pitch_ = Clamp(pitch_, 1.0f, 90.0f);
+            }
 
-        // Only move the camera / show instructions if we have a controllable object
-        bool showInstructions = false;
-        if (clientObjectID_) {
+            // Construct new orientation for the camera scene node from yaw and pitch. Roll is fixed to zero
+            cameraNode_->SetRotation(Quaternion(pitch_, yaw_, 0.0f));
 
-            URHO3D_LOGINFOF("--- Found controllable object: %u", clientObjectID_);
+            // Only move the camera / show instructions if we have a controllable object
+            bool showInstructions = false;
+            if (clientObjectID_) {
 
-            if (actorNode) {
-                const float CAMERA_DISTANCE = 5.0f;
+                //URHO3D_LOGINFOF("--- Found controllable object: %u", clientObjectID_);
 
-                Vector3 startPos = actorNode->GetPosition();
+                if (actorNode) {
+                    const float CAMERA_DISTANCE = 5.0f;
+
+                    Vector3 startPos = actorNode->GetPosition();
                 URHO3D_LOGINFOF("--- Found controllable object -> position: [%f, %f, %f] ", actorNode->GetPosition().x_, actorNode->GetPosition().y_, actorNode->GetPosition().z_);
 
 
-                Vector3 destPos =
-                        actorNode->GetPosition() + cameraNode_->GetRotation() * Vector3::BACK * CAMERA_DISTANCE;
-                Vector3 seg = destPos - startPos;
-                Ray cameraRay(startPos, seg.Normalized());
-                float cameraRayLength = seg.Length();
-                PhysicsRaycastResult result;
-                scene_->GetComponent<PhysicsWorld>()->SphereCast(result, cameraRay, 0.2f, cameraRayLength,
-                                                                 NETWORKACTOR_COL_LAYER);
-                if (result.body_)
-                    destPos = startPos + cameraRay.direction_ * result.distance_;
+                    Vector3 destPos =
+                            actorNode->GetPosition() + cameraNode_->GetRotation() * Vector3::BACK * CAMERA_DISTANCE;
+                    Vector3 seg = destPos - startPos;
+                    Ray cameraRay(startPos, seg.Normalized());
+                    float cameraRayLength = seg.Length();
+                    PhysicsRaycastResult result;
+                    scene_->GetComponent<PhysicsWorld>()->SphereCast(result, cameraRay, 0.2f, cameraRayLength,
+                                                                     NETWORKACTOR_COL_LAYER);
+                    if (result.body_)
+                        destPos = startPos + cameraRay.direction_ * result.distance_;
 
-                // Move camera some distance away from the ball
-                cameraNode_->SetPosition(destPos);
-                showInstructions = true;
+                    // Move camera some distance away from the ball
+                    cameraNode_->SetPosition(destPos);
+                    showInstructions = true;
+                } else {
+                    URHO3D_LOGINFO("--- Could not get NetworkActor, aborting.");
+                    SaveScene(false);
+                }
             } else {
-                URHO3D_LOGINFO("--- Could not get NetworkActor, aborting.");
-                SaveScene(false);
+                URHO3D_LOGINFO("--- Could not find controllable object, aborting.");
             }
-        } else {
-            URHO3D_LOGINFO("--- Could not find controllable object, aborting.");
-        }
 
-        instructionsText_->SetVisible(showInstructions);
+            instructionsText_->SetVisible(showInstructions);
+        }
     }
 }
 
@@ -3965,7 +3976,6 @@ void MayaScape::HandleConnect(StringHash eventType, VariantMap& eventData)
         // Client startup code
 
 
-        terrain_->SetEnabled(true);
 
 
 
@@ -4109,29 +4119,14 @@ void MayaScape::HandleClientObjectID(StringHash eventType, VariantMap& eventData
         URHO3D_LOGINFOF("Client -> sent node error message: %s", msg.GetData());
     }
 
-
     Node *actorNode = nullptr;
-    int attempts = 0;
+    actorNode = scene_->GetNode(clientObjectID_);
 
-    while ((actorNode == nullptr) && (attempts < 5)) {
-        actorNode = scene_->GetNode(clientObjectID_);
-
-        if (!actorNode) {
-            URHO3D_LOGINFO("Client -> could not retrieve actorNode, waiting 500 ms and trying again.");
-            // Wait 500 ms and try again
-            Time::Sleep(500);
-            attempts++;
-
-        }
+    if (actorNode) {
+//        URHO3D_LOGINFOF("Client -> actorNode: %d", actorNode->GetID());
+        // Apply transformations to camera
+        MoveCamera(actorNode);
     }
-    if (!actorNode) {
-        URHO3D_LOGINFO("Client -> could not retrieve actorNode, exiting.");
-        engine_->Exit();
-    }
-    URHO3D_LOGINFOF("Client -> actorNode: %d", actorNode->GetID());
-
-    // Apply transformations to camera
-    MoveCamera(actorNode);
 }
 
 

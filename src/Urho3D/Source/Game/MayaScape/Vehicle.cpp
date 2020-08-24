@@ -980,6 +980,7 @@ void Vehicle::DebugDraw(const Color &color)
 
 void Vehicle::SetVisible(bool visible) {
     GetNode()->SetEnabled(visible);
+    node_->SetEnabled(visible);
     for (Node *w : m_vpNodeWheel) {
         w->SetEnabled(visible);
     }

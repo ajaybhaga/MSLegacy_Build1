@@ -459,12 +459,6 @@
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/movedef.h">
 			<Option target="MayaScape"/>
 		</Unit>
-		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/network/ClientApp.cpp">
-			<Option target="MayaScape"/>
-		</Unit>
-		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/network/ClientApp.h">
-			<Option target="MayaScape"/>
-		</Unit>
 		<Unit filename="/code/dev/MayaScape/src/Urho3D/Source/Game/MayaScape/network/ClientObj.cpp">
 			<Option target="MayaScape"/>
 		</Unit>

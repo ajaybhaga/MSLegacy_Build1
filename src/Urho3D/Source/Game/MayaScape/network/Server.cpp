@@ -111,7 +111,7 @@ void Server::Disconnect()
 Node* Server::CreateClientObject(Connection *connection)
 {
     Node* clientNode = scene_->CreateChild("client");
-    clientNode->SetPosition(Vector3(Random(40.0f) - 20.0f, 5.0f, Random(40.0f) - 20.0f));
+    clientNode->SetPosition(Vector3(Random(40.0f) - 20.0f, 100.0f, Random(40.0f) - 20.0f));
 
     ClientObj *clientObj = (ClientObj*)clientNode->CreateComponent(clientHash_);
 
