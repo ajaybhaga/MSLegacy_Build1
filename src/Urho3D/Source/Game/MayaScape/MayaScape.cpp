@@ -696,14 +696,14 @@ void MayaScape::CreateScene() {
 
         packetsIn_ = ui->GetRoot()->CreateChild<Text>();
         packetsIn_->SetText("Packets in : 0");
-        packetsIn_->SetFont(cache->GetResource<Font>("Fonts/SinsGold.ttf"), 15);
+        packetsIn_->SetFont(cache->GetResource<Font>("Fonts/SinsGold.ttf"), 20);
         packetsIn_->SetHorizontalAlignment(HA_LEFT);
         packetsIn_->SetVerticalAlignment(VA_CENTER);
         packetsIn_->SetPosition(10, -10);
 
         packetsOut_ = ui->GetRoot()->CreateChild<Text>();
         packetsOut_->SetText("Packets out: 0");
-        packetsOut_->SetFont(cache->GetResource<Font>("Fonts/SinsGold.ttf"), 15);
+        packetsOut_->SetFont(cache->GetResource<Font>("Fonts/SinsGold.ttf"), 20);
         packetsOut_->SetHorizontalAlignment(HA_LEFT);
         packetsOut_->SetVerticalAlignment(VA_CENTER);
         packetsOut_->SetPosition(10, 10);
@@ -2936,7 +2936,10 @@ void MayaScape::HandleUpdate(StringHash eventType, VariantMap &eventData) {
 
     // Check for loading / saving the scene
     if (input->GetKeyPress(KEY_F5))
-        sample2D_->SaveScene(false);
+        SaveScene(false);
+
+
+
     if (input->GetKeyPress(KEY_F7))
         ReloadScene(false);
 
@@ -3468,6 +3471,7 @@ void MayaScape::CreateServerSubsystem()
 
 void MayaScape::CreateAdminPlayer()
 {
+/*
     Node* clientNode = scene_->CreateChild("Admin");
     clientNode->SetPosition(Vector3(Random(40.0f) - 20.0f, 100.0f, Random(40.0f) - 20.0f));
 
@@ -3476,7 +3480,7 @@ void MayaScape::CreateAdminPlayer()
     ((NetworkActor*)clientObj)->isServer_ = isServer_;
     // set identity
     clientObj->SetClientInfo("ADMIN", 99);
-    clientObjectID_ = clientNode->GetID();
+    clientObjectID_ = clientNode->GetID();*/
     isServer_ = true;
 
 }
@@ -3570,7 +3574,7 @@ void MayaScape::CreateUI()
             ""
             "An online open world combat racing game."
     );
-    instructionsText_->SetFont(cache->GetResource<Font>("Fonts/CompassGold.ttf"), 14);
+    instructionsText_->SetFont(cache->GetResource<Font>("Fonts/SinsGold.ttf"), 24);
     instructionsText_->SetColor(Color::WHITE);
     // Position the text relative to the screen center
     instructionsText_->SetHorizontalAlignment(HA_CENTER);
@@ -3760,7 +3764,7 @@ void MayaScape::MoveCamera(Node *actorNode, float timeStep) {
                     const float CAMERA_DISTANCE = 15.0f;
 
                     Vector3 startPos = actorNode->GetPosition();
-                    URHO3D_LOGINFOF("--- Found controllable object -> position: [%f, %f, %f] ", actorNode->GetPosition().x_, actorNode->GetPosition().y_, actorNode->GetPosition().z_);
+                    //URHO3D_LOGINFOF("--- Found controllable object -> position: [%f, %f, %f] ", actorNode->GetPosition().x_, actorNode->GetPosition().y_, actorNode->GetPosition().z_);
 
                     // Snap camera to vehicle once available
 
@@ -3773,6 +3777,7 @@ void MayaScape::MoveCamera(Node *actorNode, float timeStep) {
                         // Physics update has completed. Position camera behind vehicle
 /*                        vehicleRot_ = SmoothStepAngle(vehicleRot_, player_->GetNode()->GetRotation(), timeStep * rotLerpRate);*/
                         Quaternion dir(vehicleRot_.YawAngle(), Vector3::UP);
+                        dir = dir * Quaternion(90, 0, 90);
  //                       dir = dir * Quaternion(player_->GetVehicle()->controls_.yaw_, Vector3::UP);
 //                        dir = dir * Quaternion(player_->GetVehicle()->controls_.pitch_, Vector3::RIGHT);
 
@@ -3999,7 +4004,8 @@ void MayaScape::HandleConnect(StringHash eventType, VariantMap& eventData)
 
 
 
-
+        String playerText = "Logged in as: " + String(name.CString());
+        instructionsText_->SetText(playerText);
 
         String address = textEdit_->GetText().Trimmed();
         // Empty the text edit after reading the address to connect to
