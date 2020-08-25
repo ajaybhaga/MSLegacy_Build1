@@ -199,6 +199,8 @@ void Server::UpdatePhysicsPreStep(const Controls &controls)
     // Client: collect controls
     if (serverConnection)
     {
+        URHO3D_LOGINFO("Client: set controls for client sent to server");
+
         serverConnection->SetControls(controls);
     }
     // Server: apply controls to client objects
@@ -210,6 +212,7 @@ void Server::UpdatePhysicsPreStep(const Controls &controls)
         {
             Connection* connection = connections[i];
             const Controls& controls = connection->GetControls();
+            URHO3D_LOGINFO("Server: connection->GetControls()");
 
             // Get the object this connection is controlling
             Node* clientNode = serverObjects_[connection];
@@ -278,6 +281,8 @@ void Server::HandleClientSceneLoaded(StringHash eventType, VariantMap& eventData
 
 void Server::HandleNetworkUpdateSent(StringHash eventType, VariantMap& eventData)
 {
+//    URHO3D_LOGINFO("HandleNetworkUpdateSent");
+
     Network* network = GetSubsystem<Network>();
     Connection* serverConnection = network->GetServerConnection();
 

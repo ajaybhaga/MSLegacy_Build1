@@ -181,8 +181,9 @@ void NetworkActor::FixedUpdate(float timeStep)
     const float MOVE_TORQUE = 3.0f;
     Quaternion rotation(0.0f, controls_.yaw_, 0.0f);
 
-    if (controls_.buttons_ & NTWK_CTRL_FORWARD)
+        if (controls_.buttons_ & NTWK_CTRL_FORWARD)
     {
+        Accelerate();
     //    pRigidBody_->ApplyTorque(rotation * Vector3::RIGHT * MOVE_TORQUE);
     }
     if (controls_.buttons_ & NTWK_CTRL_BACK)
