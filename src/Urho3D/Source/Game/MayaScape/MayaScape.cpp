@@ -678,17 +678,17 @@ void MayaScape::CreateScene() {
 
         packetsIn_ = ui->GetRoot()->CreateChild<Text>();
         packetsIn_->SetText("Packets in : 0");
-        packetsIn_->SetFont(cache->GetResource<Font>("Fonts/SinsGold.ttf"), 20);
-        packetsIn_->SetHorizontalAlignment(HA_LEFT);
+        packetsIn_->SetFont(cache->GetResource<Font>(INGAME_FONT), 10);
+        packetsIn_->SetHorizontalAlignment(HA_RIGHT);
         packetsIn_->SetVerticalAlignment(VA_CENTER);
-        packetsIn_->SetPosition(10, -10);
+        packetsIn_->SetPosition(-50, -10);
 
         packetsOut_ = ui->GetRoot()->CreateChild<Text>();
         packetsOut_->SetText("Packets out: 0");
-        packetsOut_->SetFont(cache->GetResource<Font>("Fonts/SinsGold.ttf"), 20);
-        packetsOut_->SetHorizontalAlignment(HA_LEFT);
+        packetsOut_->SetFont(cache->GetResource<Font>(INGAME_FONT), 10);
+        packetsOut_->SetHorizontalAlignment(HA_RIGHT);
         packetsOut_->SetVerticalAlignment(VA_CENTER);
-        packetsOut_->SetPosition(10, 10);
+        packetsOut_->SetPosition(-50, 10);
 
 
         // Set the default UI style and font
@@ -3328,18 +3328,10 @@ void MayaScape::HandlePostUpdate(StringHash eventType, VariantMap &eventData) {
         float timeStep = eventData[P_TIMESTEP].GetFloat();
 
         // Apply transformations to camera
-        //MoveCamera(actorNode, timeStep);
+        MoveCamera(actorNode, timeStep);
 
         instructionsText_->SetVisible(true);
         hudText_->SetVisible(true);
-
-        char str[50];
-        sprintf(str, "[%f, %f, %f]", actorNode->GetPosition().x_, actorNode->GetPosition().y_, actorNode->GetPosition().z_);
-
-        String hudText = "ActorNode Position: " + String(str);
-        hudText_->SetText(hudText);
-
-
 
     }
 
@@ -3760,7 +3752,7 @@ void MayaScape::MoveCamera(Node *actorNode, float timeStep) {
                 //URHO3D_LOGINFOF("--- Found controllable object: %u", clientObjectID_);
 
                 if (actorNode) {
-                    const float CAMERA_DISTANCE = 15.0f;
+                    const float CAMERA_DISTANCE = 8.0f;
 
                     Vector3 startPos = actorNode->GetPosition();
                     //URHO3D_LOGINFOF("--- Found controllable object -> position: [%f, %f, %f] ", actorNode->GetPosition().x_, actorNode->GetPosition().y_, actorNode->GetPosition().z_);
@@ -3776,10 +3768,13 @@ void MayaScape::MoveCamera(Node *actorNode, float timeStep) {
                     // Physics update has completed. Position camera behind vehicle
 /*                        vehicleRot_ = SmoothStepAngle(vehicleRot_, player_->GetNode()->GetRotation(), timeStep * rotLerpRate);*/
                     Quaternion dir(vehicleRot_.YawAngle(), Vector3::UP);
-                    dir = dir * Quaternion(0, 0, 0);
+                    dir = dir * Quaternion(45, 0, 45);
                     //                       dir = dir * Quaternion(player_->GetVehicle()->controls_.yaw_, Vector3::UP);
 //                        dir = dir * Quaternion(player_->GetVehicle()->controls_.pitch_, Vector3::RIGHT);
 
+
+
+                    targetCameraPos_ = startPos + Vector3(CAMERA_DISTANCE, 2.0f, CAMERA_DISTANCE);
                     // Calculate ray based on focus object
 //                    float curDist = (focusObjects_[focusIndex_] - targetCameraPos_).Length();
                     float curDist = (actorNode->GetPosition() - targetCameraPos_).Length();
@@ -3897,99 +3892,114 @@ void MayaScape::MoveCamera(Node *actorNode, float timeStep) {
 
 
 void MayaScape::HandlePhysicsPreStep(StringHash eventType, VariantMap &eventData) {
-    // This function is different on the client and server. The client collects controls (WASD controls + yaw angle)
-    // and sets them to its server connection object, so that they will be sent to the server automatically at a
-    // fixed rate, by default 30 FPS. The server will actually apply the controls (authoritative simulation.)
-    auto network = GetSubsystem<Network>();
-    auto serverConnection = network->GetServerConnection();
 
-    // Client: collect controls
-    if (serverConnection) {
-        if (csp_client.prediction_controls != nullptr) {
-            URHO3D_LOGDEBUG("PhysicsPreStep predict");
+    if (started_) {
+        Server *server = GetSubsystem<Server>();
+        Input *input = GetSubsystem<Input>();
 
-            if (clientObjectID_) {
-                auto playerNode = scene_->GetNode(clientObjectID_);
-                if (playerNode != nullptr)
-                    apply_input(playerNode, *csp_client.prediction_controls);
-            }
-        } else {
-            URHO3D_LOGDEBUG("PhysicsPreStep sample");
+        // set controls and pos
+        Controls controls;
+        controls.yaw_ = yaw_;
 
-            auto controls = sample_input();
+        controls.Set(NTWK_CTRL_FORWARD, input->GetKeyDown(KEY_W));
+        controls.Set(NTWK_CTRL_BACK, input->GetKeyDown(KEY_S));
+        controls.Set(NTWK_CTRL_LEFT, input->GetKeyDown(KEY_A));
+        controls.Set(NTWK_CTRL_RIGHT, input->GetKeyDown(KEY_D));
+        controls.Set(NTWK_SWAP_MAT, input->GetKeyDown(KEY_T));
 
-            // predict locally
-            if (clientObjectID_) {
-                auto playerNode = scene_->GetNode(clientObjectID_);
-                if (playerNode != nullptr)
-                    apply_input(playerNode, controls);
-            }
+        char str[50];
+//        sprintf(str, "[%f, %f, %f]", actorNode->GetPosition().x_, actorNode->GetPosition().y_, actorNode->GetPosition().z_);
 
-            // Set the controls using the CSP system
-            csp_client.add_input(controls);
-            //serverConnection->SetControls(controls);
+        //        String hudText = "ActorNode Position: " + String(str);
+        //      hudText_->SetText(hudText);
+        //        sprintf(str, "[%f, %f, %f]", cameraNode_->GetRotation().YawAngle(), cameraNode_->GetRotation().RollAngle(), cameraNode_->GetRotation().PitchAngle());
+        sprintf(str, "[%f, %f, %s]", controls.pitch_, controls.yaw_,
+                ToStringHex(controls.buttons_).CString());
 
-            // In case the server wants to do position-based interest management using the NetworkPriority components, we should also
-            // tell it our observer (camera) position. In this sample it is not in use, but eg. the NinjaSnowWar game uses it
-            serverConnection->SetPosition(cameraNode_->GetPosition());
-        }
-    }
-        //Server: apply controls to client objects
-    else if (network->IsServerRunning()) {
-        URHO3D_LOGDEBUG("apply clients' controls");
-        auto csp = scene_->GetComponent<CSP_Server>();
-
-        const auto &connections = network->GetClientConnections();
-        for (const auto &connection : connections) {
-            if (csp->client_inputs[connection].empty())
-                continue;
-
-            auto &controls = csp->client_inputs[connection].front();
-            apply_input(connection, controls);
-            csp->client_input_IDs[connection] = controls.extraData_["id"].GetUInt();
-            csp->client_inputs[connection].pop();
-        }
-    }
-
-    /*
-    Server *server = GetSubsystem<Server>();
-    Input *input = GetSubsystem<Input>();
-
-    // set controls and pos
-    Controls controls;
-    controls.yaw_ = yaw_;
-
-    controls.Set(NTWK_CTRL_FORWARD, input->GetKeyDown(KEY_W));
-    controls.Set(NTWK_CTRL_BACK, input->GetKeyDown(KEY_S));
-    controls.Set(NTWK_CTRL_LEFT, input->GetKeyDown(KEY_A));
-    controls.Set(NTWK_CTRL_RIGHT, input->GetKeyDown(KEY_D));
-    controls.Set(NTWK_SWAP_MAT, input->GetKeyDown(KEY_T));
-
-    server->UpdatePhysicsPreStep(controls);
+        String hudText = "control data: " + String(str);
+        hudText_->SetText(hudText);
 
 
+        server->UpdatePhysicsPreStep(controls);
 
-    // Server send controls to client
+        // Server send controls to client
 
-    // server is not a connection but direct controller
-    if (isServer_)
-    {
-        Node* clientNode = scene_->GetNode(clientObjectID_);
+        // server is not a connection but direct controller
+        if (isServer_) {
+            Node *clientNode = scene_->GetNode(clientObjectID_);
 
-        if (clientNode)
-        {
-            ClientObj *clientObj = clientNode->GetDerivedComponent<ClientObj>();
+            if (clientNode) {
+                ClientObj *clientObj = clientNode->GetDerivedComponent<ClientObj>();
 
-            if (clientObj)
-            {
-                clientObj->SetControls(controls);
+                if (clientObj) {
+                    clientObj->SetControls(controls);
+                }
             }
         }
+
+
+        /*
+        // This function is different on the client and server. The client collects controls (WASD controls + yaw angle)
+        // and sets them to its server connection object, so that they will be sent to the server automatically at a
+        // fixed rate, by default 30 FPS. The server will actually apply the controls (authoritative simulation.)
+        auto network = GetSubsystem<Network>();
+        auto serverConnection = network->GetServerConnection();
+
+        // Client: collect controls
+        if (serverConnection) {
+            if (csp_client.prediction_controls != nullptr) {
+                URHO3D_LOGDEBUG("PhysicsPreStep predict");
+
+                if (clientObjectID_) {
+                    auto playerNode = scene_->GetNode(clientObjectID_);
+                    //if (playerNode != nullptr)
+                       // apply_input(playerNode, *csp_client.prediction_controls);
+                }
+            } else {
+                URHO3D_LOGDEBUG("PhysicsPreStep sample -> client sent controls");
+
+                auto controls = sample_input();
+
+                // predict locally
+                if (clientObjectID_) {
+                    auto playerNode = scene_->GetNode(clientObjectID_);
+                  // if (playerNode != nullptr)
+                        //apply_input(playerNode, controls);
+                }
+
+                // Set the controls using the CSP system
+    //            csp_client.add_input(controls);
+                serverConnection->SetControls(controls);
+
+                // In case the server wants to do position-based interest management using the NetworkPriority components, we should also
+                // tell it our observer (camera) position. In this sample it is not in use, but eg. the NinjaSnowWar game uses it
+                serverConnection->SetPosition(cameraNode_->GetPosition());
+            }
+        }
+
+
+            //Server: apply controls to client objects
+        else if (network->IsServerRunning()) {
+
+
+
+
+            URHO3D_LOGDEBUG("apply clients' controls");
+            auto csp = scene_->GetComponent<CSP_Server>();
+
+            const auto &connections = network->GetClientConnections();
+            for (const auto &connection : connections) {
+                if (csp->client_inputs[connection].empty())
+                    continue;
+
+                auto &controls = csp->client_inputs[connection].front();
+                apply_input(connection, controls);
+                csp->client_input_IDs[connection] = controls.extraData_["id"].GetUInt();
+                csp->client_inputs[connection].pop();
+            }
+        }
+    */
     }
-
-
-
-*/
 
 
 }
@@ -4067,6 +4077,8 @@ void MayaScape::HandleConnect(StringHash eventType, VariantMap &eventData) {
         String playerText = "Logged in as: " + String(clientName_.CString());
         instructionsText_->SetText(playerText);
         hudText_->SetText("HUD 1");
+        instructionsText_->SetPosition(0, 730);
+
 
 
         String address = textEdit_->GetText().Trimmed();
@@ -4205,6 +4217,7 @@ void MayaScape::HandleClientObjectID(StringHash eventType, VariantMap &eventData
     actorNode = scene_->GetNode(clientObjectID_);
 
     if (actorNode) {
+//        actorNode->SetPosition()
 //        URHO3D_LOGINFOF("Client -> actorNode: %d", actorNode->GetID());
 
         using namespace Update;

@@ -113,7 +113,8 @@ void Server::Disconnect()
 Node* Server::CreateClientObject(Connection *connection)
 {
     Node* clientNode = scene_->CreateChild("client");
-    clientNode->SetPosition(Vector3(Random(40.0f) - 20.0f, 100.0f, Random(40.0f) - 20.0f));
+//    clientNode->SetPosition(Vector3(Random(40.0f) - 20.0f, 300.0f, Random(40.0f) - 20.0f));
+    clientNode->SetPosition(Vector3(0, 0.0f, 0));
 
     ClientObj *clientObj = (ClientObj*)clientNode->CreateComponent(clientHash_);
 
@@ -146,7 +147,7 @@ void Server::CreatePlayer() {
     NetworkActor* player_ = playerNode->CreateComponent<NetworkActor>(LOCAL);
     player_->isServer_ = true;
 
-    player_->GetNode()->SetPosition(Vector3(0, 200, 0));
+    player_->GetNode()->SetPosition(Vector3(0, 0, 0));
 
 //    player_->SetWaypoints(&waypointsWorld_);
 
@@ -192,6 +193,9 @@ void Server::UpdatePhysicsPreStep(const Controls &controls)
     Network* network = GetSubsystem<Network>();
     Connection* serverConnection = network->GetServerConnection();
 
+    URHO3D_LOGINFO("Server: UpdatePhysicsPreStep");
+
+
     // Client: collect controls
     if (serverConnection)
     {
@@ -217,6 +221,8 @@ void Server::UpdatePhysicsPreStep(const Controls &controls)
 
             if (clientObj)
             {
+                URHO3D_LOGINFOF("Server: set controls for client -> %s", ToStringHex(clientNode->GetID()).CString());
+
                 clientObj->SetControls(controls);
             }
         }

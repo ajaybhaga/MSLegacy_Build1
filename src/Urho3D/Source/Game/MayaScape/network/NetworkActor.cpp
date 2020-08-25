@@ -87,9 +87,12 @@ void NetworkActor::Create()
     // Init vehicle
     Node* vehicleNode = GetScene()->CreateChild("Vehicle", LOCAL);
 
+    // Default at (0,300,0) above terrain before we set location
+    GetNode()->SetPosition(Vector3(0,300,0));
+
     // Place on track
 //    vehicleNode->SetPosition(Vector3(-814.0f+Random(-400.f, 400.0f), 150.0f, -595.0f+Random(-400.f, 400.0f)));
-    vehicleNode->SetPosition(Vector3(0,0,0));
+    vehicleNode->SetPosition(Vector3(0,100,0));
 
     // Create the vehicle logic component
     vehicle_ = vehicleNode->CreateComponent<Vehicle>(LOCAL);
@@ -121,7 +124,6 @@ void NetworkActor::Create()
     floatingText_->SetFaceCameraMode(FC_ROTATE_XYZ);
     // create text3d client info node LOCALLY
 //    nodeInfo_ = GetScene()->CreateChild("light", LOCAL);
-    nodeInfo_->SetPosition(node_->GetPosition() + Vector3(0.0f, -1.1f, 0.0f));
 
 
 /*
@@ -154,12 +156,25 @@ void NetworkActor::SwapMat()
     ballModel->SetMaterial(cache->GetResource<Material>(matName));
 }
 
+
+
 void NetworkActor::FixedUpdate(float timeStep)
 {
     if (!pRigidBody_ || !nodeInfo_)
     {
         return;
     }
+
+
+    // Snap network actor position to vehicle
+    GetNode()->SetPosition(vehicle_->GetNode()->GetPosition());
+
+
+    // TODO: 3d text not showing up
+    nodeInfo_->SetPosition(GetNode()->GetPosition() + Vector3(0.0f, 1.1f, 0.0f));
+//    floatingText_->SetEnabled(true);
+    // update text pos
+//    nodeInfo_->SetPosition(node_->GetPosition() + Vector3(0.0f, 0.7f, 0.0f));
 
 
     // OLD SIMPLE NETWORK SAMPLE CODE
@@ -195,8 +210,9 @@ void NetworkActor::FixedUpdate(float timeStep)
     lastFire_ += timeStep;
 
     /// Clients should not update the component on its own
-    controls_ = vehicle_->controls_;
+//    controls_ = vehicle_->controls_;
 
+    /*
 
     Node* node = GetNode();
     ///Acceleration
@@ -231,7 +247,7 @@ void NetworkActor::FixedUpdate(float timeStep)
         // The towards vector according to the angle
         towards_ = Vector3(cos(angle * PI / 180.0f), sin(angle * PI / 180.0f), 0.0f);
     }
-
+*/
 /* AUTO-STEERING CODE
     if (toTarget_ != Vector3::ZERO) {
         // Only pass once rigid body is setup
