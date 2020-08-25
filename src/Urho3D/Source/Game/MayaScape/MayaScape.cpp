@@ -598,33 +598,6 @@ void MayaScape::CreateAgents() {
 }
 
 
-void MayaScape::CreatePlayer() {
-    Node *playerNode = scene_->CreateChild("Player", LOCAL);
-
-    // Place on track
-    playerNode->SetPosition(Vector3(-814.0f + Random(-400.f, 400.0f), 200.0f, -595.0f + Random(-400.f, 400.0f)));
-
-    // Player is replaced with NetworkActor -> which is a Player
-    player_ = playerNode->CreateComponent<NetworkActor>(LOCAL);
-    player_->isServer_ = isServer_;
-
-    player_->SetWaypoints(&waypointsWorld_);
-
-    // Store initial player position as focus
-    focusObjects_.Push(player_->GetNode()->GetPosition());
-
-    // Place on at corner of map
-    TerrainPatch *p = terrain_->GetPatch(0, 0);
-    IntVector2 v = p->GetCoordinates();
-
-    playerNode->SetRotation(Quaternion(0.0, -0.0, -0.0));
-
-    // Register player on CSP server
-    auto csp = scene_->GetComponent<CSP_Server>();
-    // Assign player node to csp snapshot
-    csp->add_node(playerNode);
-}
-
 void MayaScape::CreateScene() {
 
     ResourceCache *cache = GetSubsystem<ResourceCache>();
@@ -1648,7 +1621,8 @@ void MayaScape::UpdateUIState(bool state) {
     // Do the opposite for menu
     versionText_->SetVisible(!state);
     studioText_->SetVisible(!state);
-    instructionsText_->SetVisible(!state);
+   // instructionsText_->SetVisible(!state);
+  //  hudText_->SetVisible(!state);
     buttonContainer_->SetVisible(!state);
 
 
@@ -3303,6 +3277,7 @@ void MayaScape::HandlePostUpdate(StringHash eventType, VariantMap &eventData) {
     }
 
 
+
     if (player_) {
         player_->floatingText_->SetText(player_->name_);
         player_->floatingText_->GetNode()->SetPosition(player_->GetNode()->GetPosition() + Vector3(0.0, 20.0, 0.0));
@@ -3353,7 +3328,19 @@ void MayaScape::HandlePostUpdate(StringHash eventType, VariantMap &eventData) {
         float timeStep = eventData[P_TIMESTEP].GetFloat();
 
         // Apply transformations to camera
-        MoveCamera(actorNode, timeStep);
+        //MoveCamera(actorNode, timeStep);
+
+        instructionsText_->SetVisible(true);
+        hudText_->SetVisible(true);
+
+        char str[50];
+        sprintf(str, "[%f, %f, %f]", actorNode->GetPosition().x_, actorNode->GetPosition().y_, actorNode->GetPosition().z_);
+
+        String hudText = "ActorNode Position: " + String(str);
+        hudText_->SetText(hudText);
+
+
+
     }
 
 }
@@ -3589,6 +3576,20 @@ void MayaScape::CreateUI() {
     // Hide until connected
     instructionsText_->SetVisible(false);
 
+
+    // Construct the instructions text element
+    hudText_ = ui->GetRoot()->CreateChild<Text>();
+    hudText_->SetText("");
+    hudText_->SetFont(cache->GetResource<Font>(INGAME_FONT), 24);
+    hudText_->SetColor(Color::WHITE);
+    // Position the text relative to the screen center
+    hudText_->SetHorizontalAlignment(HA_CENTER);
+    hudText_->SetPosition(0, 610);
+    // Hide until connected
+    hudText_->SetVisible(false);
+
+
+
     buttonContainer_ = root->CreateChild<UIElement>();
     buttonContainer_->SetFixedSize(600, 220);
     buttonContainer_->SetPosition(180, 300);
@@ -3811,7 +3812,7 @@ void MayaScape::MoveCamera(Node *actorNode, float timeStep) {
 
                     // Apply camera transformations
                     cameraNode_->SetPosition(cameraTargetPos);
-                    cameraNode_->SetRotation(dir);
+                    //cameraNode_->SetRotation(dir);
 
                     // On client
                     if (!isServer_) {
@@ -3890,7 +3891,6 @@ void MayaScape::MoveCamera(Node *actorNode, float timeStep) {
                 URHO3D_LOGINFO("--- Could not find controllable object, aborting.");
             }
 
-            instructionsText_->SetVisible(showInstructions);
         }
     }
 }
@@ -4061,18 +4061,12 @@ void MayaScape::HandleConnect(StringHash eventType, VariantMap &eventData) {
 
         // Client startup code
 
-        // Create players on client
-        // Create AI agents
-        //CreateAgents();
-
-        // Create P1 player
-        CreatePlayer();
-
         // Store name
-        player_->name_ = name.CString();
+        clientName_ = name.CString();
 
-        String playerText = "Logged in as: " + String(name.CString());
+        String playerText = "Logged in as: " + String(clientName_.CString());
         instructionsText_->SetText(playerText);
+        hudText_->SetText("HUD 1");
 
 
         String address = textEdit_->GetText().Trimmed();
@@ -4217,7 +4211,7 @@ void MayaScape::HandleClientObjectID(StringHash eventType, VariantMap &eventData
         float timeStep = eventData[P_TIMESTEP].GetFloat();
 
         // Apply transformations to camera
-        MoveCamera(actorNode, timeStep);
+        //MoveCamera(actorNode, timeStep);
     }
 }
 
@@ -4409,51 +4403,54 @@ Controls MayaScape::sample_input() {
 }
 
 
-void MayaScape::apply_input(Node *playerNode, const Controls &controls) {
+void MayaScape::apply_input(Node *actorNode, const Controls &controls) {
     // Torque is relative to the forward vector
     Quaternion rotation(0.0f, controls.yaw_, 0.0f);
 
 #define CSP_TEST_USE_PHYSICS // used for testing to make sure problems aren't related to the physics
 #ifdef CSP_TEST_USE_PHYSICS
-    auto *body = playerNode->GetComponent<RigidBody>();
-
+    auto *body = actorNode->GetComponent<RigidBody>(true);
     const float MOVE_TORQUE = 3.0f;
 
-    auto change_func = [&](Vector3 force) {
-        //#define CSP_TEST_USE_VELOCITY
+    if (body) {
+
+        auto change_func = [&](Vector3 force) {
+            //#define CSP_TEST_USE_VELOCITY
 #ifdef CSP_TEST_USE_VELOCITY
-        body->ApplyForce(force);
+            body->ApplyForce(force);
 #else
-        body->ApplyTorque(force);
+            body->ApplyTorque(force);
 #endif
-    };
+        };
 
-    // Movement torque is applied before each simulation step, which happen at 60 FPS. This makes the simulation
-    // independent from rendering framerate. We could also apply forces (which would enable in-air control),
-    // but want to emphasize that it's a ball which should only control its motion by rolling along the ground
-    if (controls.buttons_ & CTRL_FORWARD)
-        change_func(rotation * Vector3::RIGHT * MOVE_TORQUE);
-    if (controls.buttons_ & CTRL_BACK)
-        change_func(rotation * Vector3::LEFT * MOVE_TORQUE);
-    if (controls.buttons_ & CTRL_LEFT)
-        change_func(rotation * Vector3::FORWARD * MOVE_TORQUE);
-    if (controls.buttons_ & CTRL_RIGHT)
-        change_func(rotation * Vector3::BACK * MOVE_TORQUE);
+        // Movement torque is applied before each simulation step, which happen at 60 FPS. This makes the simulation
+        // independent from rendering framerate. We could also apply forces (which would enable in-air control),
+        // but want to emphasize that it's a ball which should only control its motion by rolling along the ground
+        if (controls.buttons_ & CTRL_FORWARD)
+            change_func(rotation * Vector3::RIGHT * MOVE_TORQUE);
+        if (controls.buttons_ & CTRL_BACK)
+            change_func(rotation * Vector3::LEFT * MOVE_TORQUE);
+        if (controls.buttons_ & CTRL_LEFT)
+            change_func(rotation * Vector3::FORWARD * MOVE_TORQUE);
+        if (controls.buttons_ & CTRL_RIGHT)
+            change_func(rotation * Vector3::BACK * MOVE_TORQUE);
 #else
-    const float move_distance = 2.f / scene->GetComponent<PhysicsWorld>()->GetFps();
+        const float move_distance = 2.f / scene->GetComponent<PhysicsWorld>()->GetFps();
 
-    // Movement torque is applied before each simulation step, which happen at 60 FPS. This makes the simulation
-    // independent from rendering framerate. We could also apply forces (which would enable in-air control),
-    // but want to emphasize that it's a ball which should only control its motion by rolling along the ground
-    if (controls.buttons_ & CTRL_FORWARD)
-        ballNode->SetPosition(ballNode->GetPosition() + Vector3::RIGHT * move_distance);
-    if (controls.buttons_ & CTRL_BACK)
-        ballNode->SetPosition(ballNode->GetPosition() + Vector3::LEFT * move_distance);
-    if (controls.buttons_ & CTRL_LEFT)
-        ballNode->SetPosition(ballNode->GetPosition() + Vector3::FORWARD * move_distance);
-    if (controls.buttons_ & CTRL_RIGHT)
-        ballNode->SetPosition(ballNode->GetPosition() + Vector3::BACK * move_distance);
+        // Movement torque is applied before each simulation step, which happen at 60 FPS. This makes the simulation
+        // independent from rendering framerate. We could also apply forces (which would enable in-air control),
+        // but want to emphasize that it's a ball which should only control its motion by rolling along the ground
+        if (controls.buttons_ & CTRL_FORWARD)
+            ballNode->SetPosition(ballNode->GetPosition() + Vector3::RIGHT * move_distance);
+        if (controls.buttons_ & CTRL_BACK)
+            ballNode->SetPosition(ballNode->GetPosition() + Vector3::LEFT * move_distance);
+        if (controls.buttons_ & CTRL_LEFT)
+            ballNode->SetPosition(ballNode->GetPosition() + Vector3::FORWARD * move_distance);
+        if (controls.buttons_ & CTRL_RIGHT)
+            ballNode->SetPosition(ballNode->GetPosition() + Vector3::BACK * move_distance);
 #endif
+
+    }
 }
 
 void MayaScape::apply_input(Connection *connection, const Controls &controls) {

@@ -36,6 +36,8 @@
 
 #include "Server.h"
 #include "ClientObj.h"
+#include "NetworkActor.h"
+#include "CSP_Server.h"
 
 #include <Urho3D/DebugNew.h>
 //=============================================================================
@@ -129,6 +131,39 @@ Node* Server::CreateClientObject(Connection *connection)
     }
 
     return clientNode;
+}
+
+
+void Server::CreatePlayer() {
+    Node *playerNode = scene_->CreateChild("Player", LOCAL);
+
+    playerNode->SetPosition(Vector3(0, 0, 0));
+
+    // Place on track
+//    playerNode->SetPosition(Vector3(-814.0f + Random(-400.f, 400.0f), 400.0f, -595.0f + Random(-400.f, 400.0f)));
+
+    // Player is replaced with NetworkActor -> which is a Player
+    NetworkActor* player_ = playerNode->CreateComponent<NetworkActor>(LOCAL);
+    player_->isServer_ = true;
+
+    player_->GetNode()->SetPosition(Vector3(0, 200, 0));
+
+//    player_->SetWaypoints(&waypointsWorld_);
+
+    playerNode->SetRotation(Quaternion(0.0, -0.0, -0.0));
+
+
+    // Register player on CSP server
+    auto csp = scene_->GetComponent<CSP_Server>();
+    // Assign player node to csp snapshot
+    csp->add_node(playerNode);
+
+    /*
+    // Register player on CSP server
+    auto csp = scene_->GetComponent<CSP_Server>();
+    // Assign player node to csp snapshot
+    csp->add_node(playerNode);*/
+
 }
 
 void Server::SubscribeToEvents()
@@ -229,6 +264,9 @@ void Server::HandleClientSceneLoaded(StringHash eventType, VariantMap& eventData
 	using namespace ClientSceneLoaded;
     URHO3D_LOGINFO("HandleClientSceneLoaded");
     URHO3D_LOGINFOF("Server: Scene checksum -> %s", ToStringHex(scene_->GetChecksum()).CString());
+
+    // Create player for new client
+    CreatePlayer();
 
 }
 

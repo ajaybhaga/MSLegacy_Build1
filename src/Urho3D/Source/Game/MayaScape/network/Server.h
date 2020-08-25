@@ -70,6 +70,7 @@ public:
 
     void InitializeScene(File &file);
 
+    void CreatePlayer();
     Node* CreateClientObject(Connection *connection);
     void UpdatePhysicsPreStep(const Controls &controls);
 
@@ -94,7 +95,7 @@ protected:
 
     void OutputLoginListToConsole();
 
-protected:
+        protected:
     /// Mapping from client connections to controllable objects.
     HashMap<Connection*, WeakPtr<Node> > serverObjects_;
     StringHash clientHash_;
