@@ -3922,21 +3922,6 @@ void MayaScape::HandlePhysicsPreStep(StringHash eventType, VariantMap &eventData
 
         server->UpdatePhysicsPreStep(controls);
 
-        // Server send controls to client
-
-        // server is not a connection but direct controller
-        if (isServer_) {
-            Node *clientNode = scene_->GetNode(clientObjectID_);
-
-            if (clientNode) {
-                ClientObj *clientObj = clientNode->GetDerivedComponent<ClientObj>();
-
-                if (clientObj) {
-                    clientObj->SetControls(controls);
-                }
-            }
-        }
-
 
         /*
         // This function is different on the client and server. The client collects controls (WASD controls + yaw angle)

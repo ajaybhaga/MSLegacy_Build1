@@ -305,6 +305,35 @@ void Server::HandleNetworkUpdateSent(StringHash eventType, VariantMap& eventData
                 }
             }
         }
+    } else {
+        // On running server
+        if (network->IsServerRunning()) {
+           // URHO3D_LOGINFO("Server -> HandleNetworkUpdateSent");
+
+//            ClientObj *clientObj = (ClientObj*)clientNode->CreateComponent(clientHash_);
+
+            // Server: apply controls to client objects
+            const Vector<SharedPtr<Connection> > &connections = network->GetClientConnections();
+
+            for (unsigned i = 0; i < connections.Size(); ++i) {
+                Connection *connection = connections[i];
+                const Controls &controls = connection->GetControls();
+//                URHO3D_LOGINFO("Server: connection->GetControls()");
+
+                // Get the object this connection is controlling
+                Node *clientNode = serverObjects_[connection];
+
+                if (!clientNode)
+                    continue;
+
+                ClientObj *clientObj = clientNode->GetDerivedComponent<ClientObj>();
+
+                if (clientObj) {
+                    URHO3D_LOGINFOF("Server: set controls for client [%d] -> %s", clientNode->GetID(), ToStringHex(controls.buttons_).CString());
+                    clientObj->SetControls(controls);
+                }
+            }
+        }
     }
 }
 
