@@ -24,6 +24,7 @@
 
 #include <Urho3D/Core/Object.h>
 #include <Urho3D/Input/Controls.h>
+#include "NetworkActor.h"
 
 namespace Urho3D
 {
@@ -70,9 +71,10 @@ public:
 
     void InitializeScene(File &file);
 
-    void CreatePlayer();
+    void CreatePlayer(Connection* connection);
     Node* CreateClientObject(Connection *connection);
     void UpdatePhysicsPreStep(const Controls &controls);
+    void UpdateActors(float timeStep);
 
     HashMap<String, Connection*> GetLoginList() { return loginList_; }
 protected:
@@ -102,6 +104,7 @@ protected:
     unsigned clientObjectID_;
     SharedPtr<Scene> scene_;
 
+    HashMap<Connection*, NetworkActor*> actorMap_;
     HashMap<String, Connection*> loginList_;
 
     WeakPtr<Node> app_;

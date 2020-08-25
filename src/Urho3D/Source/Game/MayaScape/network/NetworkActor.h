@@ -138,10 +138,11 @@ public:
 
 
 protected:
+
+public:
     void SwapMat();
     virtual void FixedUpdate(float timeStep);
-   
-public:
+
     String name_;
     WeakPtr<RigidBody> pRigidBody_;
     WeakPtr<Node> nodeInfo_;

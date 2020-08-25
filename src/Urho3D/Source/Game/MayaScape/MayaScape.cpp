@@ -3893,6 +3893,8 @@ void MayaScape::MoveCamera(Node *actorNode, float timeStep) {
 
 void MayaScape::HandlePhysicsPreStep(StringHash eventType, VariantMap &eventData) {
 
+//    URHO3D_LOGINFO("--- HandlePhysicsPreStep.");
+
     if (started_) {
         Server *server = GetSubsystem<Server>();
         Input *input = GetSubsystem<Input>();
@@ -3922,7 +3924,11 @@ void MayaScape::HandlePhysicsPreStep(StringHash eventType, VariantMap &eventData
 
         server->UpdatePhysicsPreStep(controls);
 
-
+        if (isServer_) {
+            using namespace Update;
+            float timeStep = eventData[P_TIMESTEP].GetFloat();
+            server->UpdateActors(timeStep);
+        }
         /*
         // This function is different on the client and server. The client collects controls (WASD controls + yaw angle)
         // and sets them to its server connection object, so that they will be sent to the server automatically at a
@@ -4135,7 +4141,7 @@ void MayaScape::HandleStartServer(StringHash eventType, VariantMap &eventData) {
     started_ = true;
 
     // Disable updates (allow focus on processing for server)
-    scene_->SetUpdateEnabled(false);
+//    scene_->SetUpdateEnabled(false);
 
     // Set logo sprite alignment
     logoSprite_->SetAlignment(HA_CENTER, VA_BOTTOM);

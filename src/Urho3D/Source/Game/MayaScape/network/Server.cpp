@@ -135,7 +135,7 @@ Node* Server::CreateClientObject(Connection *connection)
 }
 
 
-void Server::CreatePlayer() {
+void Server::CreatePlayer(Connection* connection) {
     Node *playerNode = scene_->CreateChild("Player", LOCAL);
 
     playerNode->SetPosition(Vector3(0, 0, 0));
@@ -146,6 +146,9 @@ void Server::CreatePlayer() {
     // Player is replaced with NetworkActor -> which is a Player
     NetworkActor* player_ = playerNode->CreateComponent<NetworkActor>(LOCAL);
     player_->isServer_ = true;
+
+    // Store the player in map
+    actorMap_.Populate(connection, player_);
 
     player_->GetNode()->SetPosition(Vector3(0, 0, 0));
 
@@ -185,6 +188,30 @@ void Server::SubscribeToEvents()
     SubscribeToEvent(E_NETWORKUPDATESENT, URHO3D_HANDLER(Server, HandleNetworkUpdateSent));
 }
 
+void Server::UpdateActors(float timeStep) {
+
+    Network* network = GetSubsystem<Network>();
+
+    // On running server
+    if (network->IsServerRunning())
+    {
+        const Vector<SharedPtr<Connection> >& connections = network->GetClientConnections();
+
+        for (unsigned i = 0; i < connections.Size(); ++i)
+        {
+            Connection* connection = connections[i];
+//            const Controls& controls = connection->GetControls();
+
+            // Get the object this connection is controlling
+            NetworkActor* actor = actorMap_[connection];
+
+            if (actor)
+                 // Apply update to actor
+                 actor->FixedUpdate(timeStep);
+        }
+    }
+}
+
 void Server::UpdatePhysicsPreStep(const Controls &controls)
 {
     // This function is different on the client and server. The client collects controls (WASD controls + yaw angle)
@@ -193,13 +220,13 @@ void Server::UpdatePhysicsPreStep(const Controls &controls)
     Network* network = GetSubsystem<Network>();
     Connection* serverConnection = network->GetServerConnection();
 
-    URHO3D_LOGINFO("Server: UpdatePhysicsPreStep");
+//    URHO3D_LOGINFO("Server: UpdatePhysicsPreStep");
 
 
     // Client: collect controls
     if (serverConnection)
     {
-        URHO3D_LOGINFO("Client: set controls for client sent to server");
+  //      URHO3D_LOGINFO("Client: set controls for client sent to server");
 
         serverConnection->SetControls(controls);
     }
@@ -212,7 +239,7 @@ void Server::UpdatePhysicsPreStep(const Controls &controls)
         {
             Connection* connection = connections[i];
             const Controls& controls = connection->GetControls();
-            URHO3D_LOGINFO("Server: connection->GetControls()");
+    //        URHO3D_LOGINFO("Server: connection->GetControls()");
 
             // Get the object this connection is controlling
             Node* clientNode = serverObjects_[connection];
@@ -224,7 +251,7 @@ void Server::UpdatePhysicsPreStep(const Controls &controls)
 
             if (clientObj)
             {
-                URHO3D_LOGINFOF("Server: set controls for client -> %s", ToStringHex(clientNode->GetID()).CString());
+                URHO3D_LOGINFOF("Server: set controls for client [%d] -> %s", clientNode->GetID(), ToStringHex(controls.buttons_).CString());
 
                 clientObj->SetControls(controls);
             }
@@ -259,6 +286,9 @@ void Server::HandleClientIdentity(StringHash eventType, VariantMap& eventData)
     Node* clientObject = CreateClientObject(newConnection);
     serverObjects_[newConnection] = clientObject;
 
+    // Create player for new client
+    CreatePlayer(newConnection);
+
     // Output the updated login list
     OutputLoginListToConsole();
 
@@ -273,9 +303,6 @@ void Server::HandleClientSceneLoaded(StringHash eventType, VariantMap& eventData
 	using namespace ClientSceneLoaded;
     URHO3D_LOGINFO("HandleClientSceneLoaded");
     URHO3D_LOGINFOF("Server: Scene checksum -> %s", ToStringHex(scene_->GetChecksum()).CString());
-
-    // Create player for new client
-    CreatePlayer();
 
 }
 
@@ -329,8 +356,9 @@ void Server::HandleNetworkUpdateSent(StringHash eventType, VariantMap& eventData
                 ClientObj *clientObj = clientNode->GetDerivedComponent<ClientObj>();
 
                 if (clientObj) {
-                    URHO3D_LOGINFOF("Server: set controls for client [%d] -> %s", clientNode->GetID(), ToStringHex(controls.buttons_).CString());
+//                    URHO3D_LOGINFOF("Server: set controls for client [%d] -> %s", clientNode->GetID(), ToStringHex(controls.buttons_).CString());
                     clientObj->SetControls(controls);
+
                 }
             }
         }

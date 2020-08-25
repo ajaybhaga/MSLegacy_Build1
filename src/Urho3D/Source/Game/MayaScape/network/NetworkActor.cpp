@@ -49,7 +49,11 @@ NetworkActor::NetworkActor(Context* context)
     : ClientObj(context)
     , mass_(10.0f)
 {
-    SetUpdateEventMask(0);
+  //  SetUpdateEventMask(0);
+    // fixed update() for inputs and post update() to sync wheels for rendering
+//    SetUpdateEventMask( USE_FIXEDUPDATE | USE_FIXEDPOSTUPDATE| USE_POSTUPDATE );
+
+
 }
 
 NetworkActor::~NetworkActor()
@@ -136,6 +140,7 @@ void NetworkActor::Create()
 */
     // register
     SetUpdateEventMask(USE_FIXEDUPDATE);
+
 }
 
 void NetworkActor::SwapMat()
