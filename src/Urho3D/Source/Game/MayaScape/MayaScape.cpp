@@ -166,6 +166,7 @@
 const int MSG_CHAT = 153;
 const int MSG_NODE_ERROR = 156;
 
+#define INGAME_FONT "Fonts/m6x11.ttf"
 #define GAME_SERVER_ADDRESS "localhost"
 //#define GAME_SERVER_ADDRESS "www.monkeymaya.com"
 
@@ -3554,7 +3555,7 @@ void MayaScape::CreateUI() {
     // Construct the instructions text element
     versionText_ = ui->GetRoot()->CreateChild<Text>();
     versionText_->SetText(APP_VERSION);
-    versionText_->SetFont(cache->GetResource<Font>("Fonts/CompassGold.ttf"), 40);
+    versionText_->SetFont(cache->GetResource<Font>(INGAME_FONT), 65);
     versionText_->SetColor(Color::WHITE);
     // Position the text relative to the screen center
     versionText_->SetHorizontalAlignment(HA_CENTER);
