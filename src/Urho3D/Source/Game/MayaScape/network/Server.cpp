@@ -205,9 +205,10 @@ void Server::UpdateActors(float timeStep) {
             // Get the object this connection is controlling
             NetworkActor* actor = actorMap_[connection];
 
-            if (actor)
-                 // Apply update to actor
-                 actor->FixedUpdate(timeStep);
+            if (actor) {
+                // Apply update to actor
+                actor->FixedUpdate(timeStep);
+            }
         }
     }
 }
@@ -254,6 +255,8 @@ void Server::UpdatePhysicsPreStep(const Controls &controls)
                 URHO3D_LOGINFOF("Server: set controls for client [%d] -> %s", clientNode->GetID(), ToStringHex(controls.buttons_).CString());
 
                 clientObj->SetControls(controls);
+                // Apply control to actor
+                actorMap_[connection]->SetControls(controls);
             }
         }
     }

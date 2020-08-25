@@ -3915,12 +3915,18 @@ void MayaScape::HandlePhysicsPreStep(StringHash eventType, VariantMap &eventData
         //        String hudText = "ActorNode Position: " + String(str);
         //      hudText_->SetText(hudText);
         //        sprintf(str, "[%f, %f, %f]", cameraNode_->GetRotation().YawAngle(), cameraNode_->GetRotation().RollAngle(), cameraNode_->GetRotation().PitchAngle());
-        sprintf(str, "[%f, %f, %s]", controls.pitch_, controls.yaw_,
-                ToStringHex(controls.buttons_).CString());
+//        sprintf(str, "[%f, %f, %s]", controls.pitch_, controls.yaw_,
+//                ToStringHex(controls.buttons_).CString());
 
-        String hudText = "control data: " + String(str);
-        hudText_->SetText(hudText);
+        if (player_) {
+            if (player_->vehicle_) {
+                sprintf(str, "[%f, %f]", player_->vehicle_->lastAccel_, player_->vehicle_->lastSteer_);
 
+                String hudText = "vehicle control: " + String(str);
+                hudText_->SetText(hudText);
+
+            }
+        }
 
         server->UpdatePhysicsPreStep(controls);
 

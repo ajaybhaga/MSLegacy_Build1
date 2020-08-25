@@ -62,6 +62,8 @@ const float MAX_WHEEL_ANGLE = 22.5f;
 class Vehicle : public LogicComponent {
 URHO3D_OBJECT(Vehicle, LogicComponent)
 
+    float lastAccel_ = 0.0f;
+    float lastSteer_ = 0.0f;
 public:
     /// Construct.
     Vehicle(Context *context);

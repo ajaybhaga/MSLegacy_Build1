@@ -157,9 +157,9 @@ void Vehicle::RegisterObject(Context* context)
 {
     context->RegisterFactory<Vehicle>();
    
-    //ATTRIBUTE("Controls Yaw", float, controls_.yaw_, 0.0f, AM_DEFAULT);
-    //ATTRIBUTE("Controls Pitch", float, controls_.pitch_, 0.0f, AM_DEFAULT);
-    //ATTRIBUTE("Steering", float, steering_, 0.0f, AM_DEFAULT);
+  //  ATTRIBUTE("Controls Yaw", float, controls_.yaw_, 0.0f, AM_DEFAULT);
+  //  ATTRIBUTE("Controls Pitch", float, controls_.pitch_, 0.0f, AM_DEFAULT);
+  //  ATTRIBUTE("Steering", float, steering_, 0.0f, AM_DEFAULT);
 }
 
 //=============================================================================
@@ -411,7 +411,7 @@ void Vehicle::FixedUpdate(float timeStep)
     float newSteering = 0.0f;
     float accelerator = 0.0f;
     bool braking = false;
-/*
+
     // Read controls
     if (controls_.buttons_ & CTRL_LEFT)
         newSteering = -1.0f;
@@ -421,7 +421,6 @@ void Vehicle::FixedUpdate(float timeStep)
         accelerator = 1.0f;
     if (controls_.buttons_ & CTRL_BACK)
         accelerator = -0.4f;
-*/
 
     if (controls_.buttons_ & CTRL_SPACE)
     {
@@ -434,6 +433,9 @@ void Vehicle::FixedUpdate(float timeStep)
             raycastVehicle_->Activate();
         }
 
+        // Store vehicle control information locally
+        lastAccel_ = accelerator;
+        lastSteer_ = newSteering;
 
         UpdateGear();
 

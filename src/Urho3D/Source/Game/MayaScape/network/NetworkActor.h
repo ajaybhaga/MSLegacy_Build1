@@ -97,7 +97,7 @@ public:
     void SetMass(float m_mass) { mass_ = m_mass; }
 
     Controls GetControls() { return controls_; }
-    void SetControls(Controls m_controls) { controls_ = m_controls; }
+    void SetControls(Controls controls);
 
     float GetSpeed() { return speed_; }
     void SetSpeed(float m_speed) { speed_ = m_speed; }

@@ -101,7 +101,6 @@ void NetworkActor::Create()
     // Create the vehicle logic component
     vehicle_ = vehicleNode->CreateComponent<Vehicle>(LOCAL);
     vehicle_->Init(isServer_);
-//    SetControls(ve)
 
     wpActiveIndex_ = 0;
     targetAgentIndex_ = 0;
@@ -161,7 +160,14 @@ void NetworkActor::SwapMat()
     ballModel->SetMaterial(cache->GetResource<Material>(matName));
 }
 
+void NetworkActor::SetControls(Controls controls) {
+    controls_ = controls;
 
+    // Apply control to vehicle
+    vehicle_->controls_ = controls;
+    URHO3D_LOGDEBUG("NetworkActor::SetControls -> applying to physics world.");
+
+}
 
 void NetworkActor::FixedUpdate(float timeStep)
 {
@@ -170,6 +176,9 @@ void NetworkActor::FixedUpdate(float timeStep)
         return;
     }
 
+    // Get updated controls
+//    actor->GetControls();
+    URHO3D_LOGINFOF("NetworkActor: FixedUpdate - applying controls for client [%d] -> %s", GetID(), ToStringHex(controls_.buttons_).CString());
 
     // Snap network actor position to vehicle
     GetNode()->SetPosition(vehicle_->GetNode()->GetPosition());
