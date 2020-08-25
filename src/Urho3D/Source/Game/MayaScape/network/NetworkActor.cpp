@@ -47,7 +47,7 @@
 //=============================================================================
 NetworkActor::NetworkActor(Context* context)
     : ClientObj(context)
-    , mass_(1.0f)
+    , mass_(10.0f)
 {
     SetUpdateEventMask(0);
 }
@@ -80,19 +80,19 @@ void NetworkActor::Create()
 {
     ResourceCache* cache = GetSubsystem<ResourceCache>();
 
-    Node* adjNode = node_->CreateChild("AdjNode");
+    Node* adjNode = GetScene()->CreateChild("AdjNode", LOCAL);
     adjNode->SetRotation(Quaternion(0.0, 0.0, -90.0f));
 
 
     // Init vehicle
-    Node* vehicleNode = node_->CreateChild("Vehicle");
+    Node* vehicleNode = GetScene()->CreateChild("Vehicle", LOCAL);
 
     // Place on track
 //    vehicleNode->SetPosition(Vector3(-814.0f+Random(-400.f, 400.0f), 150.0f, -595.0f+Random(-400.f, 400.0f)));
     vehicleNode->SetPosition(Vector3(0,0,0));
 
     // Create the vehicle logic component
-    vehicle_ = vehicleNode->CreateComponent<Vehicle>();
+    vehicle_ = vehicleNode->CreateComponent<Vehicle>(LOCAL);
     vehicle_->Init(isServer_);
 //    SetControls(ve)
 
@@ -102,26 +102,36 @@ void NetworkActor::Create()
     // physics components
 //    pRigidBody_->SetUseGravity(false);
 
-    pRigidBody_ = node_->GetOrCreateComponent<RigidBody>();
-    pRigidBody_->SetCollisionLayer(NETWORKACTOR_COL_LAYER);
+    pRigidBody_ = vehicleNode->GetOrCreateComponent<RigidBody>();
+   /* pRigidBody_->SetCollisionLayer(NETWORKACTOR_COL_LAYER);
     pRigidBody_->SetMass(mass_);
     pRigidBody_->SetFriction(1.0f);
     pRigidBody_->SetLinearDamping(0.5f);
     pRigidBody_->SetAngularDamping(0.5f);
-    CollisionShape* shape = node_->GetOrCreateComponent<CollisionShape>();
-    shape->SetSphere(1.0f);
+    CollisionShape* shape = vehicleNode->GetOrCreateComponent<CollisionShape>(LOCAL);
+    shape->SetSphere(1.0f);*/
     vehicleNode->SetRotation(Quaternion(0.0, -90.0, 0.0));
 
 
     // create text3d client info node LOCALLY
     nodeInfo_ = GetScene()->CreateChild("light", LOCAL);
-    nodeInfo_->SetPosition(node_->GetPosition() + Vector3(0.0f, 1.1f, 0.0f));
+    floatingText_ = nodeInfo_->CreateComponent<Text3D>();
+    floatingText_->SetColor(Color::GREEN);
+    floatingText_->SetFont(cache->GetResource<Font>("Fonts/Anonymous Pro.ttf"), 20);
+    floatingText_->SetFaceCameraMode(FC_ROTATE_XYZ);
+    // create text3d client info node LOCALLY
+//    nodeInfo_ = GetScene()->CreateChild("light", LOCAL);
+    nodeInfo_->SetPosition(node_->GetPosition() + Vector3(0.0f, -1.1f, 0.0f));
+
+
+/*
+
     Text3D *text3D = nodeInfo_->CreateComponent<Text3D>();
     text3D->SetColor(Color::GREEN);
-    text3D->SetFont(cache->GetResource<Font>("Fonts/Anonymous Pro.ttf"), 16);
+    text3D->SetFont(cache->GetResource<Font>("Fonts/Anonymous Pro.ttf"), 40);
     text3D->SetText(userName_);
     text3D->SetFaceCameraMode(FC_ROTATE_XYZ);
-
+*/
     // register
     SetUpdateEventMask(USE_FIXEDUPDATE);
 }
@@ -158,25 +168,26 @@ void NetworkActor::FixedUpdate(float timeStep)
 
     if (controls_.buttons_ & NTWK_CTRL_FORWARD)
     {
-        pRigidBody_->ApplyTorque(rotation * Vector3::RIGHT * MOVE_TORQUE);
+    //    pRigidBody_->ApplyTorque(rotation * Vector3::RIGHT * MOVE_TORQUE);
     }
     if (controls_.buttons_ & NTWK_CTRL_BACK)
     {
-        pRigidBody_->ApplyTorque(rotation * Vector3::LEFT * MOVE_TORQUE);
+     //   pRigidBody_->ApplyTorque(rotation * Vector3::LEFT * MOVE_TORQUE);
     }
     if (controls_.buttons_ & NTWK_CTRL_LEFT)
     {
-        pRigidBody_->ApplyTorque(rotation * Vector3::FORWARD * MOVE_TORQUE);
+       // pRigidBody_->ApplyTorque(rotation * Vector3::FORWARD * MOVE_TORQUE);
     }
     if (controls_.buttons_ & NTWK_CTRL_RIGHT)
     {
-        pRigidBody_->ApplyTorque(rotation * Vector3::BACK * MOVE_TORQUE);
+     //   pRigidBody_->ApplyTorque(rotation * Vector3::BACK * MOVE_TORQUE);
     }
 
+    /*
     if (controls_.IsPressed(NTWK_SWAP_MAT, prevControls_))
     {
         SwapMat();
-    }
+    }*/
 ////
 
 

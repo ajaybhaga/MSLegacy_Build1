@@ -28,7 +28,7 @@
 // All Urho3D classes reside in namespace Urho3D
 using namespace Urho3D;
 
-struct ObjectState {
+struct ObjectState2D {
     bool active;
     bool onGround;
     Vector3 moveDir;
@@ -49,12 +49,12 @@ public:
     /// Handle update. Called by LogicComponent base class.
     void Update(float timeStep) override;
     /// Update object state
-    ObjectState UpdateState(float timeStep);
+    ObjectState2D UpdateState(float timeStep);
 
     // Previous state
-    ObjectState prevState_;
+    ObjectState2D prevState_;
     // Current state
-    ObjectState currState_;
+    ObjectState2D currState_;
 
     /// Movement controls. Assigned by the main program each frame.
     Controls controls_;

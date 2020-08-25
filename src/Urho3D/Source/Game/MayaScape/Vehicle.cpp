@@ -181,7 +181,7 @@ void Vehicle::Init(bool isServer)
     SubscribeToEvent(GetNode(), E_NODECOLLISION, URHO3D_HANDLER(Vehicle, HandleVehicleCollision));
 
 //E_NODECOLLISIONSTART
-    Node* adjNode = node_->CreateChild("AdjNode");
+    Node* adjNode = node_->CreateChild("AdjNode", LOCAL);
     adjNode->SetRotation(Quaternion(0.0, 0.0, -90.0f));
 
 /*
@@ -193,11 +193,11 @@ void Vehicle::Init(bool isServer)
         raycastVehicle_ = node_->CreateComponent<RaycastVehicle>();
     }
 */
-    raycastVehicle_ = node_->CreateComponent<RaycastVehicle>();
+    raycastVehicle_ = node_->CreateComponent<RaycastVehicle>(LOCAL);
     raycastVehicle_->SetEnabled(true);
 
-    CollisionShape* hullColShape = node_->CreateComponent<CollisionShape>();
-    StaticModel* hullObject = node_->CreateComponent<StaticModel>();
+    CollisionShape* hullColShape = node_->CreateComponent<CollisionShape>(LOCAL);
+    StaticModel* hullObject = node_->CreateComponent<StaticModel>(LOCAL);
 
 //    raycastVehicle_->GetNode()->SetScale(3.0f);
 
@@ -318,13 +318,13 @@ void Vehicle::Init(bool isServer)
         for ( int i = 0; i < raycastVehicle_->GetNumWheels(); i++ )
         {
             //synchronize the wheels with the chassis worldtransform
-            raycastVehicle_->UpdateWheelTransform(i,true);
+            raycastVehicle_->UpdateWheelTransform(i,false);
 
             Vector3 v3Origin = raycastVehicle_->GetWheelPositionWS(i);
             Quaternion qRot = raycastVehicle_->GetWheelRotation(i);
 
             // wheel node
-            Node *wheelNode = GetScene()->CreateChild();
+            Node *wheelNode = GetScene()->CreateChild("wheel", LOCAL);
             m_vpNodeWheel.Push( wheelNode );
 
             wheelNode->SetPosition( v3Origin );
@@ -337,11 +337,11 @@ void Vehicle::Init(bool isServer)
             //wheelThickness = 1.0f
             wheelNode->SetScale(Vector3(tireScaleXZ,wheelThickness,tireScaleXZ));
 
-            Node* adjNode = wheelNode->CreateChild("AdjNode");
+            Node* adjNode = wheelNode->CreateChild("AdjNode", LOCAL);
             adjNode->SetRotation(Quaternion(0.0, 0.0, -90.0f));
 
             // tire model
-            StaticModel *pWheel = adjNode->CreateComponent<StaticModel>();
+            StaticModel *pWheel = adjNode->CreateComponent<StaticModel>(LOCAL);
             //pWheel->GetNode()->SetScale(0.4f);
             pWheel->SetModel(tireModel);
             pWheel->ApplyMaterialList("Models/Vehicles/Offroad/Models/wheel-fl.txt");
@@ -352,7 +352,7 @@ void Vehicle::Init(bool isServer)
 
 
             // track
-            Node *trackNode = GetScene()->CreateChild();
+            Node *trackNode = GetScene()->CreateChild("track", LOCAL);
             wheelTrackList_[i] = trackNode->CreateComponent<WheelTrackModel>();
             wheelTrackList_[i]->SetModel(trackModel->Clone());
             wheelTrackList_[i]->SetMaterial(cache->GetResource<Material>("Offroad/Models/Materials/TireTrack.xml"));
@@ -363,7 +363,7 @@ void Vehicle::Init(bool isServer)
             wheelTrackList_[i]->ValidateBufferElements();
 
             // particle emitter
-            Node *pNodeEmitter = GetScene()->CreateChild();
+            Node *pNodeEmitter = GetScene()->CreateChild("particleEmitter", LOCAL);
             Vector3 emitPos = v3Origin + Vector3(0,-m_fwheelRadius,0);
             pNodeEmitter->SetPosition( emitPos );
             ParticleEmitter* particleEmitter = pNodeEmitter->CreateComponent<ParticleEmitter>();
@@ -411,7 +411,7 @@ void Vehicle::FixedUpdate(float timeStep)
     float newSteering = 0.0f;
     float accelerator = 0.0f;
     bool braking = false;
-
+/*
     // Read controls
     if (controls_.buttons_ & CTRL_LEFT)
         newSteering = -1.0f;
@@ -421,7 +421,7 @@ void Vehicle::FixedUpdate(float timeStep)
         accelerator = 1.0f;
     if (controls_.buttons_ & CTRL_BACK)
         accelerator = -0.4f;
-
+*/
 
     if (controls_.buttons_ & CTRL_SPACE)
     {
@@ -590,18 +590,20 @@ void Vehicle::PostUpdate(float timeStep)
 
 //    URHO3D_LOGINFOF("Vehicle::PostUpdate [%f] -> got raycastVehicle.", timeStep);
 
+//  URHO3D_LOGINFOF("Vehicle::raycastVehicle_->GetNumWheels() [%d]", raycastVehicle_->GetNumWheels());
 
     for ( int i = 0; i < raycastVehicle_->GetNumWheels(); i++ )
     {
         btWheelInfo &whInfo = raycastVehicle_->GetWheelInfo( i );
 
         // update wheel transform - performed after whInfo.m_rotation is adjusted from above
-        raycastVehicle_->UpdateWheelTransform( i, true );
+        raycastVehicle_->UpdateWheelTransform( i, false );
 
         Vector3 v3Origin = raycastVehicle_->GetWheelPositionWS( i );
         Quaternion qRot = raycastVehicle_->GetWheelRotation( i );
 
         Node *pWheel = m_vpNodeWheel[ i ];
+
         pWheel->SetPosition( v3Origin );
        
         Vector3 v3PosLS = ToVector3( whInfo.m_chassisConnectionPointCS );

@@ -89,24 +89,24 @@ void Player::Init()
 {
     ResourceCache* cache = GetSubsystem<ResourceCache>();
 
-    Node* adjNode = GetScene()->CreateChild("AdjNode");
+    Node* adjNode = GetScene()->CreateChild("AdjNode", LOCAL);
     adjNode->SetRotation(Quaternion(0.0, 0.0, -90.0f));
 
     // Init vehicle
-    Node* vehicleNode = GetScene()->CreateChild("Vehicle");
+    Node* vehicleNode = GetScene()->CreateChild("Vehicle", LOCAL);
 
     // Place on track
     vehicleNode->SetPosition(Vector3(-814.0f+Random(-400.f, 400.0f), 150.0f, -595.0f+Random(-400.f, 400.0f)));
     vehicleNode->SetEnabled(false);
     // Create the vehicle logic component
-    vehicle_ = vehicleNode->CreateComponent<Vehicle>();
+    vehicle_ = vehicleNode->CreateComponent<Vehicle>(LOCAL);
     vehicle_->Init(false);
 //    SetControls(ve)
 
     wpActiveIndex_ = 0;
     targetAgentIndex_ = 0;
 
-    pRigidBody_ = vehicleNode->CreateComponent<RigidBody>();
+    pRigidBody_ = vehicleNode->CreateComponent<RigidBody>(LOCAL);
 //    pRigidBody_->SetMass(1.0f);
 //    pRigidBody_->SetUseGravity(false);
  //   pRigidBody_->SetTrigger(true);

@@ -52,6 +52,7 @@
 #include <MayaScape/ai/evolution_manager.h>
 #include <Urho3D/UI/Window.h>
 #include <MayaScape/network/NetworkActor.h>
+#include <MayaScape/network/CSP_Client.h>
 #include "Game.h"
 #include "Sample2D.h"
 #include "Vehicle.h"
@@ -170,10 +171,21 @@ private:
     void HandleCollisionBegin(StringHash eventType, VariantMap& eventData);
     /// Handle the contact end event (Box2D contact listener).
     void HandleCollisionEnd(StringHash eventType, VariantMap& eventData);
-    /// Handle reloading the scene.
-    void ReloadScene(bool reInit);
+
+    /// Handle scene update event to control camera's pitch and yaw for all samples.
+    void HandleSceneUpdate(StringHash eventType, VariantMap& eventData);
+    /// Handle a client connecting to the server.
+    void HandleClientConnected(StringHash eventType, VariantMap& eventData);
+    /// Handle a client disconnecting from the server.
+    void HandleClientDisconnected(StringHash eventType, VariantMap& eventData);
+    /// Handle remote event from server which tells our controlled object node ID.
+    void HandleKeyDown(StringHash eventType, VariantMap& eventData);
     /// Handle 'PLAY' button released event.
     void HandlePlayButton(StringHash eventType, VariantMap& eventData);
+
+
+    /// Handle reloading the scene.
+    void ReloadScene(bool reInit);
     void PlaySoundEffect(const String& soundName);
 
     void SetParticleEmitter(int hitId, float contactX, float contactY, int type, float timeStep);
@@ -196,6 +208,10 @@ private:
     void HandleClientSceneLoaded(StringHash eventType, VariantMap& eventData);
     String SaveScene(bool initial);
 
+    Controls sample_input();
+    void apply_input(Node* playerNode, const Controls& controls);
+    void apply_input(Connection* connection, const Controls& controls);
+
     String initialScene_;
     bool started_; // Is Game started?
     Vector<Urho3D::String> loginList_;
@@ -205,6 +221,7 @@ private:
     SharedPtr<NetworkActor> player_; // This player
     SharedPtr<NetworkActor> agents_[MAX_AGENTS]; // Agents
 
+    CSP_Client csp_client;
 
     SharedPtr<Terrain> terrain_;
     Vector<Vector3> trees_;

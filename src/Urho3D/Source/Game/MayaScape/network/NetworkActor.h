@@ -21,6 +21,7 @@
 //
 #pragma once
 
+#include <Urho3D/UI/Text3D.h>
 #include "ClientObj.h"
 
 namespace Urho3D
@@ -141,12 +142,15 @@ protected:
     virtual void FixedUpdate(float timeStep);
    
 public:
+    String name_;
     WeakPtr<RigidBody> pRigidBody_;
     WeakPtr<Node> nodeInfo_;
     Controls prevControls_;
     ////
     /// The controllable vehicle component.
     SharedPtr<Vehicle> vehicle_;
+
+    SharedPtr<Text3D> floatingText_;
 
     bool isServer_;
 

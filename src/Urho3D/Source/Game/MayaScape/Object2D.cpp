@@ -149,7 +149,7 @@ void Object2D::Update(float timeStep)
     }
 }
 
-ObjectState Object2D::UpdateState(float timeStep)
+ObjectState2D Object2D::UpdateState(float timeStep)
 {
     auto* input = GetSubsystem<Input>();
 
