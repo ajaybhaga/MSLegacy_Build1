@@ -45,91 +45,96 @@
 
 //=============================================================================
 //=============================================================================
-NetworkActor::NetworkActor(Context* context)
-    : ClientObj(context)
-    , mass_(10.0f),
-    isServer_(false)
-{
-  //  SetUpdateEventMask(0);
+NetworkActor::NetworkActor(Context *context)
+        : ClientObj(context), mass_(10.0f),
+          isServer_(false) {
+    //  SetUpdateEventMask(0);
     // fixed update() for inputs and post update() to sync wheels for rendering
 //    SetUpdateEventMask( USE_FIXEDUPDATE | USE_FIXEDPOSTUPDATE| USE_POSTUPDATE );
+
+    ///Set original staus
+    SetSpeed(0.0f);
+    SetMaxSpeed(5.0f);
+    SetDamping(0.015f);
+    SetAcceleration(0.03f);
+    SetBrake(0.05f);
+    SetTowards(Vector3(0.0f, 1.0f, 0.0f));
+    SetTurningVelocity(100.0f);
+    SetBulletType("AP");
+    ///Set bullets type
+//    bulletType_ = "CB";
+    lastFire_ = 0;
+    targetAgentIndex_ = 0;
+//    bulletType_ = "AP";
 
 
 }
 
-NetworkActor::~NetworkActor()
-{
-    if (nodeInfo_)
-    {
+NetworkActor::~NetworkActor() {
+    if (nodeInfo_) {
         nodeInfo_->Remove();
     }
 }
 
-void NetworkActor::RegisterObject(Context* context)
-{
+void NetworkActor::RegisterObject(Context *context) {
     context->RegisterFactory<NetworkActor>();
 
     URHO3D_COPY_BASE_ATTRIBUTES(ClientObj);
 }
 
-void NetworkActor::ApplyAttributes()
-{
+void NetworkActor::ApplyAttributes() {
 }
 
-void NetworkActor::DelayedStart()
-{
+void NetworkActor::DelayedStart() {
     Create();
 }
 
 // This will be run by server to create server objects (running the physics world)
 // This will be run by replicated client scene - to build local version
-void NetworkActor::Create()
-{
-        ResourceCache *cache = GetSubsystem<ResourceCache>();
+void NetworkActor::Create() {
+    ResourceCache *cache = GetSubsystem<ResourceCache>();
 
-        Node *adjNode = GetScene()->CreateChild("AdjNode", LOCAL);
-        adjNode->SetRotation(Quaternion(0.0, 0.0, -90.0f));
+    Node *adjNode = GetScene()->CreateChild("AdjNode", LOCAL);
+    adjNode->SetRotation(Quaternion(0.0, 0.0, -90.0f));
 
 
-        // Init vehicle
-        Node *vehicleNode = GetScene()->CreateChild("Vehicle", LOCAL);
+    // Init vehicle
+    Node *vehicleNode = GetScene()->CreateChild("Vehicle", LOCAL);
 
-        // Default at (0,300,0) above terrain before we set location
+    // Default at (0,300,0) above terrain before we set location
 
-        // Place on track
+    // Place on track
 //    vehicleNode->SetPosition(Vector3(-814.0f+Random(-400.f, 400.0f), 150.0f, -595.0f+Random(-400.f, 400.0f)));
-        vehicleNode->SetPosition(Vector3(0, 100, 0));
+    vehicleNode->SetPosition(Vector3(0, 100, 0));
 
-     GetNode()->SetPosition(vehicleNode->GetPosition() + Vector3(3, 5, 0));
+// Create the vehicle logic component
+    vehicle_ = vehicleNode->CreateComponent<Vehicle>(LOCAL);
+    vehicle_->Init(isServer_);
 
-    // Create the vehicle logic component
-        vehicle_ = vehicleNode->CreateComponent<Vehicle>(LOCAL);
-        vehicle_->Init(isServer_);
+    wpActiveIndex_ = 0;
+    targetAgentIndex_ = 0;
 
-        wpActiveIndex_ = 0;
-        targetAgentIndex_ = 0;
-
-        // physics components
+    // physics components
 //    pRigidBody_->SetUseGravity(false);
 
-        pRigidBody_ = vehicleNode->GetOrCreateComponent<RigidBody>();
-        /* pRigidBody_->SetCollisionLayer(NETWORKACTOR_COL_LAYER);
-         pRigidBody_->SetMass(mass_);
-         pRigidBody_->SetFriction(1.0f);
-         pRigidBody_->SetLinearDamping(0.5f);
-         pRigidBody_->SetAngularDamping(0.5f);
-         CollisionShape* shape = vehicleNode->GetOrCreateComponent<CollisionShape>(LOCAL);
-         shape->SetSphere(1.0f);*/
-        vehicleNode->SetRotation(Quaternion(0.0, -90.0, 0.0));
+    pRigidBody_ = vehicleNode->GetOrCreateComponent<RigidBody>();
+    /* pRigidBody_->SetCollisionLayer(NETWORKACTOR_COL_LAYER);
+     pRigidBody_->SetMass(mass_);
+     pRigidBody_->SetFriction(1.0f);
+     pRigidBody_->SetLinearDamping(0.5f);
+     pRigidBody_->SetAngularDamping(0.5f);
+     CollisionShape* shape = vehicleNode->GetOrCreateComponent<CollisionShape>(LOCAL);
+     shape->SetSphere(1.0f);*/
+    vehicleNode->SetRotation(Quaternion(0.0, -90.0, 0.0));
 
 
-        // create text3d client info node LOCALLY
-        nodeInfo_ = GetScene()->CreateChild("light", LOCAL);
-        floatingText_ = nodeInfo_->CreateComponent<Text3D>();
-        floatingText_->SetColor(Color::GREEN);
-        floatingText_->SetFont(cache->GetResource<Font>("Fonts/Anonymous Pro.ttf"), 20);
-        floatingText_->SetFaceCameraMode(FC_ROTATE_XYZ);
-        // create text3d client info node LOCALLY
+    // create text3d client info node LOCALLY
+    nodeInfo_ = GetScene()->CreateChild("light", LOCAL);
+    floatingText_ = nodeInfo_->CreateComponent<Text3D>();
+    floatingText_->SetColor(Color::GREEN);
+    floatingText_->SetFont(cache->GetResource<Font>("Fonts/Anonymous Pro.ttf"), 20);
+    floatingText_->SetFaceCameraMode(FC_ROTATE_XYZ);
+    // create text3d client info node LOCALLY
 //    nodeInfo_ = GetScene()->CreateChild("light", LOCAL);
 
 
@@ -141,17 +146,15 @@ void NetworkActor::Create()
     text3D->SetText(userName_);
     text3D->SetFaceCameraMode(FC_ROTATE_XYZ);
 */
-        // register
-        SetUpdateEventMask(USE_FIXEDUPDATE);
+    // register
+    SetUpdateEventMask(USE_FIXEDUPDATE);
 }
 
-void NetworkActor::SwapMat()
-{
-    ResourceCache* cache = GetSubsystem<ResourceCache>();
+void NetworkActor::SwapMat() {
+    ResourceCache *cache = GetSubsystem<ResourceCache>();
 
     int idx = Random(MAX_MAT_COUNT);
-    while (idx == colorIdx_)
-    {
+    while (idx == colorIdx_) {
         idx = Random(MAX_MAT_COUNT);
     }
 
@@ -159,7 +162,7 @@ void NetworkActor::SwapMat()
     SetAttribute("Color Index", Variant(idx));
 
     String matName = ToString("NetDemo/ballmat%i.xml", colorIdx_);
-    StaticModel* ballModel = node_->GetComponent<StaticModel>();
+    StaticModel *ballModel = node_->GetComponent<StaticModel>();
     ballModel->SetMaterial(cache->GetResource<Material>(matName));
 }
 
@@ -172,10 +175,8 @@ void NetworkActor::SetControls(Controls controls) {
 
 }
 
-void NetworkActor::FixedUpdate(float timeStep)
-{
-    if (!pRigidBody_ || !nodeInfo_)
-    {
+void NetworkActor::FixedUpdate(float timeStep) {
+    if (!pRigidBody_ || !nodeInfo_) {
         return;
     }
 
@@ -183,19 +184,19 @@ void NetworkActor::FixedUpdate(float timeStep)
     prevControls_ = controls_;
     lastFire_ += timeStep;
 
-    // Client will scene update
+    // Client will only do local scene updates
 
     // Only allow server to control objects based on received controls from clients
     if (isServer_) {
 
         // Get updated controls
 //    actor->GetControls();
-        URHO3D_LOGINFOF("NetworkActor: FixedUpdate - applying controls for client [%d] -> %s", GetID(),
-                        ToStringHex(controls_.buttons_).CString());
+//        URHO3D_LOGINFOF("NetworkActor: FixedUpdate - applying controls for client [%d] -> %s", GetID(),
+//                        ToStringHex(controls_.buttons_).CString());
 
         // Snap network actor position to vehicle
-        GetNode()->SetPosition(vehicle_->GetNode()->GetPosition());
-
+        if (vehicle_)
+            GetNode()->SetPosition(vehicle_->GetNode()->GetPosition());
 
         // TODO: 3d text not showing up
         nodeInfo_->SetPosition(GetNode()->GetPosition() + Vector3(0.0f, 1.1f, 0.0f));
@@ -207,43 +208,43 @@ void NetworkActor::FixedUpdate(float timeStep)
         nodeInfo_->SetPosition(node_->GetPosition() + Vector3(0.0f, 0.7f, 0.0f));
 
 
-    /// Clients should not update the component on its own
+        /// Clients should not update the component on its own
 
-    // Read control data and apply to vehicle controller
-    Node* node = GetNode();
-    ///Acceleration
-    if (controls_.IsDown(NTWK_CTRL_FORWARD)) {
-        Accelerate();
-        URHO3D_LOGINFOF("NetworkActor: FixedUpdate - applying ACCELERATE = %f", acceleration_);
-    }
-        ///Damping
-    else {
-        Damping();
-    }
-    ///Braking
-    if (controls_.IsDown(NTWK_CTRL_BACK)) {
-        Brake();
-    }
-    ///Turn left
-    if (controls_.IsDown(NTWK_CTRL_LEFT)) {
-        //Turn left
-        //towards_ = Vector3(towards_.x_*cos(turningVelocity_*timeStep) - towards_.y_*sin(turningVelocity_*timeStep), towards_.x_*sin(turningVelocity_*timeStep) + towards_.y_*cos(turningVelocity_*timeStep), 0.0f);
-        node->Rotate2D(turningVelocity_*timeStep);
-        // The angle between rotation2d and x-axis
-        float angle = 90.0f + node->GetRotation2D();
-        // The towards vector according to the angle
-        towards_ = Vector3(cos(angle * PI / 180.0f), sin(angle * PI / 180.0f), 0.0f);
-    }
-    ///Turn right
-    if (controls_.IsDown(NTWK_CTRL_RIGHT)) {
-        //Turn right
-        //towards_ = Vector3(towards_.x_*cos(turningVelocity_*timeStep) + towards_.y_*sin(turningVelocity_*timeStep), -towards_.x_*sin(turningVelocity_*timeStep) + towards_.y_*cos(turningVelocity_*timeStep), 0.0f);
-        node->Rotate2D(-turningVelocity_*timeStep);
-        // The angle between rotation2d and x-axis
-        float angle = 90.0f + node->GetRotation2D();
-        // The towards vector according to the angle
-        towards_ = Vector3(cos(angle * PI / 180.0f), sin(angle * PI / 180.0f), 0.0f);
-    }
+        // Read control data and apply to vehicle controller
+        Node *node = GetNode();
+        ///Acceleration
+        if (controls_.IsDown(NTWK_CTRL_FORWARD)) {
+            Accelerate();
+            URHO3D_LOGINFOF("NetworkActor: FixedUpdate - applying ACCELERATE = %f", speed_);
+        }
+            ///Damping
+        else {
+            Damping();
+        }
+        ///Braking
+        if (controls_.IsDown(NTWK_CTRL_BACK)) {
+            Brake();
+        }
+        ///Turn left
+        if (controls_.IsDown(NTWK_CTRL_LEFT)) {
+            //Turn left
+            //towards_ = Vector3(towards_.x_*cos(turningVelocity_*timeStep) - towards_.y_*sin(turningVelocity_*timeStep), towards_.x_*sin(turningVelocity_*timeStep) + towards_.y_*cos(turningVelocity_*timeStep), 0.0f);
+            node->Rotate2D(turningVelocity_ * timeStep);
+            // The angle between rotation2d and x-axis
+            float angle = 90.0f + node->GetRotation2D();
+            // The towards vector according to the angle
+            towards_ = Vector3(cos(angle * PI / 180.0f), sin(angle * PI / 180.0f), 0.0f);
+        }
+        ///Turn right
+        if (controls_.IsDown(NTWK_CTRL_RIGHT)) {
+            //Turn right
+            //towards_ = Vector3(towards_.x_*cos(turningVelocity_*timeStep) + towards_.y_*sin(turningVelocity_*timeStep), -towards_.x_*sin(turningVelocity_*timeStep) + towards_.y_*cos(turningVelocity_*timeStep), 0.0f);
+            node->Rotate2D(-turningVelocity_ * timeStep);
+            // The angle between rotation2d and x-axis
+            float angle = 90.0f + node->GetRotation2D();
+            // The towards vector according to the angle
+            towards_ = Vector3(cos(angle * PI / 180.0f), sin(angle * PI / 180.0f), 0.0f);
+        }
 
 
 
@@ -284,17 +285,17 @@ void NetworkActor::FixedUpdate(float timeStep)
 */
 
 
-            /*    if (autoSteering_) {
-                    URHO3D_LOGINFOF("***** Player AUTO-STEERING ENABLED - Vehicle Steer [%f]", vehicle_->GetSteering());
-                    URHO3D_LOGINFOF("***** Player - waypoint [%d]=[%f,%f,%f,%f]", wpActiveIndex_,
-                                    waypoints_->At(wpActiveIndex_).x_, waypoints_->At(wpActiveIndex_).y_,
-                                    waypoints_->At(wpActiveIndex_).z_, steering);
-                    URHO3D_LOGINFOF("***** Player - target =[%f,%f,%f]", toTarget_.x_, toTarget_.y_, toTarget_.z_);
+        /*    if (autoSteering_) {
+                URHO3D_LOGINFOF("***** Player AUTO-STEERING ENABLED - Vehicle Steer [%f]", vehicle_->GetSteering());
+                URHO3D_LOGINFOF("***** Player - waypoint [%d]=[%f,%f,%f,%f]", wpActiveIndex_,
+                                waypoints_->At(wpActiveIndex_).x_, waypoints_->At(wpActiveIndex_).y_,
+                                waypoints_->At(wpActiveIndex_).z_, steering);
+                URHO3D_LOGINFOF("***** Player - target =[%f,%f,%f]", toTarget_.x_, toTarget_.y_, toTarget_.z_);
 
-                    // Enable auto-steering
-                    vehicle_->UpdateSteering(steering);
-                }*/
-                //vehicle_->GetRigidBody()->
+                // Enable auto-steering
+                vehicle_->UpdateSteering(steering);
+            }*/
+        //vehicle_->GetRigidBody()->
 //            pRigidBody_->ApplyForce(force_);
 /*
 
@@ -330,7 +331,7 @@ void NetworkActor::FixedUpdate(float timeStep)
     }
 
 */
-    ////
+        ////
 
 
     }
@@ -474,10 +475,9 @@ void NetworkActor::Fire() {
     Fire(toTarget_);
 }
 
-void NetworkActor::Fire(Vector3 target)
-{
+void NetworkActor::Fire(Vector3 target) {
     node_ = GetNode();
-    Scene* scene = GetScene();
+    Scene *scene = GetScene();
 
 
     URHO3D_LOGDEBUG("NetworkActor::Fire()");
@@ -514,8 +514,8 @@ void NetworkActor::Fire(Vector3 target)
 */
 
         SharedPtr<Node> n;
-        Node* bullet0 = scene->CreateChild("bullet", REPLICATED);
-        Missile* newM = bullet0->CreateComponent<Missile>(LOCAL);
+        Node *bullet0 = scene->CreateChild("bullet", REPLICATED);
+        Missile *newM = bullet0->CreateComponent<Missile>(LOCAL);
         newM->SetProducer(vehicle_->GetNode()->GetID());
 
 
@@ -533,13 +533,15 @@ void NetworkActor::Fire(Vector3 target)
         // Set the ownership of the bullet to the Player
 //        bullet0->GetComponent<Missile>()->SetProducer(SharedPtr<Node>(vehicle_->GetNode()));
 
-        Node* tgt = scene->CreateChild("missileTarget", LOCAL);
+        Node *tgt = scene->CreateChild("missileTarget", LOCAL);
         //tgt->>SetPosition(0f,0f,0f);
         tgt->SetPosition(target);
         newM->AddTarget(SharedPtr<Node>(tgt));
         // Assign the producer node
-        newM->AssignProducer(vehicle_->GetNode()->GetID(), vehicle_->GetNode()->GetPosition()+Vector3(0.0f, 2.0f, 0.0f));
-        URHO3D_LOGDEBUGF("NetworkActor::Fire() [%d] -> [%f,%f,%f]", vehicle_->GetNode()->GetID(), newM->GetNode()->GetPosition().x_,
+        newM->AssignProducer(vehicle_->GetNode()->GetID(),
+                             vehicle_->GetNode()->GetPosition() + Vector3(0.0f, 2.0f, 0.0f));
+        URHO3D_LOGDEBUGF("NetworkActor::Fire() [%d] -> [%f,%f,%f]", vehicle_->GetNode()->GetID(),
+                         newM->GetNode()->GetPosition().x_,
                          newM->GetNode()->GetPosition().y_,
                          newM->GetNode()->GetPosition().z_);
 
@@ -548,8 +550,7 @@ void NetworkActor::Fire(Vector3 target)
 }
 
 
-void NetworkActor::DebugDraw(const Color &color)
-{
+void NetworkActor::DebugDraw(const Color &color) {
     if (!vehicle_)
         return;
 
@@ -557,12 +558,11 @@ void NetworkActor::DebugDraw(const Color &color)
     node_ = GetNode();
 
 
-    if ( dbgRenderer )
-    {
+    if (dbgRenderer) {
 
         // draw compound shape bounding box (the inertia bbox)
         Vector3 localExtents = vehicle_->GetRaycastVehicle()->GetCompoundLocalExtents();
-        Vector3 localCenter  = vehicle_->GetRaycastVehicle()->GetCompooundLocalExtentsCenter();
+        Vector3 localCenter = vehicle_->GetRaycastVehicle()->GetCompooundLocalExtentsCenter();
         BoundingBox bbox(-localExtents, localExtents);
 
         btTransform trans;
@@ -583,7 +583,7 @@ void NetworkActor::DebugDraw(const Color &color)
 //        ToQuaternion(trans.getRotation()),
         // dbgRenderer->AddBoundingBox(bbox, mat34, color);
 //        dbgRenderer->AddLine(posWS, posWS + node_->R, color);
-        dbgRenderer->AddLine(posWS, posWS + this->vehicle_->GetNode()->GetDirection()*40.0f, Color::CYAN);
+        dbgRenderer->AddLine(posWS, posWS + this->vehicle_->GetNode()->GetDirection() * 40.0f, Color::CYAN);
         dbgRenderer->AddLine(posWS, toTarget_, Color::YELLOW);
     }
 }

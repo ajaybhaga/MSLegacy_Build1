@@ -431,11 +431,14 @@ void Vehicle::FixedUpdate(float timeStep)
     if (raycastVehicle_) {
         if (newSteering != 0.0f || accelerator != 0.0f) {
             raycastVehicle_->Activate();
+
+            URHO3D_LOGINFOF("Vehicle: raycastVehicle_ - activated [%f, %f]", newSteering, accelerator);
         }
 
         // Store vehicle control information locally
         lastAccel_ = accelerator;
         lastSteer_ = newSteering;
+
 
         UpdateGear();
 

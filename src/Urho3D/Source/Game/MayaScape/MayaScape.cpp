@@ -3764,17 +3764,23 @@ void MayaScape::MoveCamera(Node *actorNode, float timeStep) {
                     const float maxVel = 50.0f;
                     const float damping = 0.2f;
 
-//                    vehicleRot_ = vehicleNode->GetRotation();
-                    // Physics update has completed. Position camera behind vehicle
-/*                        vehicleRot_ = SmoothStepAngle(vehicleRot_, player_->GetNode()->GetRotation(), timeStep * rotLerpRate);*/
-                    Quaternion dir(vehicleRot_.YawAngle(), Vector3::UP);
-                    dir = dir * Quaternion(45, 0, 45);
+                    Quaternion dir = Quaternion(0, 0, 90);
+                    if (player_) {
+                        if (player_->vehicle_) {
+                            vehicleRot_ = player_->vehicle_->GetNode()->GetRotation();
+                            // Physics update has completed. Position camera behind vehicle
+                            vehicleRot_ = SmoothStepAngle(vehicleRot_, player_->GetNode()->GetRotation(), timeStep * rotLerpRate);
+                            dir = Quaternion(vehicleRot_.YawAngle(), Vector3::UP);
+
+                        }
+                    }
+  //                  dir = dir * Quaternion(20, 0, 45);
                     //                       dir = dir * Quaternion(player_->GetVehicle()->controls_.yaw_, Vector3::UP);
 //                        dir = dir * Quaternion(player_->GetVehicle()->controls_.pitch_, Vector3::RIGHT);
 
 
 
-                    targetCameraPos_ = startPos + Vector3(CAMERA_DISTANCE, 2.0f, CAMERA_DISTANCE);
+                    targetCameraPos_ = startPos + Vector3(0, 30.0f, CAMERA_DISTANCE);
                     // Calculate ray based on focus object
 //                    float curDist = (focusObjects_[focusIndex_] - targetCameraPos_).Length();
                     float curDist = (actorNode->GetPosition() - targetCameraPos_).Length();
