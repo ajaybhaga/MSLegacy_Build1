@@ -47,7 +47,8 @@
 //=============================================================================
 NetworkActor::NetworkActor(Context* context)
     : ClientObj(context)
-    , mass_(10.0f)
+    , mass_(10.0f),
+    isServer_(false)
 {
   //  SetUpdateEventMask(0);
     // fixed update() for inputs and post update() to sync wheels for rendering
@@ -80,52 +81,55 @@ void NetworkActor::DelayedStart()
     Create();
 }
 
+// This will be run by server to create server objects (running the physics world)
+// This will be run by replicated client scene - to build local version
 void NetworkActor::Create()
 {
-    ResourceCache* cache = GetSubsystem<ResourceCache>();
+        ResourceCache *cache = GetSubsystem<ResourceCache>();
 
-    Node* adjNode = GetScene()->CreateChild("AdjNode", LOCAL);
-    adjNode->SetRotation(Quaternion(0.0, 0.0, -90.0f));
+        Node *adjNode = GetScene()->CreateChild("AdjNode", LOCAL);
+        adjNode->SetRotation(Quaternion(0.0, 0.0, -90.0f));
 
 
-    // Init vehicle
-    Node* vehicleNode = GetScene()->CreateChild("Vehicle", LOCAL);
+        // Init vehicle
+        Node *vehicleNode = GetScene()->CreateChild("Vehicle", LOCAL);
 
-    // Default at (0,300,0) above terrain before we set location
-    GetNode()->SetPosition(Vector3(0,300,0));
+        // Default at (0,300,0) above terrain before we set location
 
-    // Place on track
+        // Place on track
 //    vehicleNode->SetPosition(Vector3(-814.0f+Random(-400.f, 400.0f), 150.0f, -595.0f+Random(-400.f, 400.0f)));
-    vehicleNode->SetPosition(Vector3(0,100,0));
+        vehicleNode->SetPosition(Vector3(0, 100, 0));
+
+     GetNode()->SetPosition(vehicleNode->GetPosition() + Vector3(3, 5, 0));
 
     // Create the vehicle logic component
-    vehicle_ = vehicleNode->CreateComponent<Vehicle>(LOCAL);
-    vehicle_->Init(isServer_);
+        vehicle_ = vehicleNode->CreateComponent<Vehicle>(LOCAL);
+        vehicle_->Init(isServer_);
 
-    wpActiveIndex_ = 0;
-    targetAgentIndex_ = 0;
+        wpActiveIndex_ = 0;
+        targetAgentIndex_ = 0;
 
-    // physics components
+        // physics components
 //    pRigidBody_->SetUseGravity(false);
 
-    pRigidBody_ = vehicleNode->GetOrCreateComponent<RigidBody>();
-   /* pRigidBody_->SetCollisionLayer(NETWORKACTOR_COL_LAYER);
-    pRigidBody_->SetMass(mass_);
-    pRigidBody_->SetFriction(1.0f);
-    pRigidBody_->SetLinearDamping(0.5f);
-    pRigidBody_->SetAngularDamping(0.5f);
-    CollisionShape* shape = vehicleNode->GetOrCreateComponent<CollisionShape>(LOCAL);
-    shape->SetSphere(1.0f);*/
-    vehicleNode->SetRotation(Quaternion(0.0, -90.0, 0.0));
+        pRigidBody_ = vehicleNode->GetOrCreateComponent<RigidBody>();
+        /* pRigidBody_->SetCollisionLayer(NETWORKACTOR_COL_LAYER);
+         pRigidBody_->SetMass(mass_);
+         pRigidBody_->SetFriction(1.0f);
+         pRigidBody_->SetLinearDamping(0.5f);
+         pRigidBody_->SetAngularDamping(0.5f);
+         CollisionShape* shape = vehicleNode->GetOrCreateComponent<CollisionShape>(LOCAL);
+         shape->SetSphere(1.0f);*/
+        vehicleNode->SetRotation(Quaternion(0.0, -90.0, 0.0));
 
 
-    // create text3d client info node LOCALLY
-    nodeInfo_ = GetScene()->CreateChild("light", LOCAL);
-    floatingText_ = nodeInfo_->CreateComponent<Text3D>();
-    floatingText_->SetColor(Color::GREEN);
-    floatingText_->SetFont(cache->GetResource<Font>("Fonts/Anonymous Pro.ttf"), 20);
-    floatingText_->SetFaceCameraMode(FC_ROTATE_XYZ);
-    // create text3d client info node LOCALLY
+        // create text3d client info node LOCALLY
+        nodeInfo_ = GetScene()->CreateChild("light", LOCAL);
+        floatingText_ = nodeInfo_->CreateComponent<Text3D>();
+        floatingText_->SetColor(Color::GREEN);
+        floatingText_->SetFont(cache->GetResource<Font>("Fonts/Anonymous Pro.ttf"), 20);
+        floatingText_->SetFaceCameraMode(FC_ROTATE_XYZ);
+        // create text3d client info node LOCALLY
 //    nodeInfo_ = GetScene()->CreateChild("light", LOCAL);
 
 
@@ -137,9 +141,8 @@ void NetworkActor::Create()
     text3D->SetText(userName_);
     text3D->SetFaceCameraMode(FC_ROTATE_XYZ);
 */
-    // register
-    SetUpdateEventMask(USE_FIXEDUPDATE);
-
+        // register
+        SetUpdateEventMask(USE_FIXEDUPDATE);
 }
 
 void NetworkActor::SwapMat()
@@ -176,63 +179,42 @@ void NetworkActor::FixedUpdate(float timeStep)
         return;
     }
 
-    // Get updated controls
-//    actor->GetControls();
-    URHO3D_LOGINFOF("NetworkActor: FixedUpdate - applying controls for client [%d] -> %s", GetID(), ToStringHex(controls_.buttons_).CString());
-
-    // Snap network actor position to vehicle
-    GetNode()->SetPosition(vehicle_->GetNode()->GetPosition());
-
-
-    // TODO: 3d text not showing up
-    nodeInfo_->SetPosition(GetNode()->GetPosition() + Vector3(0.0f, 1.1f, 0.0f));
-//    floatingText_->SetEnabled(true);
-    // update text pos
-//    nodeInfo_->SetPosition(node_->GetPosition() + Vector3(0.0f, 0.7f, 0.0f));
-
-
-    // OLD SIMPLE NETWORK SAMPLE CODE
-    const float MOVE_TORQUE = 3.0f;
-    Quaternion rotation(0.0f, controls_.yaw_, 0.0f);
-
-        if (controls_.buttons_ & NTWK_CTRL_FORWARD)
-    {
-        Accelerate();
-    //    pRigidBody_->ApplyTorque(rotation * Vector3::RIGHT * MOVE_TORQUE);
-    }
-    if (controls_.buttons_ & NTWK_CTRL_BACK)
-    {
-     //   pRigidBody_->ApplyTorque(rotation * Vector3::LEFT * MOVE_TORQUE);
-    }
-    if (controls_.buttons_ & NTWK_CTRL_LEFT)
-    {
-       // pRigidBody_->ApplyTorque(rotation * Vector3::FORWARD * MOVE_TORQUE);
-    }
-    if (controls_.buttons_ & NTWK_CTRL_RIGHT)
-    {
-     //   pRigidBody_->ApplyTorque(rotation * Vector3::BACK * MOVE_TORQUE);
-    }
-
-    /*
-    if (controls_.IsPressed(NTWK_SWAP_MAT, prevControls_))
-    {
-        SwapMat();
-    }*/
-////
-
-
-
+    // update prev
+    prevControls_ = controls_;
     lastFire_ += timeStep;
 
+    // Client will scene update
+
+    // Only allow server to control objects based on received controls from clients
+    if (isServer_) {
+
+        // Get updated controls
+//    actor->GetControls();
+        URHO3D_LOGINFOF("NetworkActor: FixedUpdate - applying controls for client [%d] -> %s", GetID(),
+                        ToStringHex(controls_.buttons_).CString());
+
+        // Snap network actor position to vehicle
+        GetNode()->SetPosition(vehicle_->GetNode()->GetPosition());
+
+
+        // TODO: 3d text not showing up
+        nodeInfo_->SetPosition(GetNode()->GetPosition() + Vector3(0.0f, 1.1f, 0.0f));
+//    floatingText_->SetEnabled(true);
+        // update text pos
+//    nodeInfo_->SetPosition(node_->GetPosition() + Vector3(0.0f, 0.7f, 0.0f));
+
+        // update text pos
+        nodeInfo_->SetPosition(node_->GetPosition() + Vector3(0.0f, 0.7f, 0.0f));
+
+
     /// Clients should not update the component on its own
-//    controls_ = vehicle_->controls_;
 
-    /*
-
+    // Read control data and apply to vehicle controller
     Node* node = GetNode();
     ///Acceleration
     if (controls_.IsDown(NTWK_CTRL_FORWARD)) {
         Accelerate();
+        URHO3D_LOGINFOF("NetworkActor: FixedUpdate - applying ACCELERATE = %f", acceleration_);
     }
         ///Damping
     else {
@@ -262,7 +244,9 @@ void NetworkActor::FixedUpdate(float timeStep)
         // The towards vector according to the angle
         towards_ = Vector3(cos(angle * PI / 180.0f), sin(angle * PI / 180.0f), 0.0f);
     }
-*/
+
+
+
 /* AUTO-STEERING CODE
     if (toTarget_ != Vector3::ZERO) {
         // Only pass once rigid body is setup
@@ -348,11 +332,9 @@ void NetworkActor::FixedUpdate(float timeStep)
 */
     ////
 
-    // update prev
-    prevControls_ = controls_;
 
-    // update text pos
-    nodeInfo_->SetPosition(node_->GetPosition() + Vector3(0.0f, 0.7f, 0.0f));
+    }
+
 }
 
 
